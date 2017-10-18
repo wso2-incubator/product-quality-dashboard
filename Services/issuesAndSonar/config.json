@@ -1,0 +1,20 @@
+{
+  "githubAccessToken": "",
+  "githubClientId": "",
+  "githubClientSecret": "",
+
+  "jdbcUrl": "pqd_issues_sonar_db?useSSL=false",
+  "SQLusername": "root",
+  "SQLpassword": "",
+
+  "JIRAurl":"https://wso2.org/jira",
+  "JIRAusername": "",
+  "JIRApassword": "",
+
+  "githubIssueTypeTag": "",
+  "githubSeverityTag": "",
+  "githubVersionTag": "",
+
+  "sonarUrl":"https://wso2.org/sonar",
+  "sonarAccessToken":""
+}
