@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="Release Train" description="WSO2 prodct releases">
+        <Require feature="dynamic-height"/>
+        <Require feature="setprefs"/>
+        <Require feature="pubsub-2"/>
+    </ModulePrefs>
+    <Content type="html" view="home">
+        <![CDATA[
+<head>
+  <title>Release Train</title>
+  <meta charset="utf-8">
+
+  <!-- load bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  
+  <!-- load visjs time line-->
+  <!-- <link href="https://visjs.org/dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css"/> -->
+	
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css"/>
+
+  <!--  load custom css -->
+  <link href="portal/store/domain.com/gadget/releaseTrain/css/customStyles.css" rel="stylesheet" type="text/css"/>
+
+  <!-- Latest compiled and minified CSS for selectpicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+
+  <!-- Include Required Prerequisites datepicker-->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />
+   
+  <!-- Include Date Range Picker css-->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+		
+  
+  
+
+  <script id="item-template" type="text/x-handlebars-template">
+    <div class="pane">
+      <table class="score">
+
+        {{#each releases}}
+          <tr onclick="test({{this.id}})">
+              <td id='{{this.id}}'  class="btn label" data-control="userBtn" style="font-size: 10px;background-color:{{this.color}}; padding-top: 0px;padding-bottom: 0px">
+                <span class="glyphicon glyphicon-bullhorn"></span>
+                <span>{{this.PROJECT_NAME}} -</span>
+                <span > {{this.releaseProduct}} </span>
+                <!-- <span>{{this.id}}</span> -->
+              </td>
+          </tr>
+        {{/each}}
+    </table>
+    </div>
+  </script>
+
+  <script id="releaseSummary" type="text/x-handlebars-template">
+    
+    <div class="well">
+      <table>
+          <tr>
+            <td align="left">
+              <span class="label label-default" style="font-size: 15px;padding-bottom:0px;padding-top: 0px;">
+                <span class="glyphicon glyphicon-bullhorn"></span> Release Name: 
+                <span class="label" style="background-color:#F79431; font-size: 9px;color: black"> {{releaseProduct}}</span> 
+              </span>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="left">
+              <span class="label label-default" style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-bullhorn"></span> Release Type: 
+                <span class="label label-danger" style="font-size: 9px;">{{releaseType}}</span> 
+              </span>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="left" >
+              <span class="label label-default"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-calendar "></span> 
+                <span> Release Date: {{start}} </span> 
+              </span>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="left">
+              <span class="label label-info"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-user"></span> Release Manager: {{releaseManagerF}} {{releaseManagerL}}
+              </span>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="left">
+              <span class="label label-info"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-user"></span> Warranty Manager: {{warrantyManagerF}} {{warrantyManagerL}}
+              </span>
+            </td>
+          </tr> 
+
+          <tr>
+            <td id="Fixed_Issues" align="left" onclick="showFixedIssues(this.id)">
+              <span class="btn label btn-success"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues: {{fixedIssuesCount}}
+              </span>
+            </td>
+          </tr>
+
+          <tr>
+            <td id="Reported_Issues" align="left" onclick="showReportedIssues(this.id)">
+              <span class="btn label btn-warning"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-alert"></span> Reported Issues: {{reportedIssuesCount}}
+              </span>
+            </td>
+          </tr>
+          <!-- <tr><td align="left"><span class="btn label btn-danger"><span class="glyphicon glyphicon-list-alt"></span> Epic: {{featuresCount}}</span></td></tr> -->
+
+          <tr>
+            <td id="Stories" align="left" onclick="showStories({{this.storiesCount}},{{this.VERSION_ID}},this.id)">
+              <span class="btn label btn-danger"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-list-alt"></span> Stories: {{storiesCount}}
+              </span>
+            </td>
+          </tr>
+
+          <tr>
+            <td id="Features" align="left" onclick="showFeatures({{this.featuresCount}},{{this.VERSION_ID}},this.id)">
+              <span class="btn label btn-danger"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
+                <span class="glyphicon glyphicon-list-alt"></span> Features: {{featuresCount}}
+              </span>
+            </td>
+          </tr>
+    </table>
+  </div>
+</script>
+
+<script id="managerTable" type="text/x-handlebars-template">  
+  <tr onclick="drawManagerSummaryTable({{this.id}})"> 
+    <td>{{this.releaseProduct}}</td>
+    <td>{{this.releaseManagerF}} {{this.releaseManagerL}}</td>
+    <td>{{this.warrantyManagerF}} {{this.warrantyManagerL}}</td>
+    <td>{{this.start}}</td>
+  </tr>        
+</script>
+
+<script id="storyDetailedTable" type="text/x-handlebars-template">        
+  <tr > 
+    <td>{{this.no}}</td>
+    <td><a onclick="openIssue({{this.issueId}})">{{this.subject}}<a></td>  
+  </tr>     
+</script>
+
+<script id="featureDetailedTable" type="text/x-handlebars-template">   
+  <tr > 
+    <td>{{this.no}}</td>
+    <td><a onclick="openIssue({{this.issueId}})">{{this.subject}}<a></td>
+  </tr>     
+</script>
+
+
+  
+</head>
+
+<body >
+
+  
+<!-- <div style="height:200px" data-toggle="loading" data-loading-inverse="true"></div> -->
+
+
+
+
+<div style="display:block;" id="myDiv" class="animate-bottom container-fluid">
+        
+        <H1><span class="label " style="background-color:#1BA5B8; padding-top:10px"><span class="logo" > <img src="portal/store/domain.com/gadget/releaseTrain/images/logo.svg"></span> SOFTWARE RELEASE TRAIN</span></H1>
+
+        <ul class="nav nav-tabs">
+          <li class="active"><a data-toggle="tab" href="#releasetrain" onclick="hideSummaryTable()">Release Train</a></li>
+          <li><a data-toggle="tab" href="#managers" onclick="hideSummaryTable()">Managers</a></li>
+    
+        </ul>
+
+        <div class="tab-content">
+          <div id="releasetrain" class="tab-pane fade in active">
+            <div  class=row>
+                <br>
+              <div class=col-sm-3 style="padding-right:0px;width: 18%"> 
+                  <div class="container-fluid" style="background-color:#1BA5B8;color: white">Products</div>
+
+                  <div class="btn-group-vertical btn-block colors" data-toggle="buttons">
+                      <label class="btn btn-default active">
+                        <input type="radio" name="optradio" id="All" checked="checked" value="All" style="display: none;">All
+
+                      </label>
+
+                      <label class="btn btn-default">
+                        <input type="radio" name="optradio" id="API Manager" value="API Manager" style="display: none;">API Manager
+                        <span class="label  pull-right" style="background-color: green">.</span>
+                      </label>
+
+                      <label class="btn btn-default">
+                        <input type="radio" name="optradio" id="Analytics" value="Analytics" style="display: none;">Analytics
+                        <span class="label  pull-right" style="background-color: red">.</span>
+                      </label>
+
+                      <label class="btn btn-default">
+                        <input type="radio" name="optradio" id="Cloud" value="Cloud" style="display: none;">Cloud
+                        <span class="label  pull-right" style="background-color: blue">.</span>
+                      </label>
+
+                      <label class="btn btn-default">
+                        <input type="radio" name="optradio" id="Integration" value="Integration" style="display: none;">Integration
+                        <span class="label  pull-right" style="background-color: purple">.</span>
+                      </label>
+
+                      <label class="btn btn-default">
+                        <input type="radio" name="optradio" id="IOT" value="IOT" style="display: none;">IoT
+                        <span class="label  pull-right" style="background-color: skyblue">.</span>
+                      </label>
+
+                      <label class="btn btn-default">
+                        <input type="radio" name="optradio" id="Security" value="IS" style="display: none;">Identity and Access Management
+                        <span class="label  pull-right" style="background-color: orange">.</span>
+                      </label>
+
+                      <label class="btn btn-default">
+                        <input type="radio" name="optradio" id="Security" value="Other" style="display: none;">Other
+                        <span class="label  pull-right" style="background-color: black">.</span>
+                      </label>
+                  </div>
+
+                    
+            </div>
+              <div class=col-sm-9 style="padding-left:2px;width: 82%">
+                  <div class="container-fluid" style="background-color:#1BA5B8;color: white">Release Train</div>
+                <div id="visualization"></div>
+              </div>
+            </div>
+          </div>
+        
+          <div id="managers" class="tab-pane fade">
+              <div class="row">
+              <br>
+                
+
+                <div class="col-sm-3" style="padding-right:4px;padding-bottom: 10px">
+                  <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 6px 10px; border: 1px solid #ccc; width: 100%;border-radius: 4px;">
+                      <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                      <span></span> <b class="caret"></b>
+                  </div>
+                </div>
+                <div class="col-sm-2" style="padding-left: 0px; padding-bottom: 10px;">
+                  <select id="productSelect" class="selectpicker">
+                    <option value="all">All Products</option>
+                    <option value="apim">API Manager</option>
+                    <option value="analytics">Analytics</option>
+                    <option value="cloud">Cloud</option>
+                    <option value="integration">Integration</option>
+                    <option value="iot">IoT</option>
+                    <option value="identity">Identity and Access Management</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>     
+          </div>
+
+          <div style="height:229px;overflow-y:auto;" >
+            <table class="table table-bordered table-striped table-hover ">
+              <thead style="background-color: #1BA5B8;color:white;">
+                  <tr>
+                      <th>Release Name</th>
+                      <th>Release Manager</th>
+                      <th>Warranty Manager</th>
+                      <th>Date</th>
+                  </tr>
+              </thead>
+              <tbody id=managerSummary>
+                
+                  
+                    
+              </tbody>
+            </table>
+          </div>
+
+          
+          </div>
+        </div>
+
+        
+
+        <div id="featureTable" >
+          <div class="container-fluid">
+            <div class="row">
+              <div class="well">
+                <span class="badge btn pull-right" style="background-color:#1BA5B8 " onclick="closeTable('#featureTable')"><span class="glyphicon glyphicon-remove-sign"></span> Close </span> 
+
+                <table class="table table-bordered table-striped table-hover " >
+                  <thead style="background-color: #1BA5B8">
+                    <tr>
+                      <th >Release Summary</th>
+                      <th id="moreDetails">More Details</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="tb"> 
+
+                    <td class=" col-sm-4">
+                      <div class="summary">
+                      </div>
+                    </td>
+
+                    <td width="720" height="245"><div style="height: 245px; overflow: auto" ><div class=" col-sm-12 detailedinfo panel-group" id="accordion" role="tablist" aria-multiselectable="true"></div></div></td>
+
+                    
+
+                  </tbody>
+
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div id="storySummary">
+          <table class="table table-bordered table-striped table-hover " >
+          <thead style="background-color: #1BA5B8;color:white">
+            <tr>
+              <th>#</th>
+              <th>Story</th>
+              
+            </tr>
+          </thead>
+          <tbody id="storySubjects">
+                
+            
+                    
+          </tbody>
+        </table>  
+        </div>
+
+
+        <div id="featureSummary">
+          <table class="table table-bordered table-striped table-hover " >
+          <thead style="background-color: #1BA5B8;color:white">
+            <tr>
+              <th>#</th>
+              <th>Feature</th>
+          </thead>
+          <tbody id="featureSubjects">
+                
+            
+                    
+          </tbody>
+        </table>  
+        </div>
+
+    </div>
+
+
+
+
+
+<!--bootstrap-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- load handlebars for templating, and create a template -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+
+<!-- load visjs time line-->
+<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/vis/4.20.1/vis.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-timeline-graph2d.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript for select picker -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
+<!-- Include Required Prerequisites datepicker: moment.js-->
+<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/1/jquery.min.js"></script> -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
+<!-- Include Date Range Picker js-->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+
+<!-- wso2 loader js-->
+<script type="text/javascript" src="js/wso2loading.js"></script>
+
+<!--custom js-->
+<script type="text/javascript" src="js/main.js"></script>
+<script type="text/javascript" src="js/functions.js"></script>
+
+</body>
+      ]]>
+  </Content>
+</Module>
