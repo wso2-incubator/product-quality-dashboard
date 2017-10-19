@@ -4,6 +4,10 @@ const string CONFIG_PATH = "config.json";
 
 const string API_VERSION = "v1.0";
 
+const string GET_ALL_ISSUE_TYPE_DB_QUERY_VERSION2 = "SELECT pqd_issue_type_id, pqd_issue_type FROM pqd_issue_type";
+
+const string GET_SEVERITY_DB_QUERY_VERSION2 = "SELECT pqd_severity_id, pqd_severity FROM pqd_severity";
+
 const string PRODUCT_COMPONENT_REPO_TABLE_NAME = "pqd_product_component_repo_table";
 
 

@@ -61,6 +61,12 @@ const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES = "SELECT pqd_issue_type.pqd_is
                                                    "pqd_issue_type.pqd_issue_type_id = pqd_product_issues.pqd_issue_type_id " +
                                                    "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_issue_type_id";
 
+const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                   "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                   "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
+                                                   "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
+                                                   "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_issue_type_id";
+
 const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
                                                    "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
                                                    "FROM pqd_issue_type INNER JOIN pqd_product_issues WHERE " +
@@ -73,6 +79,12 @@ const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES = "SELECT pqd_severity.pqd_sever
                                                   "FROM pqd_severity INNER JOIN pqd_product_issues WHERE " +
                                                   "pqd_severity.pqd_severity_id = pqd_product_issues.pqd_severity_id " +
                                                   "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                  "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                  "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
+                                                  "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
+                                                  "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_severity_id";
 
 const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
                                                   "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
@@ -108,8 +120,23 @@ const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE_SEVERITY 
                                                                          "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
                                                                          "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
                                                                          "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                                         "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_severity_id = ?" +
+                                                                         "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
                                                                                   "AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_component_id, pqd_component_name";
+
+const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                      "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                      "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
+                                                                      "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
+                                                                      "AND pqd_component_issues.pqd_component_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
+                                                                      "GROUP BY pqd_issue_type_id";
+
+
+const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                      "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                      "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
+                                                                      "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
+                                                                      "AND pqd_component_issues.pqd_component_id = ? " +
+                                                                      "AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
 
 const string GET_GITHUB_PRODUCT_PRODUCT_ISSUES = "SELECT pqd_product.pqd_product_id AS pqd_component_id, pqd_product.pqd_product_name " +
                                           "AS pqd_component_name, SUM(pqd_product_issues.pqd_issues_count) " +
@@ -297,6 +324,11 @@ const string GET_AREA_ISSUES_QUERY = "INSERT INTO pqd_area_issues(pqd_area_id, p
                                      "AS combined GROUP BY combined.pqd_area_id, combined.pqd_issue_type_id, combined.pqd_severity_id";
 
 const string DELETE_GITHUB_AREA_ISSUES_QUERY = "TRUNCATE TABLE pqd_area_issues";
+
+const string GET_PRODUCT_ID_FOR_COMPONENT_ID = "SELECT pqd_product.pqd_product_id FROM pqd_product INNER JOIN pqd_component " +
+                                               "WHERE pqd_product.pqd_product_id = pqd_component.pqd_product_id AND pqd_component.pqd_component_id = ?";
+
+
 
 
 

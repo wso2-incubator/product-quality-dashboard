@@ -379,17 +379,81 @@ service<http> ProductQualityService {
 
         message response = {};
 
+
+        sql:Parameter paramForComponentId = {sqlType:"integer", value: componentId};
+        sql:Parameter[] paramsForComponent = [paramForComponentId];
+
+        json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, paramsForComponent);
+
+        int productId = 0;
+
+        if (lengthof productIdJson > 0){
+            productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
+        } else {
+            json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+        }
+
         json responseJson = {"error":false, "data":{ "items": [] }};
 
-        json issuesComponentJson = getComponentIssues(sqlCon,componentId);
+        sql:Parameter paramForProduct = {sqlType: "integer", value:productId};
+        sql:Parameter[] paramsForProduct = [paramForProduct];
+
+        json issuesComponentJson = getComponentIssues1(sqlCon,componentId);
         json sonarComponentJson = getSelectionResult("component", componentId, 0, 0);
 
-        sql:Parameter componentIdParam = {sqlType:"integer", value:componentId};
-        sql:Parameter[] paramsForComponent = [componentIdParam];
+
+
+
+        json allComponentJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_QUERY, paramsForProduct);
 
         int a = 0;
 
-        json issueTypeIssues = jsons:getJson(issuesComponentJson, "$.data.issueIssueType");
+        while(a < lengthof allComponentJson){
+
+            //logger:info(issuesProductJson);
+
+            int currentComponentId = jsons:getInt(allComponentJson[a], "$.pqd_component_id");
+            json currentComponentIssuesJson;
+
+            currentComponentIssuesJson = jsons:getJson(issuesComponentJson, "$.data.items[?(@.id==" +  currentComponentId +
+                                                                          ")].issues");
+
+            //logger:info(currentComponentIssuesJson);
+
+            //logger:info(jsons:getInt(allAreasJson[a], , "$.pqd_area_id") + " " + currentAreaIssuesJson);
+
+            int currentComponentIssues;
+
+            if(lengthof currentComponentIssuesJson != 0) {
+                currentComponentIssues = jsons:getInt(currentComponentIssuesJson, "$[0]");
+            }else {
+                currentComponentIssues = 0;
+            }
+
+
+            json currentComponentSonarsJson = jsons:getJson(sonarComponentJson, "$.data.items[?(@.id==" + jsons:getInt(allComponentJson[a], "$.pqd_component_id") +
+                                                                              ")].sonar");
+
+            int currentComponentSonars;
+
+            if(lengthof currentComponentSonarsJson != 0) {
+                currentComponentSonars = jsons:getInt(currentComponentSonarsJson, "$[0]");
+            }else{
+                currentComponentSonars = 0;
+            }
+
+            json currentComponentJson = {"name":jsons:getString(allComponentJson[a], "$.pqd_component_name"),
+                                            "id": currentComponentId,
+                                            "issues": currentComponentIssues, "sonar": currentComponentSonars
+                                        };
+
+
+            jsons:addToArray(responseJson, "$.data.items", currentComponentJson);
+
+            a = a + 1;
+        }
+
+        json issueTypeIssues = jsons:getJson(issuesComponentJson, "$.data.issueIssuetype");
         jsons:addToObject(responseJson, "$.data", "issueIssuetype", issueTypeIssues);
 
         json severityIssues = jsons:getJson(issuesComponentJson, "$.data.issueSeverity");
@@ -411,6 +475,18 @@ service<http> ProductQualityService {
 
         reply response;
 
+    }
+
+    @http:GET {}
+    @http:Path {value:"/getIssueTypesAndSeverities"}
+    resource getIssueTypesAndSeverities(message m) {
+
+        message response = {};
+        json data = getIssueTypesAndSeverities();
+        messages:setJsonPayload(response, data);
+        messages:setHeader(response, "Access-Control-Allow-Origin", "*");
+        messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
+        reply response;
     }
 }
 
@@ -437,6 +513,32 @@ function getSQLconfigData(json configData)(map){
 
     return propertiesMap;
 
+}
+
+function getIssueTypesAndSeverities()(json){
+    json data = {"error":false};
+    json info = {issueIssuetypes:[], issueSeverities:[], sonarIssuetypes:[{"id":1, "type":"Bug"},
+                                                                          {"id":2, "type":"Code smell"},
+                                                                          {"id":3, "type":"Vulnerability"}],
+                    sonarSeverities:[{"id":1, "severity":"Blocker"},{"id":2, "severity":"Critical"},{"id":3, "severity":"Major"},
+                                     {"id":4, "severity":"Minor"},{"id":5, "severity":"Info"}]};
+
+    sql:ClientConnector sqlCon = create sql:ClientConnector(propertiesMap);
+    sql:Parameter[] params = [];
+
+    datatable issuetypeTable = sql:ClientConnector.select(sqlCon, GET_ALL_ISSUE_TYPE_DB_QUERY_VERSION2, params);
+    var issuetypes,_ = <json>issuetypeTable;
+    jsons:addToObject(info,"$","issueIssuetypes" ,issuetypes);
+    datatables:close(issuetypeTable);
+
+    datatable severityTable = sql:ClientConnector.select(sqlCon, GET_SEVERITY_DB_QUERY_VERSION2, params);
+    var severities,_ = <json>severityTable;
+    jsons:addToObject(info,"$","issueSeverities", severities);
+    datatables:close(severityTable);
+
+    sql:ClientConnector.close(sqlCon);
+    jsons:addToObject(data, "$", "data", info);
+    return data;
 }
 
 
