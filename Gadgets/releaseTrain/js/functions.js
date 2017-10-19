@@ -207,6 +207,7 @@ $(function() {
   cb(start, end);        
 });
 
+var managerTableRowId=0;
 function drawManagerSummaryTable(data){
   for (var i=0;i<dataSet.length;i++){
     if (dataSet[i].id==data){
@@ -224,7 +225,10 @@ function drawManagerSummaryTable(data){
       var html    = template(dataSet[i]);
       $( ".summary" ).append(  html );
 
+      $("#"+managerTableRowId).removeClass("rowHighlight");
+      $("#"+data).addClass("rowHighlight");
 
+      managerTableRowId=data;
 
     }
   }
@@ -360,6 +364,12 @@ function changeButton(divId){
 
 function showFixedIssues(divId){
     changeButton(divId);
+    
+    $(".detailedinfo").empty();
+    
+    var html    = "<div class=well ><p> Nothing to display </p></div>";
+        
+    $( ".detailedinfo" ).append(  html );
 
     //fixed issues should be display here.
     //fixed issues will be taken from github.
@@ -369,6 +379,12 @@ function showFixedIssues(divId){
 
 function showReportedIssues(divId){
     changeButton(divId);
+
+    $(".detailedinfo").empty();
+ 	
+    var html    = "<div class=well ><p> Nothing to display </p></div>";
+        
+    $( ".detailedinfo" ).append(  html );
     
     //reported issues should be display here.
     //reported issues will be taken from github.

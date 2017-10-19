@@ -1,5 +1,6 @@
-// create a handlebars template
-  var url="localhost";
+  var url="10.100.4.2";
+  
+  // create a handlebars template
   var source   = document.getElementById('item-template').innerHTML;
   var template = Handlebars.compile(document.getElementById('item-template').innerHTML);
 
@@ -93,20 +94,76 @@
   x(Data1,template);
 
   function x(Data,template){
-
+      var now = moment().minutes(0).seconds(0).milliseconds(0);
    
       // Configuration for the Timeline
       var options = {
         
-        start:new Date()-1000*60*60*24*40,
-        end:new Date()+1000*60*60*24*1,
-
         template: template,
-        rollingMode:{follow:true,offset:0.5},
         zoomable:false,
         timeAxis: {scale: 'day', step:1 },
-        height:"264px",
+        height:"275px",
 
+      };
+
+      var flagDate=null;
+      var start= now.clone().add(-28, 'days');
+      var end  =now.clone().add(28, 'days');
+
+      for(var i=Data.length-1;i>=0;i--){
+        
+            console.log(Data[i].start);
+            var currentLoopDate=new Date(Data[i].start);
+
+            if(start<=currentLoopDate  &&  currentLoopDate<= end){
+              console.log("if1");
+              options1= jQuery.extend(options, {start:start,end:end});
+              break;
+            }else if (end<currentLoopDate){
+
+              flagDate=currentLoopDate;
+              console.log("if2");
+
+            }else if (currentLoopDate<start){
+                console.log("if3");
+            
+
+                if(flagDate==null){
+                  
+                  start=moment(Data[i].start).add(-28, 'days');
+                  end=moment(Data[i].start).add(28, 'days');
+                  options1= jQuery.extend(options, {start:start,end:end});
+                  break;
+                }else{
+                  
+                  start=moment(flagDate).add(-28, 'days');
+                  end=moment(flagDate).add(28, 'days');
+                  options1= jQuery.extend(options, {start:start,end:end});
+                  break;
+                }
+            
+        }
+
+      }
+
+      
+
+      document.getElementById('toggleRollingMode').onclick = function () { 
+        
+
+        options = {
+        
+
+        start: now.clone().add(-28, 'days'),
+        end: now.clone().add(28, 'days'),
+        template: template,
+        zoomable:false,
+        timeAxis: {scale: 'day', step:1 },
+        height:"275px",
+
+      };
+
+      timeline.setOptions(options);
       };
 
       

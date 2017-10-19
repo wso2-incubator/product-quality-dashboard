@@ -30,7 +30,7 @@ table .description {
 .pane {
 	display: inline-block;
 	overflow-y: auto;
-	max-height:140px;
+	max-height:200px;
 }
 
 .buttonChange{
@@ -52,5 +52,20 @@ table .description {
 	display: none;
 }
 
-	
+.rowHighlight{
+	background-color: #bfb8b7;
+}
+
+.today {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 10px;
+    z-index: 9999;
+}
+
+table.ex2 {
+    border-collapse: separate;
+    border-spacing: 10px 10px;
+}
 
