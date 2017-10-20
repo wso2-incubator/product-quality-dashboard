@@ -4,10 +4,10 @@ $(function() {
     var end = moment();
 
     function cb(start, end) {
-        $('#config-demo span').html(start.format('YYYY MMMM, D') + ' - ' + end.format('YYYY MMMM, D'));
+        $('.config-demo span').html(start.format('YYYY MMMM, D') + ' - ' + end.format('YYYY MMMM, D'));
     }
 
-    $('#config-demo').daterangepicker({
+    $('.config-demo').daterangepicker({
         startDate: moment().subtract(30, 'days'),
         endDate: end,
         ranges: {

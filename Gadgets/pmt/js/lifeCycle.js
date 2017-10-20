@@ -31,20 +31,31 @@ function loadStackQueuedGraph(){
         json.data = counts[z];
         chart.push(json)
     }
-    console.log(chart);
+
     drawStackChart(products,chart);
+
+    // document.getElementById('product2').innerHTML = "";
+    // for (var x = 0; x < products.length; x++) {
+    //     document.getElementById('product2').innerHTML += "<a href='#' class='list-group-item' style='font-size:1vw;'>"
+    //         + products[x] +
+    //         "</a>";
+    // }
+
+    console.log(products);
 }
 
 function drawStackChart(products,chartData){
+    if(startDate === ""){
+        defaultTitle = "Patch States of Products from "+firstdate+' to '+today;
+    }else{
+        defaultTitle = "Patch States of Products from "+startDate+' to '+endDate;
+    }
     Highcharts.chart('lifeCycle', {
         chart: {
             type: 'column'
         },
         title: {
-            text: 'Patch States of Products from 2017-08-29 to 2017-09-28'
-        },
-        subtitle:{
-            text:"Click on a bar to view more details"
+            text: defaultTitle
         },
         xAxis: {
             categories: products
@@ -98,7 +109,6 @@ function drawStackChart(products,chartData){
     });
 }
 
-
 Highcharts.chart('stateGraph', {
     chart: {
         backgroundColor: 'white',
@@ -149,7 +159,7 @@ Highcharts.chart('stateGraph', {
                     .add();
 
                 // Queued label
-                ren.label('Queued State  <br/> <span style="text-align: center;">Count 34</span>', 10, 82)
+                ren.label('Queued State  <br/> <span style="text-align: center;">Count 21</span>', 10, 82)
                     .attr({
                         fill: colors[0],
                         stroke: 'white',
@@ -165,7 +175,7 @@ Highcharts.chart('stateGraph', {
                     .add()
                     .shadow(true);
 
-                ren.label('Pre QA State  <br/> <span style="text-align: center;">Count 34</span>', 220, 82)
+                ren.label('Pre QA State  <br/> <span style="text-align: center;">Count 13</span>', 220, 82)
                     .attr({
                         fill: colors[1],
                         stroke: 'white',
@@ -180,7 +190,7 @@ Highcharts.chart('stateGraph', {
                     })
                     .add();
 
-                ren.label('Developing State <br/> <span style="text-align: center;">Count 34</span>', 430, 82)
+                ren.label('Developing State <br/> <span style="text-align: center;">Count 09</span>', 430, 82)
                     .attr({
                         fill: colors[1],
                         stroke: 'white',
@@ -195,7 +205,7 @@ Highcharts.chart('stateGraph', {
                     })
                     .add();
 
-                ren.label('Testing State  <br/> <span style="text-align: center;">Count 34</span>', 660, 82)
+                ren.label('Testing State  <br/> <span style="text-align: center;">Count 05</span>', 660, 82)
                     .attr({
                         fill: colors[1],
                         stroke: 'white',
@@ -219,7 +229,7 @@ Highcharts.chart('stateGraph', {
                     .translate(115, 105)
                     .add();
 
-                ren.label('Get 2 Days', 135, 87)
+                ren.label('Average 2 Days', 135, 87)
                     .css({
                         fontSize: '10px',
                         color: colors[3]
@@ -235,7 +245,7 @@ Highcharts.chart('stateGraph', {
                     .translate(325, 105)
                     .add();
 
-                ren.label('Get 2 Days', 345, 87)
+                ren.label('Average 2 Days', 345, 87)
                     .css({
                         fontSize: '10px',
                         color: colors[3]
@@ -251,7 +261,7 @@ Highcharts.chart('stateGraph', {
                     .translate(555, 105)
                     .add();
 
-                ren.label('Get 2 Days', 575, 87)
+                ren.label('Average 2 Days', 575, 87)
                     .css({
                         fontSize: '10px',
                         color: colors[3]
@@ -267,7 +277,7 @@ Highcharts.chart('stateGraph', {
                     .add();
 
                 //On hold state
-                ren.label('On Hold State  <br/> <span style="text-align: center;">Count 34</span>', 290, 250)
+                ren.label('On Hold State  <br/> <span style="text-align: center;">Count 04</span>', 290, 250)
                     .attr({
                     fill: colors[1],
                     stroke: 'white',
@@ -291,7 +301,7 @@ Highcharts.chart('stateGraph', {
                     .add();
 
                 //Broken State
-                ren.label('Broken State   <br/> <span style="text-align: center;">Count 34</span>', 525, 250)
+                ren.label('Broken State   <br/> <span style="text-align: center;">Count 11</span>', 525, 250)
                     .attr({
                         fill: colors[1],
                         stroke: 'white',
@@ -307,7 +317,7 @@ Highcharts.chart('stateGraph', {
                     .add();
 
                 // Released label
-                ren.label('Released State   <br/> <span style="text-align: center;">Count 34</span>', 870, 80)
+                ren.label('Released State   <br/> <span style="text-align: center;">Count 1123</span>', 870, 80)
                     .attr({
                         fill: '#7AC29A',
                         stroke: 'white',
