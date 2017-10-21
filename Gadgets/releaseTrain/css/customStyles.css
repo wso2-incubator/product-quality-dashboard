@@ -56,16 +56,32 @@ table .description {
 	background-color: #bfb8b7;
 }
 
-.today {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 10px;
-    z-index: 9999;
-}
-
 table.ex2 {
     border-collapse: separate;
     border-spacing: 10px 10px;
 }
+
+.today1 {
+    position: absolute;
+    /*left: -5px;*/
+    top: 0;
+    right: 5px;
+    margin: 10px;
+    z-index: 9999;
+}
+
+.today2 {
+    position: absolute;
+    left: -5px;
+    top: 0;
+    /*right: 5px;*/
+    margin: 10px;
+    z-index: 9999;
+}
+
+.today3 {
+	display: none;
+}
+
+
 

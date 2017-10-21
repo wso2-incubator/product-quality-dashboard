@@ -117,6 +117,9 @@
 
             if(start<=currentLoopDate  &&  currentLoopDate<= end){
               console.log("if1");
+              $("#leftArrow").css("display","none");
+              $("#rightArrow").css("display","none");
+              $("#toggleRollingMode").css("display","block");
               options1= jQuery.extend(options, {start:start,end:end});
               break;
             }else if (end<currentLoopDate){
@@ -129,12 +132,16 @@
             
 
                 if(flagDate==null){
+
+                  
                   
                   start=moment(Data[i].start).add(-28, 'days');
                   end=moment(Data[i].start).add(28, 'days');
                   options1= jQuery.extend(options, {start:start,end:end});
                   break;
                 }else{
+
+                  
                   
                   start=moment(flagDate).add(-28, 'days');
                   end=moment(flagDate).add(28, 'days');
@@ -149,7 +156,7 @@
       
 
       document.getElementById('toggleRollingMode').onclick = function () { 
-        
+       
 
         options = {
         
@@ -175,6 +182,43 @@
       timeline.setItems(items);
       
   };
+
+  timeline.on('rangechanged', function (properties) {
+    console.log(properties);
+    var now = moment().minutes(0).seconds(0).milliseconds(0);
+    var start=moment(properties.start);
+    var end=moment(properties.end);
+    var duration1 = moment.duration(now.diff(start));
+    var duration2 = moment.duration(end.diff(now));
+    var days1 = duration1.asDays();
+    var days2 = duration2.asDays();
+
+    if(days1<0){
+        $(".todayposition").removeClass("today3");
+        $(".todayposition").removeClass("today1");
+        $(".todayposition").addClass("today2");
+        $("#leftArrow").css("display","block");
+        $("#rightArrow").css("display","none");
+    }else if(days2<0){
+        $(".todayposition").removeClass("today3");
+        $(".todayposition").removeClass("today2");
+        $(".todayposition").addClass("today1");
+        $("#leftArrow").css("display","none");
+        $("#rightArrow").css("display","block");
+    }else{
+        $(".todayposition").removeClass("today2");
+        $(".todayposition").removeClass("today1");
+        $(".todayposition").addClass("today3");
+        $("#leftArrow").css("display","none");
+        $("#rightArrow").css("display","none");
+    }
+  
+
+    console.log(days1);
+    console.log(days2);
+
+
+  });
 
   timeline.on('click', function (properties) {
 
