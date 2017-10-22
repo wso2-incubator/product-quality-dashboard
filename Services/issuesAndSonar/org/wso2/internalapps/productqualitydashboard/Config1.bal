@@ -55,88 +55,35 @@ const string GET_GITHUB_PRODUCT_ISSUES = "SELECT pqd_product.pqd_product_id, pqd
                                          "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
                                          "AND pqd_product.pqd_product_id = ? GROUP BY pqd_product_id";
 
-const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                   "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                   "FROM pqd_issue_type INNER JOIN pqd_product_issues WHERE " +
-                                                   "pqd_issue_type.pqd_issue_type_id = pqd_product_issues.pqd_issue_type_id " +
-                                                   "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_issue_type_id";
+const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES = "";
 
-const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                   "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                   "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
-                                                   "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
-                                                   "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_issue_type_id";
+const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES = "";
 
-const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                   "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                   "FROM pqd_issue_type INNER JOIN pqd_product_issues WHERE " +
-                                                   "pqd_issue_type.pqd_issue_type_id = pqd_product_issues.pqd_issue_type_id " +
-                                                   "AND pqd_product_issues.pqd_product_id = ? AND pqd_product_issues.pqd_severity_id = ? " +
-                                                                      "GROUP BY pqd_issue_type_id";
+const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "";
 
-const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                  "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                  "FROM pqd_severity INNER JOIN pqd_product_issues WHERE " +
-                                                  "pqd_severity.pqd_severity_id = pqd_product_issues.pqd_severity_id " +
-                                                  "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_severity_id";
+const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES = "";
 
-const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                  "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                  "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
-                                                  "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
-                                                  "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_severity_id";
+const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES = "";
 
-const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                  "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                  "FROM pqd_severity INNER JOIN pqd_product_issues WHERE " +
-                                                  "pqd_severity.pqd_severity_id = pqd_product_issues.pqd_severity_id " +
-                                                  "AND pqd_product_issues.pqd_product_id = ? " +
-                                                                      "AND pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "";
 
 const string GET_GITHUB_PRODUCT_SUM_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, SUM(pqd_product_issues.pqd_issues_count) " +
                                             "AS pqd_issues_count FROM pqd_product INNER JOIN pqd_product_issues " +
                                             "WHERE pqd_product_issues.pqd_product_id = ? AND " +
                                             "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id";
 
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                            "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                            "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                            "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                            "AND pqd_component.pqd_product_id = ? GROUP BY pqd_component_id, pqd_component_name";
+const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES = "";
 
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                                   "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                   "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                                   "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                   "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_component_id, pqd_component_name";
+const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE = "";
 
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_SEVERITY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                                                         "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                         "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                                                         "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                                         "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_severity_id = ? GROUP BY pqd_component_id, pqd_component_name";
+const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_SEVERITY = "";
 
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE_SEVERITY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                                                         "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                         "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                                                         "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                                         "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
-                                                                                  "AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_component_id, pqd_component_name";
+const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE_SEVERITY = "";
 
-const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                      "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                      "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
-                                                                      "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
-                                                                      "AND pqd_component_issues.pqd_component_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
-                                                                      "GROUP BY pqd_issue_type_id";
+const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "";
 
 
-const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                      "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                      "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
-                                                                      "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
-                                                                      "AND pqd_component_issues.pqd_component_id = ? " +
-                                                                      "AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "";
 
 const string GET_GITHUB_PRODUCT_PRODUCT_ISSUES = "SELECT pqd_product.pqd_product_id AS pqd_component_id, pqd_product.pqd_product_name " +
                                           "AS pqd_component_name, SUM(pqd_product_issues.pqd_issues_count) " +
@@ -151,61 +98,23 @@ const string GET_GITHUB_AREA_SUM_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.
                                          "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id";
 
 
-const string GET_GITHUB_AREA_PRODUCT_ISSUES = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                              "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                              "FROM pqd_product INNER JOIN pqd_product_issues WHERE " +
-                                              "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id AND " +
-                                              "pqd_product.pqd_area_id = ? GROUP BY pqd_product_id";
+const string GET_GITHUB_AREA_PRODUCT_ISSUES = "";
 
-const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_ISSUETYPE_ISSUES = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                                                  "SUM(pqd_product_issues.pqd_issues_count) AS " +
-                                                                  "pqd_issues_count FROM pqd_product INNER JOIN " +
-                                                                  "pqd_product_issues WHERE " +
-                                                                  "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
-                                                                  "AND pqd_product.pqd_area_id = ? AND " +
-                                                                  "pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_product_id";
+const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_ISSUETYPE_ISSUES = "";
 
-const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_ISSUES = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                                                  "SUM(pqd_product_issues.pqd_issues_count) AS " +
-                                                                  "pqd_issues_count FROM pqd_product INNER JOIN " +
-                                                                  "pqd_product_issues WHERE " +
-                                                                  "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
-                                                                  "AND pqd_product.pqd_area_id = ? AND " +
-                                                                  "pqd_product_issues.pqd_severity_id = ? GROUP BY pqd_product_id";
+const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_ISSUES = "";
 
-const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_AND_ISSUETYPE = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                                                        "SUM(pqd_product_issues.pqd_issues_count) AS " +
-                                                                        "pqd_issues_count FROM pqd_product INNER JOIN " +
-                                                                        "pqd_product_issues WHERE " +
-                                                                        "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
-                                                                        "AND pqd_product.pqd_area_id = ? AND " +
-                                                                        "pqd_product_issues.pqd_severity_id = ? " +
-                                                                        "AND pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_product_id";
+const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_AND_ISSUETYPE = "";
 
 
-const string GET_GITHUB_AREA_ISSUETYPE_ISSUES = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
-                                                "INNER JOIN pqd_area_issues WHERE " +
-                                                "pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                "AND pqd_area_issues.pqd_area_id = ? GROUP BY pqd_issue_type_id";
+const string GET_GITHUB_AREA_ISSUETYPE_ISSUES = "";
 
-const string GET_GITHUB_AREA_ISSUETYPE_FILTER_BY_SEVERITY_ISSUES = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                   "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
-                                                                   "INNER JOIN pqd_area_issues WHERE " +
-                                                                   "pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                                   "AND pqd_area_issues.pqd_area_id = ? AND pqd_area_issues.pqd_severity_id = ? " +
-                                                                   "GROUP BY pqd_issue_type_id";
+const string GET_GITHUB_AREA_ISSUETYPE_FILTER_BY_SEVERITY_ISSUES = "";
 
-const string GET_GITHUB_AREA_SEVERITY_FILTER_BY_ISSUETYPE_ISSUES = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                             "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
-                                                             "INNER JOIN pqd_area_issues WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                                             "AND pqd_area_issues.pqd_area_id = ? AND pqd_area_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+const string GET_GITHUB_AREA_SEVERITY_FILTER_BY_ISSUETYPE_ISSUES = "";
 
 
-const string GET_GITHUB_AREA_SEVERITY_ISSUES = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                      "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
-                                      "INNER JOIN pqd_area_issues WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                      "AND pqd_area_issues.pqd_area_id = ? GROUP BY pqd_severity_id";
+const string GET_GITHUB_AREA_SEVERITY_ISSUES = "";
 
 
 
@@ -242,56 +151,17 @@ const string GET_GITHUB_PRODUCT_CURRENT_ISSUES_QUERY = "SELECT pqd_product_id, p
 const string GET_GITHUB_AREA_CURRENT_ISSUES_QUERY = "SELECT pqd_area_id, pqd_issue_type_id, pqd_severity_id, pqd_issues_count " +
                                                        "FROM pqd_area_issues";
 
-const string GET_GITHUB_ALL_AREAS_CURRENT_ISSUES_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                         "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                         "FROM pqd_area INNER JOIN pqd_area_issues " +
-                                                         "WHERE pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                         "GROUP BY pqd_area_id";
 
-const string GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                                   "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                   "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
-                                                                   "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                                   "AND pqd_area_issues.pqd_issue_type_id = ? GROUP BY pqd_area_id";
 
-const string GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                                  "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                  "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
-                                                                  "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                                  "AND pqd_area_issues.pqd_severity_id = ? GROUP BY pqd_area_id";
+const string GET_GITHUB_ALL_AREAS_FILTERED_CURRENT_ISSUES_QUERY = "";
 
-const string GET_GITHUB_ALL_AREAS_FILTERED_CURRENT_ISSUES_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                                  "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                  "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
-                                                                  "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                                  "AND pqd_area_issues.pqd_issue_type_id = ? " +
-                                                                  "AND pqd_area_issues.pqd_severity_id = ? GROUP BY pqd_area_id";
+const string GET_GITHUB_ALL_AREAS_ISSUETYPE_QUERY = "";
 
-const string GET_GITHUB_ALL_AREAS_ISSUETYPE_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                    "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
-                                                    "INNER JOIN pqd_area_issues " +
-                                                    "WHERE pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                    "GROUP BY pqd_issue_type_id";
+const string GET_GITHUB_ALL_AREAS_SEVERITY_QUERY = "";
 
-const string GET_GITHUB_ALL_AREAS_SEVERITY_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                   "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                   "FROM pqd_severity INNER JOIN pqd_area_issues " +
-                                                   "WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                                   "GROUP BY pqd_severity_id";
+const string GET_GITHUB_ALL_AREAS_SEVERITY_ISSUETYPE_QUERY = "";
 
-const string GET_GITHUB_ALL_AREAS_SEVERITY_ISSUETYPE_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                    "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
-                                                    "INNER JOIN pqd_area_issues " +
-                                                    "WHERE pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                             "AND pqd_area_issues.pqd_severity_id = ? " +
-                                                    "GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_ALL_AREAS_ISSUETYPE_SEVERITY_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                             "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                             "FROM pqd_severity INNER JOIN pqd_area_issues " +
-                                                             "WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                                             "AND pqd_area_issues.pqd_issue_type_id = ? " +
-                                                             "GROUP BY pqd_severity_id";
+const string GET_GITHUB_ALL_AREAS_ISSUETYPE_SEVERITY_QUERY = "";
 
 const string GET_GITHUB_COMPONENT_QUERY = "SELECT pqd_component_id, pqd_component_name, pqd_product_id, github_repo_name, github_repo_organization " +
                                           "FROM pqd_component";
@@ -726,5 +596,193 @@ const string GET_GITHUB_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "S
                                                                             "GROUP BY year";
 
 
+const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
+                                                         "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                         "FROM pqd_area INNER JOIN pqd_area_issues " +
+                                                         "WHERE pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
+                                                         "GROUP BY pqd_area_id";
+
+const string GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                        "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                        "INNER JOIN pqd_area_issues " +
+                                                        "WHERE pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
+                                                        "GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                        "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                        "FROM pqd_severity INNER JOIN pqd_area_issues " +
+                                                        "WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
+                                                        "GROUP BY pqd_severity_id";
 
 
+const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
+                                                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
+                                                                                "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
+                                                                                "AND pqd_area_issues.pqd_issue_type_id = ? GROUP BY pqd_area_id";
+
+const string GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_severity INNER JOIN pqd_area_issues " +
+                                                                                "WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
+                                                                                "AND pqd_area_issues.pqd_issue_type_id = ? " +
+                                                                                "GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
+                                                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
+                                                                                "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
+                                                                                "AND pqd_area_issues.pqd_severity_id = ? GROUP BY pqd_area_id";
+
+const string GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_issue_type INNER JOIN pqd_area_issues " +
+                                                                                "WHERE pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
+                                                                                "AND pqd_area_issues.pqd_severity_id = ? " +
+                                                                                "GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
+                                                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
+                                                                                "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
+                                                                                "AND pqd_area_issues.pqd_issue_type_id = ? " +
+                                                                                "AND pqd_area_issues.pqd_severity_id = ? GROUP BY pqd_area_id";
+
+
+const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                            "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                            "FROM pqd_product INNER JOIN pqd_product_issues WHERE " +
+                                                            "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id AND " +
+                                                            "pqd_product.pqd_area_id = ? GROUP BY pqd_product_id";
+
+const string GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                            "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                            "INNER JOIN pqd_area_issues WHERE " +
+                                                            "pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
+                                                            "AND pqd_area_issues.pqd_area_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                            "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                            "INNER JOIN pqd_area_issues WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
+                                                            "AND pqd_area_issues.pqd_area_id = ? GROUP BY pqd_severity_id";
+
+
+const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                                                "SUM(pqd_product_issues.pqd_issues_count) AS " +
+                                                                                "pqd_issues_count FROM pqd_product INNER JOIN " +
+                                                                                "pqd_product_issues WHERE " +
+                                                                                "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
+                                                                                "AND pqd_product.pqd_area_id = ? AND " +
+                                                                                "pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_product_id";
+
+const string GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                                "INNER JOIN pqd_area_issues WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
+                                                                                "AND pqd_area_issues.pqd_area_id = ? AND pqd_area_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                                                "SUM(pqd_product_issues.pqd_issues_count) AS " +
+                                                                                "pqd_issues_count FROM pqd_product INNER JOIN " +
+                                                                                "pqd_product_issues WHERE " +
+                                                                                "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
+                                                                                "AND pqd_product.pqd_area_id = ? AND " +
+                                                                                "pqd_product_issues.pqd_severity_id = ? GROUP BY pqd_product_id";
+
+const string GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                                "INNER JOIN pqd_area_issues WHERE " +
+                                                                                "pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
+                                                                                "AND pqd_area_issues.pqd_area_id = ? AND pqd_area_issues.pqd_severity_id = ? " +
+                                                                                "GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                                                "SUM(pqd_product_issues.pqd_issues_count) AS " +
+                                                                                "pqd_issues_count FROM pqd_product INNER JOIN " +
+                                                                                "pqd_product_issues WHERE " +
+                                                                                "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
+                                                                                "AND pqd_product.pqd_area_id = ? AND " +
+                                                                                "pqd_product_issues.pqd_severity_id = ? " +
+                                                                                "AND pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_product_id";
+
+
+
+const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                        "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                        "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
+                                                        "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
+                                                        "AND pqd_component.pqd_product_id = ? GROUP BY pqd_component_id, pqd_component_name";
+
+const string GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                        "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                        "FROM pqd_issue_type INNER JOIN pqd_product_issues WHERE " +
+                                                        "pqd_issue_type.pqd_issue_type_id = pqd_product_issues.pqd_issue_type_id " +
+                                                        "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                        "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                        "FROM pqd_severity INNER JOIN pqd_product_issues WHERE " +
+                                                        "pqd_severity.pqd_severity_id = pqd_product_issues.pqd_severity_id " +
+                                                        "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_severity_id";
+
+
+const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                        "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                        "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
+                                                        "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
+                                                        "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_component_id, pqd_component_name";
+
+const string GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_severity INNER JOIN pqd_product_issues WHERE " +
+                                                                                "pqd_severity.pqd_severity_id = pqd_product_issues.pqd_severity_id " +
+                                                                                "AND pqd_product_issues.pqd_product_id = ? " +
+                                                                                "AND pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                                                "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
+                                                                                "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
+                                                                                "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
+                                                                                "GROUP BY pqd_component_id, pqd_component_name";
+
+const string GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_issue_type INNER JOIN pqd_product_issues WHERE " +
+                                                                                "pqd_issue_type.pqd_issue_type_id = pqd_product_issues.pqd_issue_type_id " +
+                                                                                "AND pqd_product_issues.pqd_product_id = ? AND pqd_product_issues.pqd_severity_id = ? " +
+                                                                                "GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                                                "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
+                                                                                "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
+                                                                                "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_issue_type_id = ? " +
+                                                                                "AND pqd_component_issues.pqd_severity_id = ? GROUP BY pqd_component_id, pqd_component_name";
+
+
+
+const string GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                        "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                        "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
+                                                        "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
+                                                        "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                        "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                        "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
+                                                        "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
+                                                        "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
+                                                                                "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
+                                                                                "AND pqd_component_issues.pqd_component_id = ? " +
+                                                                                "AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
+                                                                                "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
+                                                                                "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
+                                                                                "AND pqd_component_issues.pqd_component_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
+                                                                                "GROUP BY pqd_issue_type_id";

@@ -111,7 +111,7 @@ service<http> ProductQualityService {
         json responseJson = {"error":false, "data":{ "items": [] }};
 
         json sonarAllJson = getAllAreaSonarIssues();
-        json issuesAllJson = getAllAreaIssue(sqlCon);
+        json issuesAllJson = getGithubIssuesData(sqlCon, "all", 0, 0, 0);
 
         sql:Parameter[] paramsForArea = [];
 
@@ -200,7 +200,7 @@ service<http> ProductQualityService {
         //json sonarAllJson = allAreaSonars();
         //json issuesAllJson = getAllAreaIssue(sqlCon);
 
-        json issuesAreaJson = getAreaIssues(sqlCon, areaId);
+        json issuesAreaJson = getGithubIssuesData(sqlCon, "area", areaId, 0, 0);
         json sonarAreaJson = getSelectionResult("area", areaId, 0, 0);
 
         sql:Parameter areaIdParam = {sqlType:"integer", value:areaId};
@@ -287,7 +287,7 @@ service<http> ProductQualityService {
 
         json responseJson = {"error":false, "data":{ "items": [] }};
 
-        json issuesProductJson = getProductIssues(sqlCon, productId);
+        json issuesProductJson = getGithubIssuesData(sqlCon, "product", productId, 0, 0);
         json sonarProductJson = getSelectionResult("product", productId, 0, 0);
 
         sql:Parameter productIdParam = {sqlType:"integer", value:productId};
@@ -398,7 +398,7 @@ service<http> ProductQualityService {
         sql:Parameter paramForProduct = {sqlType: "integer", value:productId};
         sql:Parameter[] paramsForProduct = [paramForProduct];
 
-        json issuesComponentJson = getComponentIssues1(sqlCon,componentId);
+        json issuesComponentJson = getGithubIssuesData(sqlCon, "component", componentId, 0, 0);
         json sonarComponentJson = getSelectionResult("component", componentId, 0, 0);
 
 

@@ -148,7 +148,7 @@ service<http> GithubService {
     @http:GET {}
     @http:Path {value:"/issues/all"}
     resource getGithubIssuesForAllAreas(message m){
-        json responseJson = getAllAreaIssue(sqlCon);
+        json responseJson = getGithubIssuesData(sqlCon, "all", 0, 0, 0);
 
         message response = {};
 
@@ -600,65 +600,7 @@ service<http> GithubService {
 
         json responseJson;
 
-        if(category == "all"){
-            if ((issueTypeId == 0) && (severityId == 0)){
-                responseJson = getAllAreaIssue(sqlCon);
-            }
-            else if (issueTypeId == 0){
-                responseJson = getAllAreaSeverityIssues(sqlCon, severityId);
-            }
-            else if (severityId == 0){
-                responseJson = getAllAreaIssueTypeIssues(sqlCon, issueTypeId);
-            }
-            else if ((issueTypeId != 0) && (severityId != 0)){
-                responseJson = getAllAreaIssueTypeSeverityIssues(sqlCon, issueTypeId, severityId);
-            }
-
-
-        } else if (category == "area"){
-            if ((issueTypeId == 0) && (severityId == 0)){
-                responseJson = getAreaIssues(sqlCon, categoryId);
-            }
-            else if (issueTypeId == 0){
-                responseJson = getAreaSeverityIssues(sqlCon, categoryId, severityId);
-            }
-            else if (severityId == 0){
-                responseJson = getAreaIssueTypeIssues(sqlCon, categoryId, issueTypeId);
-            }
-            else if ((issueTypeId != 0) && (severityId != 0)){
-                responseJson = getAreaIssueTypeSeverityIssues(sqlCon, categoryId, issueTypeId, severityId);
-            }
-
-
-        } else if (category == "product"){
-            if ((issueTypeId == 0) && (severityId == 0)){
-                responseJson = getProductIssues(sqlCon, categoryId);
-            }
-            else if (issueTypeId == 0){
-                responseJson = getProductSeverityIssues(sqlCon, categoryId, severityId);
-            }
-            else if (severityId == 0){
-                responseJson = getProductIssueTypeIssues(sqlCon, categoryId, issueTypeId);
-            }
-            else if ((issueTypeId != 0) && (severityId != 0)){
-                responseJson = getProductIssueTypeSeverityIssues(sqlCon, categoryId, issueTypeId, severityId);
-            }
-        } else if (category == "version"){
-
-        } else if (category == "component"){
-                    if ((issueTypeId == 0) && (severityId == 0)){
-                        responseJson = getComponentIssues1(sqlCon, categoryId);
-                    }
-                    else if (issueTypeId == 0){
-                        responseJson = getComponentSeverityIssues(sqlCon, categoryId, severityId);
-                    }
-                    else if (severityId == 0){
-                        responseJson = getComponentIssueTypeIssues(sqlCon, categoryId, issueTypeId);
-                    }
-                    else if ((issueTypeId != 0) && (severityId != 0)){
-                        responseJson = getComponentIssueTypeSeverityIssues(sqlCon, categoryId, issueTypeId, severityId);
-                    }
-        }
+        responseJson = getGithubIssuesData(sqlCon, category, categoryId, issueTypeId, severityId);
 
         messages:setJsonPayload(response, responseJson);
 
@@ -698,6 +640,713 @@ service<http> GithubService {
 
 
 }
+
+
+function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int categoryId, int issueTypeId, int severityId)(json){
+    logger:debug("getGithubIssuesData function got invoked for category : " + category + "; categoryId : "
+                 + categoryId + "; and issueTypeId : " + issueTypeId + "; severityId : " + severityId);
+
+    // available categories
+    // 1. all
+    // 2. area
+    // 3. product
+    // 4. component
+
+    // issueTypeId = 0 or severityId = 0  indicates that issueTypeId or severityId is not selected
+
+    if(category == "all"){
+        if (issueTypeId == 0 && severityId == 0){
+
+            sql:Parameter[] emptyParams = [];
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_QUERY, emptyParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY, emptyParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY, emptyParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int areaIndex = 0;
+            while(areaIndex < lengthof areaIssueJson) {
+                var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[areaIndex], "$.pqd_issues_count");
+                int areaIssues = areaIssueVar;
+
+                json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[areaIndex], "$.pqd_area_name"),
+                                               "id": jsons:getInt(areaIssueJson[areaIndex], "$.pqd_area_id"),
+                                               "issues": areaIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
+                areaIndex = areaIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                "issues": issueTypeIssues
+                                            };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if (issueTypeId == 0){
+            sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
+            sql:Parameter[] sqlParams = [severityIdParam];
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int areaIndex = 0;
+            while(areaIndex < lengthof areaIssueJson) {
+                var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[areaIndex], "$.pqd_issues_count");
+                int areaIssues = areaIssueVar;
+
+                json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[areaIndex], "$.pqd_area_name"),
+                                                    "id": jsons:getInt(areaIssueJson[areaIndex], "$.pqd_area_id"),
+                                                    "issues": areaIssues
+                                                };
+                jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
+                areaIndex = areaIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                        "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                        "issues": issueTypeIssues
+                                                    };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;        
+
+
+        } else if (severityId == 0){
+            sql:Parameter issueTypeIdParam = {sqlType : "integer", value: issueTypeId};
+            sql:Parameter[] sqlParams = [issueTypeIdParam];
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int areaIndex = 0;
+            while(areaIndex < lengthof areaIssueJson) {
+                var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[areaIndex], "$.pqd_issues_count");
+                int areaIssues = areaIssueVar;
+
+                json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[areaIndex], "$.pqd_area_name"),
+                                               "id": jsons:getInt(areaIssueJson[areaIndex], "$.pqd_area_id"),
+                                               "issues": areaIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
+                areaIndex = areaIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;       
+                    
+        } else if ((issueTypeId != 0) && (severityId != 0)){
+            sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
+            sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
+            sql:Parameter[] sqlParams = [issueTypeIdParam, severityIdParam];
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int areaIndex = 0;
+            while(areaIndex < lengthof areaIssueJson) {
+                var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[areaIndex], "$.pqd_issues_count");
+                int areaIssues = areaIssueVar;
+
+                json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[areaIndex], "$.pqd_area_name"),
+                                               "id": jsons:getInt(areaIssueJson[areaIndex], "$.pqd_area_id"),
+                                               "issues": areaIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
+                areaIndex = areaIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+        }
+    } else if (category == "area"){
+        if (issueTypeId == 0 && severityId == 0){
+            sql:Parameter areaIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter[] sqlParams = [areaIdParam];
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int productIndex = 0;
+            while(productIndex < lengthof productIssueJson) {
+                var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[productIndex], "$.pqd_issues_count");
+                int productIssues = productIssueVar;
+
+                json currentProductItemJson = {"name": jsons:getString(productIssueJson[productIndex], "$.pqd_product_name"),
+                                               "id": jsons:getInt(productIssueJson[productIndex], "$.pqd_product_id"),
+                                               "issues": productIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
+                productIndex = productIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                "issues": issueTypeIssues
+                                            };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if (issueTypeId == 0){
+            sql:Parameter areaIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter severityIdParam = { sqlType: "integer", value: severityId};
+            sql:Parameter[] sqlParams = [areaIdParam, severityIdParam];
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int productIndex = 0;
+            while(productIndex < lengthof productIssueJson) {
+                var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[productIndex], "$.pqd_issues_count");
+                int productIssues = productIssueVar;
+
+                json currentProductItemJson = {"name": jsons:getString(productIssueJson[productIndex], "$.pqd_product_name"),
+                                               "id": jsons:getInt(productIssueJson[productIndex], "$.pqd_product_id"),
+                                               "issues": productIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
+                productIndex = productIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                "issues": issueTypeIssues
+                                            };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if (severityId == 0){
+
+            sql:Parameter areaIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId};
+            sql:Parameter[] sqlParams = [areaIdParam, issueTypeIdParam];
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int productIndex = 0;
+            while(productIndex < lengthof productIssueJson) {
+                var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[productIndex], "$.pqd_issues_count");
+                int productIssues = productIssueVar;
+
+                json currentProductItemJson = {"name": jsons:getString(productIssueJson[productIndex], "$.pqd_product_name"),
+                                               "id": jsons:getInt(productIssueJson[productIndex], "$.pqd_product_id"),
+                                               "issues": productIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
+                productIndex = productIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if ((issueTypeId != 0) && (severityId != 0)){
+            sql:Parameter areaIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
+            sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
+            sql:Parameter[] sqlParams = [areaIdParam, issueTypeIdParam, severityIdParam];
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int productIndex = 0;
+            while(productIndex < lengthof productIssueJson) {
+                var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[productIndex], "$.pqd_issues_count");
+                int productIssues = productIssueVar;
+
+                json currentProductItemJson = {"name": jsons:getString(productIssueJson[productIndex], "$.pqd_product_name"),
+                                               "id": jsons:getInt(productIssueJson[productIndex], "$.pqd_product_id"),
+                                               "issues": productIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
+                productIndex = productIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+        }
+
+    } else if (category == "product"){
+        if (issueTypeId == 0 && severityId == 0){
+            sql:Parameter productIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter[] sqlParams = [productIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                "issues": issueTypeIssues
+                                            };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if (issueTypeId == 0){
+
+            sql:Parameter productIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter severityIdParam = { sqlType: "integer", value:severityId};
+            sql:Parameter[] sqlParams = [productIdParam, severityIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                "issues": issueTypeIssues
+                                            };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if (severityId == 0){
+            sql:Parameter productIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId};
+            sql:Parameter[] sqlParams = [productIdParam, issueTypeIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if ((issueTypeId != 0) && (severityId != 0)){
+            sql:Parameter productIdParam = { sqlType: "integer", value: categoryId};
+            sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId};
+            sql:Parameter severityIdParam = { sqlType: "integer", value: severityId};
+            sql:Parameter[] sqlParams = [productIdParam, issueTypeIdParam, severityIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+        }
+
+    } else if (category == "version"){
+        if (issueTypeId == 0 && severityId == 0){
+
+        } else if (issueTypeId == 0){
+
+        } else if (severityId == 0){
+
+        } else if ((issueTypeId != 0) && (severityId != 0)){
+            
+        }
+
+    } else if (category == "component"){
+        if (issueTypeId == 0 && severityId == 0){
+
+            sql:Parameter componentIdParam = {sqlType:"integer", value: categoryId};
+            sql:Parameter[] componentParams = [componentIdParam];
+
+            json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, componentParams);
+            int productId = 0;
+            if (lengthof productIdJson > 0){
+                productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
+            } else {
+                json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+                return responseJson;
+            }
+
+            sql:Parameter productIdParam = { sqlType: "integer", value: productId};
+            sql:Parameter[] productParams = [productIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY, productParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_QUERY, componentParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_QUERY, componentParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                "issues": issueTypeIssues
+                                            };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if (issueTypeId == 0){
+            sql:Parameter componentIdParam = {sqlType:"integer", value: categoryId};
+            sql:Parameter[] componentParams = [componentIdParam];
+
+            json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, componentParams);
+            int productId = 0;
+            if (lengthof productIdJson > 0){
+                productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
+            } else {
+                json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+                return responseJson;
+            }
+
+            sql:Parameter productIdParam = { sqlType: "integer", value: productId };
+            sql:Parameter severityIdParam = { sqlType: "integer", value: severityId };
+            sql:Parameter[] productIdParams = [productIdParam, severityIdParam];
+            sql:Parameter[] sqlParams = [componentIdParam, severityIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, productIdParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+
+            int issueTypeIndex = 0;
+            while(issueTypeIndex < lengthof issueTypeJson) {
+
+                var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[issueTypeIndex], "$.pqd_issues_count");
+                int issueTypeIssues = issueTypeIssueVar;
+
+                json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[issueTypeIndex], "$.pqd_issue_type"),
+                                                "id": jsons:getInt(issueTypeJson[issueTypeIndex], "$.pqd_issue_type_id"),
+                                                "issues": issueTypeIssues
+                                            };
+                jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
+                issueTypeIndex = issueTypeIndex + 1;
+            }
+
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if (severityId == 0){
+            sql:Parameter componentIdParam = {sqlType:"integer", value: categoryId};
+            sql:Parameter[] componentParams = [componentIdParam];
+
+            json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, componentParams);
+            int productId = 0;
+            if (lengthof productIdJson > 0){
+                productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
+            } else {
+                json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+                return responseJson;
+            }
+
+            sql:Parameter productIdParam = { sqlType: "integer", value: productId};
+            sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
+            sql:Parameter[] productIdParams = [productIdParam, issueTypeIdParam];
+            sql:Parameter[] sqlParams = [componentIdParam, issueTypeIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, productIdParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+
+            int severityIndex = 0;
+            while(severityIndex < lengthof severityJson) {
+
+                var severityIssueVar, _ = <int>jsons:getFloat(severityJson[severityIndex], "$.pqd_issues_count");
+
+                json currentSeverityJson = {"name": jsons:getString(severityJson[severityIndex], "$.pqd_severity"),
+                                               "id": jsons:getInt(severityJson[severityIndex], "$.pqd_severity_id"),
+                                               "issues": severityIssueVar
+                                           };
+                jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
+                severityIndex = severityIndex + 1;
+            }
+
+            logger:info(responseJson);
+            return responseJson;
+
+        } else if ((issueTypeId != 0) && (severityId != 0)){
+            sql:Parameter componentIdParam = {sqlType:"integer", value: categoryId};
+            sql:Parameter[] componentParams = [componentIdParam];
+
+            json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, componentParams);
+            int productId = 0;
+            if (lengthof productIdJson > 0){
+                productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
+            } else {
+                json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+                return responseJson;
+            }
+
+            sql:Parameter productIdParam = { sqlType: "integer", value: productId };
+            sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId };
+            sql:Parameter severityIdParam = { sqlType: "integer", value: severityId };
+            sql:Parameter[] productIdParams = [productIdParam, issueTypeIdParam, severityIdParam];
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, productIdParams);
+
+            json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
+
+            int componentIndex = 0;
+            while(componentIndex < lengthof componentIssueJson) {
+                var componentIssueVar, _ = <int>jsons:getFloat(componentIssueJson[componentIndex], "$.pqd_issues_count");
+                int componentIssues = componentIssueVar;
+
+                json currentComponentItemJson = {"name": jsons:getString(componentIssueJson[componentIndex], "$.pqd_component_name"),
+                                               "id": jsons:getInt(componentIssueJson[componentIndex], "$.pqd_component_id"),
+                                               "issues": componentIssues
+                                           };
+                jsons:addToArray(responseJson, "$.data.items", currentComponentItemJson);
+                componentIndex = componentIndex + 1;
+            }
+            logger:info(responseJson);
+            return responseJson;
+        }
+
+    }
+
+    json responseJson = {"error": true, "msg": ""};
+
+    logger:info(responseJson);
+    return responseJson;
+}
+
 
 function getOrganizationRepoSummary (string organization) (json) {
 
@@ -960,9 +1609,7 @@ function getConfigData(string filePath)(json){
         logger:error("JSON syntax error found in "+ filePath + " " + err.msg);
         json configJson = jsons:parse(configString);
     }
-
     return null;
-
 
 }
 
@@ -1342,324 +1989,11 @@ function getComponentIssues(sql:ClientConnector sqlCon, int componentId)(json){
 }
 
 
-function getProductIssues(sql:ClientConnector sqlCon, int productId)(json){
-    logger:debug("get Product Issues functions got invoked for product id : " + productId);
 
-    sql:Parameter productIdParam = {sqlType:"integer", value:productId};
-    sql:Parameter[] paramsForProduct = [productIdParam];
 
 
-    datatable productIssueSumDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_SUM_QUERY, paramsForProduct);
-    var productIssueVar, _ = <json>productIssueSumDt;
-    logger:debug(productIssueVar);
-    json productIssueJson = productIssueVar;
-    datatables:close(productIssueSumDt);
 
-    datatable productComponentIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES, paramsForProduct);
-    var productComponentIssuesVar, _ = <json>productComponentIssueDt;
-    logger:debug(productComponentIssuesVar);
-    json productComponentJson = productComponentIssuesVar;
-    datatables:close(productComponentIssueDt);
 
-    datatable productIssueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES, paramsForProduct);
-    var productIssueTypeIssuesVar, _ = <json>productIssueTypeIssueDt;
-    logger:debug(productIssueTypeIssuesVar);
-    json issueTypeJson = productIssueTypeIssuesVar;
-    datatables:close(productIssueTypeIssueDt);
-
-    datatable productSeverityDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_SEVERITY_ISSUES, paramsForProduct);
-    var productSeverityIssuesVar, _ = <json>productSeverityDt;
-    logger:debug(productSeverityIssuesVar);
-    json severityJson = productSeverityIssuesVar;
-    datatables:close(productSeverityDt);
-
-    json responseJson = {"error":false, "data": {"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-
-    if (lengthof productIssueJson == 1) {
-        var productIssuesVar, _ = <int>jsons:getFloat(productIssueJson[0], "$.pqd_issues_count");
-        int areaIssuesInt = productIssuesVar;
-
-        jsons:addToObject(responseJson, "$.data", "name", jsons:getString(productIssueJson[0], "$.pqd_product_name"));
-        jsons:addToObject(responseJson, "$.data", "id", jsons:getInt(productIssueJson[0], "$.pqd_product_id"));
-        jsons:addToObject(responseJson, "$.data", "issues", areaIssuesInt);
-
-    } else {
-        return responseJson;
-    }
-
-    int a = 0;
-
-    while(a < lengthof productComponentJson){
-
-        var productIssuesVar, _ = <int>jsons:getFloat(productComponentJson[a], "$.pqd_issues_count");
-        int productIssues = productIssuesVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentProductItemJson = {"name": jsons:getString(productComponentJson[a], "$.pqd_component_name"),
-                                          "id": jsons:getInt(productComponentJson[a], "$.pqd_component_id"),
-                                          "issues": productIssues
-                                      };
-
-        jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
-
-        a = a + 1;
-    }
-
-    int b = 0;
-
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                        "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                        "issues": issueTypeIssues
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    int c = 0;
-
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                       "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                       "issues": severityIssueVar
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getComponentIssues1(sql:ClientConnector sqlCon, int componentId)(json){
-    logger:debug("get Product Issues functions got invoked for component id : " + componentId);
-
-    sql:Parameter paramForComponentId = {sqlType:"integer", value: componentId};
-    sql:Parameter[] paramsForComponent = [paramForComponentId];
-
-    json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, paramsForComponent);
-
-    int productId = 0;
-
-    if (lengthof productIdJson > 0){
-        productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
-    } else {
-        json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-        return responseJson;
-    }
-
-    sql:Parameter paramForProduct = {sqlType: "integer", value:productId};
-    sql:Parameter[] paramsForProduct = [paramForProduct];
-
-
-    datatable productIssueSumDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_SUM_QUERY, paramsForProduct);
-    var productIssueVar, _ = <json>productIssueSumDt;
-    logger:debug(productIssueVar);
-    json productIssueJson = productIssueVar;
-    datatables:close(productIssueSumDt);
-
-    datatable productComponentIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES, paramsForProduct);
-    var productComponentIssuesVar, _ = <json>productComponentIssueDt;
-    logger:debug(productComponentIssuesVar);
-    json productComponentJson = productComponentIssuesVar;
-    datatables:close(productComponentIssueDt);
-
-
-    datatable productIssueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES, paramsForComponent);
-    var productIssueTypeIssuesVar, _ = <json>productIssueTypeIssueDt;
-    logger:debug(productIssueTypeIssuesVar);
-    json issueTypeJson = productIssueTypeIssuesVar;
-    datatables:close(productIssueTypeIssueDt);
-
-    datatable productSeverityDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_COMPONENT_SEVERITY_ISSUES, paramsForComponent);
-    var productSeverityIssuesVar, _ = <json>productSeverityDt;
-    logger:debug(productSeverityIssuesVar);
-    json severityJson = productSeverityIssuesVar;
-    datatables:close(productSeverityDt);
-
-    json responseJson = {"error":false, "data": {"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof productComponentJson){
-
-        var productIssuesVar, _ = <int>jsons:getFloat(productComponentJson[a], "$.pqd_issues_count");
-        int productIssues = productIssuesVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentProductItemJson = {"name": jsons:getString(productComponentJson[a], "$.pqd_component_name"),
-                                          "id": jsons:getInt(productComponentJson[a], "$.pqd_component_id"),
-                                          "issues": productIssues
-                                      };
-
-        jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
-
-        a = a + 1;
-    }
-
-
-    int b = 0;
-
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                        "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                        "issues": issueTypeIssues
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    int c = 0;
-
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                       "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                       "issues": severityIssueVar
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getAreaIssues(sql:ClientConnector sqlCon, int areaId)(json){
-    logger:debug("get Area Issues functions got invoked for area id : " + areaId);
-
-    sql:Parameter areaIdParam = {sqlType:"integer", value:areaId};
-    sql:Parameter[] paramsForArea = [areaIdParam];
-
-
-    datatable areaIssueSumDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_SUM_QUERY, paramsForArea);
-    var areaIssueVar, _ = <json>areaIssueSumDt;
-    logger:debug(areaIssueVar);
-    json areaIssueJson = areaIssueVar;
-    datatables:close(areaIssueSumDt);
-
-    datatable areaProductIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_PRODUCT_ISSUES, paramsForArea);
-    var areaProductIssuesVar, _ = <json>areaProductIssueDt;
-    logger:debug(areaProductIssuesVar);
-    json areaProductJson = areaProductIssuesVar;
-    datatables:close(areaProductIssueDt);
-
-    datatable areaIssueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_ISSUETYPE_ISSUES, paramsForArea);
-    var areaIssueTypeIssuesVar, _ = <json>areaIssueTypeIssueDt;
-    logger:debug(areaIssueTypeIssuesVar);
-    json issueTypeJson = areaIssueTypeIssuesVar;
-    datatables:close(areaIssueTypeIssueDt);
-
-    datatable areaSeverityDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_SEVERITY_ISSUES, paramsForArea);
-    var areaSeverityIssuesVar, _ = <json>areaSeverityDt;
-    logger:debug(areaSeverityIssuesVar);
-    json severityJson = areaSeverityIssuesVar;
-    datatables:close(areaSeverityDt);
-
-    json responseJson = {"error":false, "data": {"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-
-    if (lengthof areaIssueJson == 1){
-        var areaIssuesVar, _ = <int>jsons:getFloat(areaIssueJson[0], "$.pqd_issues_count");
-        int areaIssuesInt = areaIssuesVar;
-
-        jsons:addToObject(responseJson, "$.data", "name", jsons:getString(areaIssueJson[0], "$.pqd_area_name"));
-        jsons:addToObject(responseJson, "$.data", "id", jsons:getInt(areaIssueJson[0], "$.pqd_area_id"));
-        jsons:addToObject(responseJson, "$.data", "issues", areaIssuesInt);
-
-    } else {
-        return responseJson;
-    }
-
-    int a = 0;
-
-
-    while(a < lengthof areaProductJson){
-
-        var areaIssuesVar, _ = <int>jsons:getFloat(areaProductJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssuesVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentProductItemJson = {"name": jsons:getString(areaProductJson[a], "$.pqd_product_name"),
-                                       "id": jsons:getInt(areaProductJson[a], "$.pqd_product_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
-
-        a = a + 1;
-    }
-
-    int b = 0;
-
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                        "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                        "issues": issueTypeIssues
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    int c = 0;
-
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                       "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                       "issues": severityIssueVar
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-
-    return responseJson;
-
-
-}
 
 function formatComponentIssues(sql:ClientConnector sqlCon, int componentId, json componentIssues)(json){
     logger:debug("formart Component Issues function got revoked for component Id : " + componentId);
@@ -1770,797 +2104,8 @@ function formatComponentIssues(sql:ClientConnector sqlCon, int componentId, json
     return formattedComponentIssues;
 }
 
-function getAllAreaIssueTypeIssues(sql:ClientConnector sqlCon, int issueTypeId)(json){
-    logger:debug("getAllAreaIssueTypeIssue function got invoked for issue type : " + issueTypeId);
 
-    sql:Parameter paramForIssueTypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForIssueTypeId = [paramForIssueTypeId];
 
-    datatable allAreaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY, paramsForIssueTypeId);
-    var areaVar, _ = <json>allAreaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(allAreaIssueDt);
-
-    datatable allSeverityIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_ISSUETYPE_SEVERITY_QUERY, paramsForIssueTypeId);
-    var severityVar, _ = <json>allSeverityIssueDt;
-    logger:debug(severityVar);
-    json severityJson = severityVar;
-    datatables:close(allSeverityIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_area_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_area_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-    int c = 0;
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                       "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                       "issues": severityIssueVar
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getAllAreaSeverityIssues(sql:ClientConnector sqlCon, int severityId)(json){
-    logger:debug("getAllAreaSeverityIssue function got invoked for severityID "+ severityId);
-
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter[] paramsForSeverityId = [paramForSeverityId];
-
-    datatable allAreaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY, paramsForSeverityId);
-    var areaVar, _ = <json>allAreaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(allAreaIssueDt);
-
-    datatable allIssueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_SEVERITY_ISSUETYPE_QUERY, paramsForSeverityId);
-    var issueTypeVar, _ = <json>allIssueTypeIssueDt;
-    logger:debug(issueTypeVar);
-    json issueTypeJson = issueTypeVar;
-    datatables:close(allIssueTypeIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_area_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_area_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-    int b = 0;
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                        "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                        "issues": issueTypeIssues
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getAllAreaIssueTypeSeverityIssues(sql:ClientConnector sqlCon, int issueTypeId, int severityId)(json){
-    logger:debug("getAllAreaSeverityIssue function got invoked for severityID "+ severityId);
-
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter paramForIssuetypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForFilterId = [paramForIssuetypeId, paramForSeverityId];
-
-    datatable allAreaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_FILTERED_CURRENT_ISSUES_QUERY, paramsForFilterId);
-    var areaVar, _ = <json>allAreaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(allAreaIssueDt);
-
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_area_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_area_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-
-    logger:info(responseJson);
-
-    return responseJson;
-}
-
-function getAreaIssueTypeIssues(sql:ClientConnector sqlCon, int areaId, int issueTypeId)(json){
-    logger:debug("getAreaIssueTypeIssue function got invoked for area : " + areaId + " and issue type : " + issueTypeId);
-
-    sql:Parameter paramForAreaId = {sqlType:"integer", value: areaId};
-    sql:Parameter paramForIssueTypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForIssueTypeId = [paramForAreaId, paramForIssueTypeId];
-
-    datatable areaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_PRODUCT_FILTER_BY_ISSUETYPE_ISSUES, paramsForIssueTypeId);
-    var areaVar, _ = <json>areaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(areaIssueDt);
-
-    datatable severityIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_SEVERITY_FILTER_BY_ISSUETYPE_ISSUES, paramsForIssueTypeId);
-    var severityVar, _ = <json>severityIssueDt;
-    logger:debug(severityVar);
-    json severityJson = severityVar;
-    datatables:close(severityIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_product_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_product_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-    int c = 0;
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                       "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                       "issues": severityIssueVar
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getAreaSeverityIssues(sql:ClientConnector sqlCon, int areaId, int severityId)(json){
-    logger:debug("getAreaSeverityIssue function got invoked for areaId : "+ areaId + " and severityID "+ severityId);
-
-    sql:Parameter paramForAreaId = {sqlType: "integer", value: areaId};
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter[] paramsForSeverityId = [paramForAreaId, paramForSeverityId];
-
-    datatable areaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_ISSUES, paramsForSeverityId);
-    var areaVar, _ = <json>areaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(areaIssueDt);
-
-    datatable issueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_ISSUETYPE_FILTER_BY_SEVERITY_ISSUES, paramsForSeverityId);
-    var issueTypeVar, _ = <json>issueTypeIssueDt;
-    logger:debug(issueTypeVar);
-    json issueTypeJson = issueTypeVar;
-    datatables:close(issueTypeIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_product_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_product_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-    int b = 0;
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                        "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                        "issues": issueTypeIssues
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getAreaIssueTypeSeverityIssues(sql:ClientConnector sqlCon, int areaId, int issueTypeId, int severityId)(json){
-    logger:debug("getAreaIssueTypeSeverityIssue function got invoked for areaId : " + areaId +
-                 " issueTypeId : " +  issueTypeId + " severityID "+ severityId);
-
-    sql:Parameter paramForAreaId = {sqlType: "integer", value: areaId};
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter paramForIssuetypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForFilterId = [paramForAreaId, paramForSeverityId, paramForIssuetypeId];
-
-    datatable allAreaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_AND_ISSUETYPE, paramsForFilterId);
-    var areaVar, _ = <json>allAreaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(allAreaIssueDt);
-
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_product_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_product_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getProductIssueTypeIssues(sql:ClientConnector sqlCon, int productId, int issueTypeId)(json){
-    logger:debug("getProductIssueTypeIssue function got invoked for product : " + productId + " and issue type : " + issueTypeId);
-
-    sql:Parameter paramForProductId = {sqlType:"integer", value: productId};
-    sql:Parameter paramForIssueTypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForIssueTypeId = [paramForProductId, paramForIssueTypeId];
-
-    datatable productIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE, paramsForIssueTypeId);
-    var productVar, _ = <json>productIssueDt;
-    logger:debug(productVar);
-    json productIssueJson = productVar;
-    datatables:close(productIssueDt);
-
-    datatable severityIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE, paramsForIssueTypeId);
-    var severityVar, _ = <json>severityIssueDt;
-    logger:debug(severityVar);
-    json severityJson = severityVar;
-    datatables:close(severityIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof productIssueJson){
-
-        var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[a], "$.pqd_issues_count");
-        int productIssues = productIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentProductItemJson = {"name":jsons:getString(productIssueJson[a], "$.pqd_component_name"),
-                                       "id": jsons:getInt(productIssueJson[a], "$.pqd_component_id"),
-                                       "issues": productIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
-
-        a = a + 1;
-    }
-
-    int c = 0;
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                       "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                       "issues": severityIssueVar
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getProductSeverityIssues(sql:ClientConnector sqlCon, int productId, int severityId)(json){
-    logger:debug("getProductSeverityIssue function got invoked for areaId : "+ productId + " and severityID "+ severityId);
-
-    sql:Parameter paramForProductId = {sqlType: "integer", value: productId};
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter[] paramsForSeverityId = [paramForProductId, paramForSeverityId];
-
-    datatable productIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_SEVERITY, paramsForSeverityId);
-    var productVar, _ = <json>productIssueDt;
-    logger:debug(productVar);
-    json productIssueJson = productVar;
-    datatables:close(productIssueDt);
-
-    datatable issueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY, paramsForSeverityId);
-    var issueTypeVar, _ = <json>issueTypeIssueDt;
-    logger:debug(issueTypeVar);
-    json issueTypeJson = issueTypeVar;
-    datatables:close(issueTypeIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof productIssueJson) {
-
-        var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = productIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(productIssueJson[a], "$.pqd_component_name"),
-                                       "id": jsons:getInt(productIssueJson[a], "$.pqd_component_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-    int b = 0;
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                        "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                        "issues": issueTypeIssues
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getProductIssueTypeSeverityIssues(sql:ClientConnector sqlCon, int productId, int issueTypeId, int severityId)(json){
-    logger:debug("getProductIssueTypeSeverityIssue function got invoked for areaId : " + productId +
-                 " issueTypeId : " +  issueTypeId + " severityID "+ severityId);
-
-    sql:Parameter paramForProductId = {sqlType:"integer", value:productId};
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter paramForIssuetypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForFilterId = [paramForProductId, paramForSeverityId, paramForIssuetypeId];
-
-    datatable allAreaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE_SEVERITY, paramsForFilterId);
-    var areaVar, _ = <json>allAreaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(allAreaIssueDt);
-
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_component_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_component_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getComponentIssueTypeIssues(sql:ClientConnector sqlCon, int componentId, int issueTypeId)(json){
-    logger:debug("getComponentIssueTypeIssue function got invoked for component : " + componentId + " and issue type : " + issueTypeId);
-
-    sql:Parameter paramForComponentId = {sqlType:"integer", value: componentId};
-    sql:Parameter[] paramsForComponent = [paramForComponentId];
-
-    json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, paramsForComponent);
-
-    int productId = 0;
-
-    if (lengthof productIdJson > 0){
-        productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
-    } else {
-        json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-        return responseJson;
-    }
-
-    sql:Parameter paramForProductId = {sqlType:"integer", value: productId};
-    sql:Parameter paramForIssueTypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForProductId = [paramForProductId, paramForIssueTypeId];
-
-    datatable productIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE, paramsForProductId);
-    var productVar, _ = <json>productIssueDt;
-    logger:debug(productVar);
-    json productIssueJson = productVar;
-    datatables:close(productIssueDt);
-
-    sql:Parameter[] paramsForComponentId = [paramForComponentId, paramForIssueTypeId];
-
-    datatable severityIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_COMPONENT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE, paramsForComponentId);
-    var severityVar, _ = <json>severityIssueDt;
-    logger:debug(severityVar);
-    json severityJson = severityVar;
-    datatables:close(severityIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof productIssueJson){
-
-        var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[a], "$.pqd_issues_count");
-        int productIssues = productIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentProductItemJson = {"name":jsons:getString(productIssueJson[a], "$.pqd_component_name"),
-                                          "id": jsons:getInt(productIssueJson[a], "$.pqd_component_id"),
-                                          "issues": productIssues
-                                      };
-
-        jsons:addToArray(responseJson, "$.data.items", currentProductItemJson);
-
-        a = a + 1;
-    }
-
-    int c = 0;
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                       "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                       "issues": severityIssueVar
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getComponentSeverityIssues(sql:ClientConnector sqlCon, int componentId, int severityId)(json){
-    logger:debug("getComponentSeverityIssue function got invoked for areaId : "+ componentId + " and severityID "+ severityId);
-
-
-    sql:Parameter paramForComponentId = {sqlType:"integer", value: componentId};
-    sql:Parameter[] paramsForComponent = [paramForComponentId];
-
-    json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, paramsForComponent);
-
-    int productId = 0;
-
-    if (lengthof productIdJson > 0){
-        productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
-    } else {
-        json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-        return responseJson;
-    }
-
-    sql:Parameter paramForProductId = {sqlType: "integer", value: productId};
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter[] paramsForProductId = [paramForProductId, paramForSeverityId];
-
-    datatable productIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_SEVERITY, paramsForProductId);
-    var productVar, _ = <json>productIssueDt;
-    logger:debug(productVar);
-    json productIssueJson = productVar;
-    datatables:close(productIssueDt);
-
-    sql:Parameter[] paramsForComponentId = [paramForComponentId, paramForSeverityId];
-
-    datatable issueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY, paramsForComponentId);
-    var issueTypeVar, _ = <json>issueTypeIssueDt;
-    logger:debug(issueTypeVar);
-    json issueTypeJson = issueTypeVar;
-    datatables:close(issueTypeIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof productIssueJson) {
-
-        var productIssueVar, _ = <int>jsons:getFloat(productIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = productIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(productIssueJson[a], "$.pqd_component_name"),
-                                       "id": jsons:getInt(productIssueJson[a], "$.pqd_component_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-    int b = 0;
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                        "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                        "issues": issueTypeIssues
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getComponentIssueTypeSeverityIssues(sql:ClientConnector sqlCon, int componentId, int issueTypeId, int severityId)(json){
-    logger:debug("getComponentIssueTypeSeverityIssue function got invoked for componentId : " + componentId +
-                 " issueTypeId : " +  issueTypeId + " severityID "+ severityId);
-
-
-    sql:Parameter paramForComponentId = {sqlType:"integer", value: componentId};
-    sql:Parameter[] paramsForComponent = [paramForComponentId];
-
-    json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, paramsForComponent);
-
-    int productId = 0;
-
-    if (lengthof productIdJson > 0){
-        productId = jsons:getInt(productIdJson, "$[0].pqd_product_id");
-    } else {
-        json responseJson = {"error":true, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-        return responseJson;
-    }
-
-
-    sql:Parameter paramForProductId = {sqlType:"integer", value:productId};
-    sql:Parameter paramForSeverityId = {sqlType: "integer", value: severityId};
-    sql:Parameter paramForIssuetypeId = {sqlType: "integer", value: issueTypeId};
-    sql:Parameter[] paramsForFilterId = [paramForProductId, paramForSeverityId, paramForIssuetypeId];
-
-    datatable allAreaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE_SEVERITY, paramsForFilterId);
-    var areaVar, _ = <json>allAreaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(allAreaIssueDt);
-
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_component_name"),
-                                       "id": jsons:getInt(areaIssueJson[a], "$.pqd_component_id"),
-                                       "issues": areaIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-
-    logger:info(responseJson);
-    return responseJson;
-}
-
-function getAllAreaIssue(sql:ClientConnector sqlCon)(json) {
-    logger:debug("getAllAreaIssue function got invoked");
-
-    sql:Parameter[] paramForAllArea = [];
-
-    datatable allAreaIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_CURRENT_ISSUES_QUERY, paramForAllArea);
-    var areaVar, _ = <json>allAreaIssueDt;
-    logger:debug(areaVar);
-    json areaIssueJson = areaVar;
-    datatables:close(allAreaIssueDt);
-
-    datatable allIssueTypeIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_ISSUETYPE_QUERY, paramForAllArea);
-    var issueTypeVar, _ = <json>allIssueTypeIssueDt;
-    logger:debug(issueTypeVar);
-    json issueTypeJson = issueTypeVar;
-    datatables:close(allIssueTypeIssueDt);
-
-    datatable allSeverityIssueDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ALL_AREAS_SEVERITY_QUERY, paramForAllArea);
-    var severityVar, _ = <json>allSeverityIssueDt;
-    logger:debug(severityVar);
-    json severityJson = severityVar;
-    datatables:close(allSeverityIssueDt);
-
-
-    json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
-
-    int a = 0;
-
-    while(a < lengthof areaIssueJson){
-
-        var areaIssueVar, _ = <int>jsons:getFloat(areaIssueJson[a], "$.pqd_issues_count");
-        int areaIssues = areaIssueVar;
-
-        //logger:info("check " +areaIssues);
-
-        json currentAreaItemJson = {"name": jsons:getString(areaIssueJson[a], "$.pqd_area_name"),
-                                  "id": jsons:getInt(areaIssueJson[a], "$.pqd_area_id"),
-                                  "issues": areaIssues
-                              };
-
-        jsons:addToArray(responseJson, "$.data.items", currentAreaItemJson);
-
-        a = a + 1;
-    }
-
-    int b = 0;
-
-    while(b < lengthof issueTypeJson){
-
-        var issueTypeIssueVar, _ = <int>jsons:getFloat(issueTypeJson[b], "$.pqd_issues_count");
-        int issueTypeIssues = issueTypeIssueVar;
-
-        json currentIssueTypeJson = {"name": jsons:getString(issueTypeJson[b], "$.pqd_issue_type"),
-                                       "id": jsons:getInt(issueTypeJson[b], "$.pqd_issue_type_id"),
-                                       "issues": issueTypeIssues
-                                   };
-
-        jsons:addToArray(responseJson, "$.data.issueIssuetype", currentIssueTypeJson);
-
-        b = b + 1;
-    }
-
-    int c = 0;
-
-    while(c < lengthof severityJson){
-
-        var severityIssueVar, _ = <int>jsons:getFloat(severityJson[c], "$.pqd_issues_count");
-
-        json currentSeverityJson = {"name": jsons:getString(severityJson[c], "$.pqd_severity"),
-                                        "id": jsons:getInt(severityJson[c], "$.pqd_severity_id"),
-                                        "issues": severityIssueVar
-                                    };
-
-        jsons:addToArray(responseJson, "$.data.issueSeverity", currentSeverityJson);
-
-        c = c + 1;
-    }
-
-    logger:info(responseJson);
-    return responseJson;
-}
 
 function getIssueTypeAll(sql:ClientConnector sqlCon)(json){
     logger:debug("Get issue type all function got invoked");
@@ -3947,6 +3492,8 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
 
 function getDataFromDatabase(sql:ClientConnector sqlCon, string sqlQuery, sql:Parameter[] paramsForQuery)(json){
+    logger:debug("getDataFromDatabase function got invoked for sqlQuery : " + sqlQuery);
+
     datatable commonDt = sql:ClientConnector.select(sqlCon, sqlQuery, paramsForQuery);
     var commonVar, _ = <json>commonDt;
     logger:debug(commonVar);

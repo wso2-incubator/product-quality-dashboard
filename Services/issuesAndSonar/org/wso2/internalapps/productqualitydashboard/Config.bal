@@ -1,5 +1,7 @@
 package org.wso2.internalapps.productqualitydashboard;
 
+const string GET_AREA_DETAIL = "SELECT pqd_product_jira_id,pqd_product_jira_key, pqd_product_jira_name FROM pqd_product_jira";
+
 const string CONFIG_PATH = "config.json";
 
 const string API_VERSION = "v1.0";
@@ -16,6 +18,13 @@ const string GET_ALL_ISSUE_TYPE_COUNT = "SELECT a.pqd_jira_issue_type, SUM(a.pqd
                                         " pqd_product_jira_version = ?  AND c.pqd_area_name = ? " +
                                         "GROUP BY a.pqd_jira_issue_type";
 
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_AREA_TESTING = "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
+                                        "FROM pqd_jira_issues_by_product WHERE " +
+                                        "pqd_area_id = ? GROUP BY pqd_issue_type_id";
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_OF_AREA_FOR_SEVERITY_TESTING = "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
+                                        "FROM pqd_jira_issues_by_product WHERE pqd_area_id = ? AND pqd_severity_id = ? " +
+                                        " GROUP BY pqd_issue_type_id";
+
 const string GET_ALL_ISSUE_TYPE_COUNT_TEST = "SELECT pqd_jira_issue_type, SUM(pqd_issue_count) AS issue_type_level_issues " +
                                         "FROM jira_issues WHERE pqd_component_jira_id = ? AND" +
                                         " pqd_product_jira_version = ? ";
@@ -25,10 +34,14 @@ const string GET_ALL_ISSUE_TYPE_COUNT_1 = "SELECT pqd_jira_issue_type, SUM(pqd_i
                                         "GROUP BY pqd_jira_issue_type";
 
 const string GET_PRODUCT_DB_QUERY = "SELECT pqd_product_jira_id,pqd_product_jira_key, pqd_product_jira_name FROM pqd_product_jira";
+const string GET_PRODUCT_DB_QUERY_VERSION2= "SELECT pqd_area_id,pqd_product_id, jira_project_id FROM pqd_product WHERE jira_project_id != 0";
 
 const string GET_ISSUE_TYPE_DB_QUERY = "SELECT pqd_issue_type FROM pqd_jira_issue_type";
+const string GET_ISSUE_TYPE_DB_QUERY_VERSION2 = "SELECT pqd_issue_type_id, pqd_issue_type FROM pqd_issue_type WHERE jira_issue_type IS NOT NULL";
+
 
 const string GET_SEVERITY_DB_QUERY = "SELECT pqd_jira_severity FROM pqd_jira_severity";
+
 
 const string GET_JIRA_PROJECTS_DB_QUERY = "SELECT * FROM pqd_jira_projects WHERE pqd_product_id = ?";
 
@@ -37,8 +50,10 @@ const string GET_JIRA_COMPONENTS_DB_QUERY = "SELECT * FROM pqd_jira_components W
 const string GET_COMPONENT_DB_QUERY = "SELECT * FROM pqd_component_repo where pqd_product_id = ?";
 
 const string GET_PROJECT_VERSIONS = "SELECT pqd_product_jira_version FROM pqd_product_jira_version where pqd_product_jira_id = ?";
+const string GET_PROJECT_VERSIONS_VERSION2 = "SELECT pqd_product_version_id, pqd_product_version FROM pqd_product_version where pqd_product_id = ?";
 
 const string GET_PROJECT_COMPONENTS = "SELECT pqd_component_jira_id FROM pqd_component_jira where pqd_product_jira_id = ?";
+const string GET_PROJECT_COMPONENTS_VERSION2 = "SELECT pqd_component_id, jira_component_id FROM pqd_component where pqd_product_id = ? AND jira_component_id != 0";
 
 const string INSERT_SNAPSHOT_ID = "INSERT INTO pqd_jira_snapshot () VALUES ()";
 
@@ -60,8 +75,14 @@ const string INSERT_JIRA_ISSUES = "INSERT INTO pqd_jira_issues (" +
                                       "VALUES (?,?,?,?,?,?,?)";
 
 const string DELETE_JIRA_ISSUES = "DELETE FROM pqd_jira_issues WHERE 1";
+const string DELETE_JIRA_ISSUES_BY_PRODUCT = "DELETE FROM pqd_jira_issues_by_product WHERE 1";
+const string DELETE_JIRA_ISSUES_BY_COMPONENT = "DELETE FROM pqd_jira_issues_by_component WHERE 1";
+const string DELETE_JIRA_ISSUES_BY_VERSION = "DELETE FROM pqd_jira_issues_by_product_version WHERE 1";
 
 const string INSERT_JIRA_ISSUES_HISTORY = "INSERT INTO pqd_jira_issues_history SELECT * FROM pqd_jira_issues";
+const string INSERT_JIRA_ISSUES_HISTORY_BY_PRODUCT = "INSERT INTO pqd_jira_issues_history_by_product SELECT * FROM pqd_jira_issues_by_product";
+const string INSERT_JIRA_ISSUES_HISTORY_BY_VERSION = "INSERT INTO pqd_jira_issues_history_by_version SELECT * FROM pqd_jira_issues_by_product_version";
+const string INSERT_JIRA_ISSUES_HISTORY_BY_COMPONENT = "INSERT INTO pqd_jira_issues_history_by_component SELECT * FROM pqd_jira_issues_by_component";
 
 const string INSERT_JIRA_ISSUES_VIEW = "CREATE OR REPLACE VIEW jira_issues AS SELECT pqd_product_jira_id," +
                                        "pqd_component_jira_id, " +
@@ -71,29 +92,27 @@ const string INSERT_JIRA_ISSUES_VIEW = "CREATE OR REPLACE VIEW jira_issues AS SE
                                        "pqd_issue_count FROM pqd_jira_issues";
 
 const string INSERT_JIRA_ISSUES_BY_PRODUCT = "INSERT INTO pqd_jira_issues_by_product (" +
-                                               "pqd_product_jira_id," +
-                                               "pqd_jira_issue_type," +
-                                               "pqd_jira_severity, " +
-                                               "pqd_snapshot_id, " +
-                                               "pqd_issue_count) " +
-                                      "VALUES (?,?,?,?,?)";
+                                                "pqd_area_id," +
+                                                "pqd_product_id," +
+                                                "pqd_issue_type_id," +
+                                                "pqd_severity_id, " +
+                                                "pqd_issue_count, pqd_updated) " +
+                                             "VALUES (?,?,?,?,?,?)";
 
 const string INSERT_JIRA_ISSUES_BY_COMPONENT = "INSERT INTO pqd_jira_issues_by_component (" +
-                                               "pqd_product_jira_id," +
-                                               "pqd_component_jira_id, " +
-                                               "pqd_jira_issue_type," +
-                                               "pqd_jira_severity, " +
-                                               "pqd_snapshot_id, " +
-                                               "pqd_issue_count) " +
+                                               "pqd_product_id," +
+                                               "pqd_component_id, " +
+                                               "pqd_issue_type_id," +
+                                               "pqd_severity_id, " +
+                                               "pqd_issue_count, pqd_updated) " +
                                       "VALUES (?,?,?,?,?,?)";
 
 const string INSERT_JIRA_ISSUES_BY_VERSION = "INSERT INTO pqd_jira_issues_by_product_version (" +
-                                               "pqd_product_jira_id," +
-                                               "pqd_product_jira_version," +
-                                               "pqd_jira_issue_type," +
-                                               "pqd_jira_severity, " +
-                                               "pqd_snapshot_id, " +
-                                               "pqd_issue_count) " +
+                                             "pqd_product_id," +
+                                             "pqd_product_version_id," +
+                                               "pqd_issue_type_id," +
+                                               "pqd_severity_id, " +
+                                               "pqd_issue_count, pqd_updated) " +
                                       "VALUES (?,?,?,?,?,?)";
 
 
@@ -101,6 +120,18 @@ const string GET_ISSUE_COUNT_BY_PRODUCT = "SELECT a.pqd_product_jira_id AS pqd_p
                                           "AS product_level_issues FROM pqd_jira_issues AS a JOIN pqd_product_jira AS b " +
                                           "ON a.pqd_product_jira_id = b.pqd_product_jira_id JOIN pqd_product_areas AS c ON a.pqd_product_jira_id = c.pqd_product_jira_id WHERE " +
                                           "pqd_component_jira_id = ? AND pqd_product_jira_version = ? AND c.pqd_area_name = ? GROUP BY pqd_product_jira_id";
+const string GET_ISSUE_COUNT_BY_PRODUCT_FOR_AREA_TESTING = "SELECT pqd_product_id, SUM(pqd_issue_count) " +
+                                          "AS product_level_issues FROM pqd_jira_issues_by_product " +
+                                          "WHERE pqd_area_id = ? GROUP BY pqd_product_id";
+const string GET_ISSUE_COUNT_BY_PRODUCT_OF_AREA_FOR_ISSUE_TYPE_TESTING = "SELECT pqd_product_id, SUM(pqd_issue_count) " +
+                                          "AS product_level_issues FROM pqd_jira_issues_by_product " +
+                                          "WHERE pqd_area_id = ? AND pqd_issue_type_id = ? GROUP BY pqd_product_id";
+const string GET_ISSUE_COUNT_BY_PRODUCT_OF_AREA_FOR_SEVERITY_TESTING = "SELECT pqd_product_id, SUM(pqd_issue_count) " +
+                                          "AS product_level_issues FROM pqd_jira_issues_by_product " +
+                                          "WHERE pqd_area_id = ? AND pqd_severity_id = ? GROUP BY pqd_product_id";
+const string GET_ISSUE_COUNT_BY_PRODUCT_OF_AREA_FOR_ISSUE_TYPE_AND_SEVERITY_TESTING = "SELECT pqd_product_id, SUM(pqd_issue_count) " +
+                                          "AS product_level_issues FROM pqd_jira_issues_by_product " +
+                                          "WHERE pqd_area_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_product_id";
 
 
 const string GET_ISSUE_HISTORY_FOR_AREA =  "SELECT SUM(pqd_issue_count) AS issues, a.pqd_updated FROM pqd_jira_issues_history " +
@@ -108,6 +139,15 @@ const string GET_ISSUE_HISTORY_FOR_AREA =  "SELECT SUM(pqd_issue_count) AS issue
                                            "WHERE a.pqd_updated BETWEEN ? AND ? AND b.pqd_area_name = ? AND " +
                                            "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                            "GROUP BY a.pqd_updated";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_ISSUE_TYPE_TESTING =  "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                           "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ?  " +
+                                           "GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_ISSUE_TYPE_AND_SEVERITY_TESTING =  "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                           "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ?  " +
+                                           "GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_SEVERITY_TESTING =  "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                           "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_severity_id = ?  " +
+                                           "GROUP BY pqd_updated";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_FOR_AREA =
                                     "SELECT SUM(pqd_issue_count) AS issues, a.pqd_updated FROM pqd_jira_issues_history " +
@@ -144,6 +184,18 @@ const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_FOR_AREA_BY_YEAR =
                                     "WHERE a.pqd_updated BETWEEN ? AND ? AND b.pqd_area_name = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_OF_AREA_FOR_ISSUE_TYPE_BY_YEAR_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, year (t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ?  " +
+                                    "GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_OF_AREA_FOR_ISSUE_TYPE_AND_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, year (t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ?  " +
+                                    "GROUP BY pqd_updated) as t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_OF_AREA_FOR_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, year (t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_severity_id = ?  " +
+                                    "GROUP BY pqd_updated) t GROUP BY year";
 
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_FOR_AREA_BY_YEAR =
@@ -175,6 +227,21 @@ const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_FOR_AREA_BY_MONTH =
                                     "WHERE a.pqd_updated BETWEEN ? AND ? AND b.pqd_area_name = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_ISSUE_TYPE_BY_MONTH_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, ? (t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ?  " +
+                                    "GROUP BY pqd_updated) t GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_ISSUE_TYPE_AND_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ?  " +
+                                    "GROUP BY pqd_updated) as t  GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, ? (t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_severity_id = ?  " +
+                                    "GROUP BY pqd_updated) t GROUP BY year, month";
 
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_FOR_AREA_BY_MONTH =
@@ -203,12 +270,27 @@ const string GET_ISSUE_HISTORY_FOR_AREA_BY_QUARTER =
                                     "GROUP BY year, quarter";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_FOR_AREA_BY_QUARTER =
-                                    "SELECT SUM(pqd_issue_count) AS issues, ? (a.pqd_updated) AS year, quarter(a.pqd_updated)" +
+                                    "SELECT SUM(pqd_issue_count) AS issues, year(a.pqd_updated) AS year, quarter(a.pqd_updated)" +
                                     " AS quarter FROM pqd_jira_issues_history " +
                                     "AS a JOIN pqd_product_areas AS b ON a.pqd_product_jira_id = b.pqd_product_jira_id " +
                                     "WHERE a.pqd_updated BETWEEN ? AND ? AND b.pqd_area_name = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_ISSUE_TYPE_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ?  " +
+                                    "GROUP BY pqd_updated) t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_ISSUE_TYPE_AND_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ?  " +
+                                    "GROUP BY pqd_updated) as t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_AREA_FOR_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT SUM(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_area_id = ? AND pqd_severity_id = ?  " +
+                                    "GROUP BY pqd_updated) t GROUP BY year, quarter";
 
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_FOR_AREA_BY_QUARTER =
@@ -238,6 +320,42 @@ const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE =
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_AND_SEVERITY_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_AND_SEVERITY_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_AND_SEVERITY_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_SEVERITY_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND  pqd_severity_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_SEVERITY_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_SEVERITY_TESTING =
+                                    "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated";
 
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY =
@@ -263,44 +381,126 @@ const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_BY_YEAR =
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_update) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_AND_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_AND_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_AND_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_SEVERITY_BY_YEAR_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND  pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year";
 
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_BY_YEAR =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_severity = ? GROUP BY year";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_AND_SEVERITY_BY_YEAR =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? AND pqd_jira_severity = ? GROUP BY year";
 
 const string GET_ISSUE_HISTORY_BY_MONTH =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
                                     " AS month FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "GROUP BY year, month";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_BY_MONTH =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
                                     " AS month FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated) t GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_update) t  GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated) t GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_AND_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_AND_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_AND_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year, month";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_SEVERITY_BY_MONTH_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated)" +
+                                    " AS month FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND  pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, month";
 
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_BY_MONTH =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
                                     " AS month FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_severity = ? GROUP BY year, month";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_AND_SEVERITY_BY_MONTH =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated)" +
                                     " AS month FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
@@ -308,29 +508,74 @@ const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_AND_SEVERITY_BY_MONTH =
 
 
 const string GET_ISSUE_HISTORY_BY_QUARTER =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
                                     " AS quarter FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "GROUP BY year, quarter";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_BY_QUARTER =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
                                     " AS quarter FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_issue_type = ? GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated) t GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_update) t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? GROUP BY pqd_updated) t GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_ISSUE_TYPE_AND_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_ISSUE_TYPE_AND_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_ISSUE_TYPE_AND_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_PRODUCT_FOR_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_id = ? AND " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_VERSION_FOR_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_version " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_version_id = ? " +
+                                    "AND pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_COMPONENT_FOR_SEVERITY_BY_QUARTER_TESTING =
+                                    "SELECT AVG(t.issues) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated)" +
+                                    " AS quarter FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_component " +
+                                    "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_id = ? " +
+                                    "AND  pqd_severity_id = ? GROUP BY pqd_updated) t  GROUP BY year, quarter";
 
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_BY_QUARTER =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
                                     " AS quarter FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                     "AND pqd_jira_severity = ? GROUP BY year, quarter";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_AND_SEVERITY_BY_QUARTER =
-                                    "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
+                                    "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated)" +
                                     " AS quarter FROM pqd_jira_issues_history " +
                                     "WHERE pqd_updated BETWEEN ? AND ? AND pqd_product_jira_id = ? AND " +
                                     "pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
@@ -342,6 +587,16 @@ const string GET_ISSUE_HISTORY_FOR_ALL =
                                 "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history " +
                                 "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_TESTING =
+                                "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? GROUP BY pqd_updated";
+
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_AND_SEVERITY_TESTING =
+                                "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_SEVERITY_TESTING =
+                                "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_severity_id = ? GROUP BY pqd_updated";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_FOR_ALL =
                                 "SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history " +
@@ -362,59 +617,92 @@ const string GET_ISSUE_HISTORY_FOR_ALL_BY_YEAR =
                                 "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
                                 "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_BY_YEAR_TESTING =
+                                "SELECT AVG(table1.issues) AS issues, year(table1.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? GROUP BY pqd_updated) table1 GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_AND_SEVERITY_BY_YEAR_TESTING =
+                                "SELECT AVG(table1.issues) AS issues, year(table1.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) table1 GROUP BY year";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_SEVERITY_BY_YEAR_TESTING =
+                                "SELECT AVG(t.pqd_issue_count) AS issues, year(t.pqd_updated) AS year FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_FOR_ALL_BY_YEAR =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
                                 "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_issue_type = ? GROUP BY year";
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_FOR_ALL_BY_YEAR =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
                                 "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_severity = ? GROUP BY year";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_AND_SEVERITY_FOR_ALL_BY_YEAR =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year FROM pqd_jira_issues_history " +
                                 "WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_issue_type = ? AND pqd_jira_severity = ? GROUP BY year";
 
 const string GET_ISSUE_HISTORY_FOR_ALL_BY_MONTH =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? GROUP BY year, month";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_FOR_ALL_BY_MONTH =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_issue_type = ? GROUP BY year,month";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_BY_MONTH_TESTING =
+                                "SELECT AVG(table1.issues) AS issues, year(table1.pqd_updated) AS year, month(table1.pqd_updated) AS month" +
+                                " FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? GROUP BY pqd_updated) table1 GROUP BY year,month";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_AND_SEVERITY_BY_MONTH_TESTING =
+                                "SELECT AVG(table1.issues) AS issues, year(table1.pqd_updated) AS year, month(table1.pqd_updated) AS month" +
+                                " (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) table1  GROUP BY year,month";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_SEVERITY_BY_MONTH_TESTING =
+                                "SELECT AVG(t.pqd_issue_count) AS issues, year(t.pqd_updated) AS year, month(t.pqd_updated) AS month" +
+                                " FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year,month";
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_FOR_ALL_BY_MONTH =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_severity = ? GROUP BY year, month";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_AND_SEVERITY_FOR_ALL_BY_MONTH =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, month(pqd_updated) AS month" +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_issue_type = ? AND pqd_jira_severity = ? GROUP BY year, month";
 
 const string GET_ISSUE_HISTORY_FOR_ALL_BY_QUARTER =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter " +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter " +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? GROUP BY year, quarter";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_FOR_ALL_BY_QUARTER =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter" +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter" +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_issue_type = ? GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_BY_QUARTER_TETSING =
+                                "SELECT AVG(table1.issues) AS issues, year(table1.pqd_updated) AS year, quarter(table1.pqd_updated) AS quarter" +
+                                " FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? GROUP BY pqd_updated) table1 GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_ISSUE_TYPE_AND_SEVERITY_BY_QUARTER_TETSING =
+                                "SELECT AVG(table1.issues) AS issues, year(table1.pqd_updated) AS year, quarter(table1.pqd_updated) AS quarter" +
+                                " FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? GROUP BY pqd_updated) table1  GROUP BY year, quarter";
+const string GET_ISSUE_HISTORY_OF_ALL_FOR_SEVERITY_BY_QUARTER_TETSING =
+                                "SELECT AVG(t.pqd_issue_count) AS issues, year(t.pqd_updated) AS year, quarter(t.pqd_updated) AS quarter" +
+                                " FROM (SELECT SUM(pqd_issue_count) AS issues, pqd_updated FROM pqd_jira_issues_history_by_product " +
+                                "WHERE pqd_updated BETWEEN ? AND ? AND pqd_severity_id = ? GROUP BY pqd_updated) t GROUP BY year, quarter";
 
 const string GET_ISSUE_HISTORY_OF_SEVERITY_FOR_ALL_BY_QUARTER =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter" +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter" +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_severity = ? GROUP BY year, quarter";
 
 const string GET_ISSUE_HISTORY_OF_ISSUE_TYPE_AND_SEVERITY_FOR_ALL_BY_QUARTER =
-                                "SELECT SUM(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter" +
+                                "SELECT AVG(pqd_issue_count) AS issues, year(pqd_updated) AS year, quarter(pqd_updated) AS quarter" +
                                 " FROM pqd_jira_issues_history WHERE pqd_updated BETWEEN ? AND ? AND pqd_component_jira_id = ? AND " +
                                 "pqd_product_jira_version = ? AND pqd_jira_issue_type = ? AND pqd_jira_severity = ? GROUP BY year, quarter";
 
@@ -424,21 +712,69 @@ const string GET_ISSUE_COUNT_BY_COMPONENT = "SELECT b.pqd_component_jira_id, b.p
                                           "RIGHT JOIN pqd_component_jira AS b ON a.pqd_component_jira_id = b.pqd_component_jira_id " +
                                           "WHERE a.pqd_component_jira_id != ? AND pqd_product_jira_version = ? " +
                                           "AND a.pqd_product_jira_id = ? GROUP BY a.pqd_component_jira_id";
+const string GET_ISSUE_COUNT_BY_COMPONENT_FOR_PRODUCT_TESTING = "SELECT pqd_component_id, SUM(pqd_issue_count) AS component_level_issues FROM pqd_jira_issues_by_component " +
+                                          "WHERE pqd_product_id = ? GROUP BY pqd_component_id";
+const string GET_ISSUE_COUNT_BY_COMPONENT_OF_PRODUCT_FOR_ISSUE_TYPE_TESTING = "SELECT pqd_component_id, SUM(pqd_issue_count) AS component_level_issues FROM pqd_jira_issues_by_component " +
+                                          "WHERE pqd_product_id = ? AND pqd_issue_type_id = ? ROUP BY pqd_component_id";
+const string GET_ISSUE_COUNT_BY_COMPONENT_OF_PRODUCT_FOR_SEVERITY_TESTING = "SELECT pqd_component_id, SUM(pqd_issue_count) AS component_level_issues FROM pqd_jira_issues_by_component " +
+                                          "WHERE pqd_product_id = ? AND pqd_severity_id = ? ROUP BY pqd_component_id";
+const string GET_ISSUE_COUNT_BY_COMPONENT_OF_PRODUCT_FOR_ISSUE_TYPE_AND_SEVERITY_TESTING = "SELECT pqd_component_id, SUM(pqd_issue_count) AS component_level_issues FROM pqd_jira_issues_by_component " +
+                                          "WHERE pqd_product_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? ROUP BY pqd_component_id";
+
+const string GET_ISSUE_COUNT_OF_COMPONENT_BY_ISSUE_TYPE = "SELECT b.pqd_component_jira_id, b.pqd_component_jira_name," +
+                                          " SUM(pqd_issue_count) AS component_level_issues FROM pqd_jira_issues AS a " +
+                                          "RIGHT JOIN pqd_component_jira AS b ON a.pqd_component_jira_id = b.pqd_component_jira_id " +
+                                          "WHERE a.pqd_product_jira_id = ? AND a.pqd_component_jira_id != ? AND pqd_product_jira_version = ? " +
+                                          "AND pqd_jira_issue_type GROUP BY a.pqd_component_jira_id";
+
 
 const string GET_ISSUE_COUNT_BY_ISSUE_TYPE = "SELECT pqd_jira_issue_type, SUM(pqd_issue_count) AS issue_type_level_issues " +
                                             "FROM pqd_jira_issues WHERE pqd_component_jira_id = ? AND" +
                                             " pqd_product_jira_version = ? AND pqd_product_jira_id = ? " +
                                             "GROUP BY pqd_jira_issue_type";
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_PRODUCT_TESTING = "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
+                                            "FROM pqd_jira_issues_by_product WHERE pqd_product_id = ? " +
+                                            "GROUP BY pqd_issue_type_id";
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_OF_PRODUCT_FOR_SEVERITY_TESTING = "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
+                                            "FROM pqd_jira_issues_by_product WHERE pqd_product_id = ? AND pqd_severity_id = ? " +
+                                            "GROUP BY pqd_issue_type_id";
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_COMPONENT_TESTING = "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
+                                             "FROM pqd_jira_issues_by_component WHERE pqd_component_jira_id = ? " +
+                                             "GROUP BY pqd_issue_type_id";
+
 
 const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_AREA = "SELECT pqd_jira_issue_type, SUM(pqd_issue_count) AS issue_type_level_issues " +
                                                       "FROM pqd_jira_issues " +
                                                       "WHERE pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
                                                       "GROUP BY pqd_jira_issue_type";
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_ALL_TESTING =
+                                        "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
+                                        "FROM pqd_jira_issues_by_product GROUP BY pqd_issue_type_id";
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_OF_ALL_FOR_SEVERIRY_TESTING =
+                                        "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
+                                        "FROM pqd_jira_issues_by_product WHERE pqd_severity_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_ISSUE_COUNT_BY_SEVERITY_OF_PRODUCT_FOR_AREA = "SELECT pqd_jira_severity, SUM(pqd_issue_count) AS severity_level_issues" +
+                                                               " FROM pqd_jira_issues WHERE " +
+                                                               " pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
+                                                               " GROUP BY pqd_jira_severity";
+const string GET_ISSUE_COUNT_BY_SEVERITY_FOR_ALL_TESTING = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+                                                            " FROM pqd_jira_issues_by_product GROUP BY pqd_severity_id";
+const string GET_ISSUE_COUNT_BY_SEVERITY_OF_ALL_FOR_ISSUE_TYPE_TESTING =
+                                                "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+                                                " FROM pqd_jira_issues_by_product WHERE pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
 
 const string GET_ISSUE_COUNT_BY_SEVERITY = "SELECT a.pqd_jira_severity, SUM(a.pqd_issue_count) AS severity_level_issues" +
                                             " FROM pqd_jira_issues AS a JOIN pqd_product_areas AS c ON a.pqd_product_jira_id = c.pqd_product_jira_id WHERE a.pqd_component_jira_id = ? AND " +
                                             "a.pqd_product_jira_version = ? AND c.pqd_area_name = ? " +
                                             " GROUP BY a.pqd_jira_severity";
+const string GET_ISSUE_COUNT_BY_SEVERITY_FOR_AREA_TESTING = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+                                            " FROM pqd_jira_issues_by_product WHERE pqd_area_id = ? " +
+                                            " GROUP BY pqd_severity_id";
+const string GET_ISSUE_COUNT_BY_SEVERITY_OF_AREA_FOR_SEVERITY_TESTING = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+                                            " FROM pqd_jira_issues_by_product WHERE pqd_area_id = ? AND pqd_severity_id = ?" +
+                                            " GROUP BY pqd_severity_id";
 
 
 const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_OF_SEVERITY = "SELECT a.pqd_jira_issue_type, SUM(a.pqd_issue_count) AS issue_type_level_issues " +
@@ -462,10 +798,22 @@ const string GET_ISSUE_COUNT_OF_VERSION_BY_PRODUCT = "SELECT pqd_product_jira_ve
                                              " pqd_product_jira_version != ?  " +
                                              "GROUP BY pqd_product_jira_version";
 
-const string GET_ISSUE_COUNT_FOR_AREA = "SELECT c.pqd_area_name, SUM(pqd_issue_count) AS area_level_issues " +
+const string GET_ISSUE_COUNT_FOR_AREA = "SELECT c.pqd_area_name, SUM(pqd_issue_count) AS area_level_issues, a.pqd_product_jira_id " +
                                         "FROM pqd_jira_issues AS a JOIN pqd_product_areas AS c ON a.pqd_product_jira_id = c.pqd_product_jira_id" +
                                         " WHERE pqd_component_jira_id = ? AND pqd_product_jira_version = ?  " +
                                         "GROUP BY c.pqd_area_name";
+const string GET_ISSUE_COUNT_FOR_AREA_TESTING = "SELECT pqd_area_id, SUM(pqd_issue_count) AS area_level_issues " +
+                                        "FROM pqd_jira_issues_by_product " +
+                                        "GROUP BY pqd_area_id";
+const string GET_ISSUE_COUNT_OF_AREA_FOR_ISSUE_TYPE_TESTING = "SELECT pqd_area_id, SUM(pqd_issue_count) AS area_level_issues " +
+                                        "FROM pqd_jira_issues_by_product WHERE pqd_issue_type_id = ? " +
+                                        "GROUP BY pqd_area_id";
+const string GET_ISSUE_COUNT_OF_AREA_FOR_SEVERITY_TESTING = "SELECT pqd_area_id, SUM(pqd_issue_count) AS area_level_issues " +
+                                        "FROM pqd_jira_issues_by_product WHERE pqd_severity_id = ? " +
+                                        "GROUP BY pqd_area_id";
+const string GET_ISSUE_COUNT_OF_AREA_FOR_BOTH_ISSUE_TYPE_AND_SEVERITY_TESTING = "SELECT pqd_area_id, SUM(pqd_issue_count) AS area_level_issues " +
+                                        "FROM pqd_jira_issues_by_product WHERE pqd_issue_type_id = ? AND pqd_severity_id = ? " +
+                                        "GROUP BY pqd_area_id";
 
 const string GET_ISSUE_COUNT_BY_SEVERITY_OF_ISSUE_TYPE = "SELECT pqd_jira_severity, SUM(pqd_issue_count) AS severity_level_issues" +
                                                          " FROM pqd_jira_issues WHERE pqd_component_jira_id = ? AND " +
@@ -492,16 +840,29 @@ const string GET_ISSUE_COUNT_BY_SEVERITY_OF_COMPONENT = "SELECT pqd_jira_severit
                                                         " FROM pqd_jira_issues WHERE pqd_component_jira_id = ? AND " +
                                                         "pqd_product_jira_version = ? " +
                                                         " GROUP BY pqd_jira_severity";
+const string GET_ISSUE_COUNT_BY_SEVERITY_FOR_COMPONENT_TESTING = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+                                                        " FROM pqd_jira_issues_by_component WHERE pqd_component_jira_id = ? " +
+                                                        " GROUP BY pqd_severity_id";
 
 const string GET_ISSUE_COUNT_BY_SEVERITY_OF_PRODUCT = "SELECT pqd_jira_severity, SUM(pqd_issue_count) AS severity_level_issues" +
                                                         " FROM pqd_jira_issues WHERE pqd_product_jira_id = ? AND " +
                                                         "pqd_product_jira_version = ? AND pqd_component_jira_id = ?" +
                                                         " GROUP BY pqd_jira_severity";
+const string GET_ISSUE_COUNT_BY_SEVERITY_FOR_PRODUCT_TESTING = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+                                                        " FROM pqd_jira_issues_by_product WHERE pqd_product_id = ? GROUP BY pqd_severity_id";
+const string GET_ISSUE_COUNT_BY_SEVERITY_OF_PRODUCT_FOR_ISSUE_TYPE_TESTING = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+                                                        " FROM pqd_jira_issues_by_product WHERE pqd_product_id = ? AND pqd_issue_type_id = ? GROUP BY pqd_severity_id";
 
-const string GET_ISSUE_COUNT_BY_SEVERITY_OF_PRODUCT_FOR_AREA = "SELECT pqd_jira_severity, SUM(pqd_issue_count) AS severity_level_issues" +
-                                                        " FROM pqd_jira_issues WHERE " +
-                                                        "pqd_product_jira_version = ? AND pqd_component_jira_id = ?" +
-                                                        " GROUP BY pqd_jira_severity";
+
+const string GET_PRODUCTS_NAMES = "SELECT pqd_product_jira_id, pqd_product_jira_name FROM pqd_product_jira";
+
+const string GET_MAPPING = "SELECT pqd_component_jira_id AS id, "+
+                           "pqd_component_jira_name AS name FROM pqd_component_jira  "+
+                           "WHERE pqd_product_jira_id = ?";
+
+const string GET_MAPPING_VERSION = "SELECT pqd_product_jira_version AS id "+
+                           " FROM pqd_product_jira_version  "+
+                           "WHERE pqd_product_jira_id = ?";
 
 
 
