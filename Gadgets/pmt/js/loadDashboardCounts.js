@@ -10,8 +10,11 @@ var monthGapFlag = false;
 var menuDrillDown = [];
 var menuVersionDrillDown = [];
 var queuedDetails = [];
+var queuedVersionDetails = [];
 var devDetails = [];
+var devVersionDetails = [];
 var etaDetails = [];
+var etaVersionDetails = [];
 var target = "";
 var BALLERINA_URL = "192.168.56.2:9092";
 // var BALLERINA_URL = "localhost:9092";
@@ -75,12 +78,17 @@ function initLoadDashboard() {
                 document.getElementById('productVersion' + (parseInt(x) + 1)).innerHTML +=
                     "<button onclick='leftMenuClick(" + (parseInt(x) + 1) + "," + (parseInt(y) + 1) + ")'  class='list-group-item list-group-item-info' style='width:100%;text-align: left;' id='subVersion" + (parseInt(y) + 1) + "'>Version " +
                     menuVersionDrillDown[y].VERSION +
+                    "<span id='productVersionETACount"+(parseInt(y)+1)+"' class='badge' style='background-color:#DC143C;display:none;'>5</span>" +
+                    "<span id='productVersionDevCount"+(parseInt(y)+1)+"' class='badge' style='background-color:#4BC2DE;padding:3px 6px;'>5</span>" +
+                    "<span id='productVersionCount"+(parseInt(y)+1)+"' class='badge' style='background-color:#F4A94E; padding:3px 6px;'>15</span>"+
                     "</button>";
             }
         }
     }
 
     loadPatchCountDrillDown(firstdate,today);
+    loadPatchCountVersionDrillDown(firstdate,today);
+
     // document.onreadystatechange = function () {
     //     var state = document.readyState;
     //     if (state === 'interactive') {
@@ -523,6 +531,207 @@ function loadPatchCountDrillDown(start,end){
     }
 }
 
+function loadPatchCountVersionDrillDown(start,end){
+
+    $.ajax({
+        type: "GET",
+        url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-menu-version-badgeCounts/'+start+'/'+end,
+        async:false,
+        success: function (data) {
+            queuedVersionDetails = data.jsonResOfQueuedCount;
+            etaVersionDetails = data.jsonResOfETACounts;
+            devVersionDetails = data.jsonResOfDEVCounts;
+        }
+    });
+
+
+    //set Queued patch count in version break down
+    if(!jQuery.isEmptyObject(queuedVersionDetails)){
+        var count = queuedVersionDetails.length;
+        for(var x=1;x<versionCount;x++){
+            if(document.getElementById('productVersionCount'+(parseInt(x)+1)) !== null){
+                document.getElementById('productVersionCount'+(parseInt(x)+1)).innerHTML = '';
+            }
+        }
+
+        if(count === undefined){
+            for(var y=0;y<totalProducts;y++){
+                var element =  document.getElementById('product'+(parseInt(y)+1)).innerHTML;
+                if(element.split("<span")[0].trim() === queuedVersionDetails.PRODUCT_NAME.trim()){
+                    var childVersions = [];
+                    var childElement = document.getElementById('productVersion'+(y+1));
+                    for (var ii = 0; ii < childElement.childNodes.length; ii++) {
+                        var childId = childElement.childNodes[ii].id;
+                        childVersions.push(childId);
+                    }
+
+                    for(var c=0;c<childVersions.length;c++){
+                        if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+queuedVersionDetails.PRODUCT_VERSION.trim()){
+                            var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[13];
+                            document.getElementById(id).innerHTML = queuedVersionDetails.total;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }else{
+            for(var x=0;x<count;x++){
+                for(var y=0;y<totalProducts;y++){
+                    var element =  document.getElementById('product'+(parseInt(y)+1)).innerHTML;
+                    if(element.split("<span")[0].trim() === queuedVersionDetails[x].PRODUCT_NAME.trim()){
+                        var childVersions = [];
+                        var childElement = document.getElementById('productVersion'+(y+1));
+                        for (var ii = 0; ii < childElement.childNodes.length; ii++) {
+                            var childId = childElement.childNodes[ii].id;
+                            childVersions.push(childId);
+                        }
+
+                        for(var c=0;c<childVersions.length;c++){
+                            if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+queuedVersionDetails[x].PRODUCT_VERSION.trim()){
+                                var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[13];
+                                document.getElementById(id).innerHTML = queuedVersionDetails[x].total;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }else{
+        for(var x=1;x<versionCount;x++){
+            if(document.getElementById('productVersionCount'+(parseInt(x)+1)) !== null){
+                document.getElementById('productVersionCount'+(parseInt(x)+1)).innerHTML = '';
+            }
+        }
+    }
+
+    //set ETA patch count in version break down
+    if(!jQuery.isEmptyObject(etaVersionDetails)){
+        var count = etaVersionDetails.length;
+        for(var x=1;x<versionCount;x++){
+            if(document.getElementById('productVersionETACount'+(parseInt(x)+1)) !== null){
+                document.getElementById('productVersionETACount'+(parseInt(x)+1)).innerHTML = '';
+            }
+        }
+
+        if(count === undefined){
+            for(var y=0;y<totalProducts;y++){
+                var element =  document.getElementById('product'+(parseInt(y)+1)).innerHTML;
+                if(element.split("<span")[0].trim() === etaVersionDetails.PRODUCT_NAME.trim()){
+                    var childVersions = [];
+                    var childElement = document.getElementById('productVersion'+(y+1));
+                    for (var ii = 0; ii < childElement.childNodes.length; ii++) {
+                        var childId = childElement.childNodes[ii].id;
+                        childVersions.push(childId);
+                    }
+
+                    for(var c=0;c<childVersions.length;c++){
+                        if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+etaVersionDetails.PRODUCT_VERSION.trim()){
+                            var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                            document.getElementById(id).innerHTML = etaVersionDetails.total;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }else{
+            for(var x=0;x<count;x++){
+                for(var y=0;y<totalProducts;y++){
+                    var element =  document.getElementById('product'+(parseInt(y)+1)).innerHTML;
+                    if(element.split("<span")[0].trim() === etaVersionDetails[x].PRODUCT_NAME.trim()){
+                        var childVersions = [];
+                        var childElement = document.getElementById('productVersion'+(y+1));
+                        for (var ii = 0; ii < childElement.childNodes.length; ii++) {
+                            var childId = childElement.childNodes[ii].id;
+                            childVersions.push(childId);
+                        }
+
+                        for(var c=0;c<childVersions.length;c++){
+                            if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+etaVersionDetails[x].PRODUCT_VERSION.trim()){
+                                var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                                document.getElementById(id).innerHTML = etaVersionDetails[x].total;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }else{
+        for(var x=1;x<versionCount;x++){
+            if(document.getElementById('productVersionETACount'+(parseInt(x)+1)) !== null){
+                document.getElementById('productVersionETACount'+(parseInt(x)+1)).innerHTML = '';
+            }
+        }
+    }
+
+    //set DEV patch count in version break down
+    if(!jQuery.isEmptyObject(devVersionDetails)){
+        var count = devVersionDetails.length;
+        for(var x=1;x<versionCount;x++){
+            if(document.getElementById('productVersionDevCount'+(parseInt(x)+1)) !== null){
+                document.getElementById('productVersionDevCount'+(parseInt(x)+1)).innerHTML = '';
+            }
+        }
+
+        if(count === undefined){
+            for(var y=0;y<totalProducts;y++){
+                var element =  document.getElementById('product'+(parseInt(y)+1)).innerHTML;
+                if(element.split("<span")[0].trim() === devVersionDetails.PRODUCT_NAME.trim()){
+                    var childVersions = [];
+                    var childElement = document.getElementById('productVersion'+(y+1));
+                    for (var ii = 0; ii < childElement.childNodes.length; ii++) {
+                        var childId = childElement.childNodes[ii].id;
+                        childVersions.push(childId);
+                    }
+
+                    for(var c=0;c<childVersions.length;c++){
+                        if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+devVersionDetails.PRODUCT_VERSION.trim()){
+                            var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[7];
+                            document.getElementById(id).innerHTML = " <span class='badge' style='background-color:#DC143C;padding:1px 3px 1px 2px;border-radius:0;border-top-left-radius:90%;border-bottom-left-radius:90%; width:13px;margin-left:-4px; margin-right:3px !important;'>"+ document.getElementById(document.getElementById(childVersions[c]).innerHTML.split("\"")[1]).innerHTML+"</span><span style='margin-top:2px;'>" + devVersionDetails.total+"</span>";
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }else{
+            for(var x=0;x<count;x++){
+                for(var y=0;y<totalProducts;y++){
+                    var element =  document.getElementById('product'+(parseInt(y)+1)).innerHTML;
+                    if(element.split("<span")[0].trim() === devVersionDetails[x].PRODUCT_NAME.trim()){
+                        var childVersions = [];
+                        var childElement = document.getElementById('productVersion'+(y+1));
+                        for (var ii = 0; ii < childElement.childNodes.length; ii++) {
+                            var childId = childElement.childNodes[ii].id;
+                            childVersions.push(childId);
+                        }
+
+                        for(var c=0;c<childVersions.length;c++){
+                            if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+devVersionDetails[x].PRODUCT_VERSION.trim()){
+                                var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[7];
+                                document.getElementById(id).innerHTML = " <span class='badge' style='background-color:#DC143C;padding:1px 3px 1px 2px;border-radius:0;border-top-left-radius:90%;border-bottom-left-radius:90%; width:13px;margin-left:-4px; margin-right:3px !important;'>"+ document.getElementById(document.getElementById(childVersions[c]).innerHTML.split("\"")[1]).innerHTML+"</span><span style='margin-top:2px;'>" + devVersionDetails[x].total+"</span>";
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }else{
+        for(var x=1;x<versionCount;x++){
+            if(document.getElementById('productVersionDevCount'+(parseInt(x)+1)) !== null){
+                document.getElementById('productVersionDevCount'+(parseInt(x)+1)).innerHTML = '';
+            }
+        }
+    }
+}
+
 function changeDurationButtonCSS(val){
     var duration = ['day','week','month','quater','year'];
     for(var i=0;i<duration.length;i++){
@@ -559,7 +768,7 @@ function loadPatchDetails(type) {
     document.getElementById('popupInner').innerHTML = "No any patch details during this date range";
 
     if(type === 'queue'){
-        document.getElementById('myModalLabel').innerHTML = "Queued Patch Details</h3>";
+        document.getElementById('myModalLabel').innerHTML = "Yet to Start Patch Details</h3>";
         $.ajax({
             type: "GET",
             url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/get-queue-details/'+start+'/'+end,
@@ -581,7 +790,7 @@ function loadPatchDetails(type) {
             }
         })
     }else if(type === 'dev'){
-        document.getElementById('myModalLabel').innerHTML = "Developing Patch Details";
+        document.getElementById('myModalLabel').innerHTML = "In Progress Patch Details";
         $.ajax({
             type: "GET",
             url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/get-dev-details/'+start+'/'+end,
