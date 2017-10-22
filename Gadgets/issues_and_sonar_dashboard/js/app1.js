@@ -591,7 +591,7 @@ function allAreaClick() {
 
     sameAreaIsSelected = 0;
 
-    document.getElementById('componentChoice').innerHTML = "";
+    document.getElementById('componentChoice').innerHTML = "&nbsp";
     loadSidePaneAtReset(sidePaneDetails);
     initChart(content);
     debugger;
@@ -626,7 +626,7 @@ function leftMenuAreaClick(areaId){
 
 
     debugger;
-    document.getElementById('componentChoice').innerHTML = "";
+    document.getElementById('componentChoice').innerHTML = "&nbsp";
     document.getElementById('product'+(areaId)).innerHTML = "";
     document.getElementById("issuetype-choice").disabled = false;
     document.getElementById("severity-choice").disabled = false;
