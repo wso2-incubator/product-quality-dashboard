@@ -3,10 +3,11 @@ package source;
 import configuration;
 import ballerina.data.sql;
 import ballerina.lang.system;
+import ballerina.lang.messages;
 import ballerina.lang.strings;
 import ballerina.lang.time;
-import ballerina.lang.messages;
 import org.wso2.ballerina.connectors.jira;
+
 
 
 string[] monthLimit = null;
@@ -18,12 +19,12 @@ string[] months = ["January", "February", "March", "April", "May","June", "July"
 
 
 function dbConnectivity() {
-    map props = {"jdbcUrl":"jdbc:mysql://" + configuration:DB_HOST + ":" + configuration:DB_PORT + "/"+configuration:DB_NAME+"", "username":configuration:DB_USERNAME, "password":configuration:DB_PASSWORD};
+    map props = {"jdbcUrl":"jdbc:mysql://" + configuration:DB_HOST + ":" + configuration:DB_PORT + "/"+configuration:DB_NAME+"", "username":configuration:DB_USERNAME, "password":configuration:DB_PASSWORD,"maximumPoolSize":50};
     dbConnection = create sql:ClientConnector(props);
 }
 
 function jiraConnector(){
-    JIRA_Connector = create jira:ClientConnector(configuration:baseURL,"USERNAME SHOULD BE HERE","PASSWORD SHOULD BE HERE");
+    JIRA_Connector = create jira:ClientConnector(configuration:baseURL,"sajithal@wso2.com","Capn@sv12");
 }
 
 function loadDashboard(string startDate,string endDate)(json){
@@ -96,6 +97,7 @@ function loadDashboard(string startDate,string endDate)(json){
     var jsonResOfReactive, _ = <json>dt7;
     var reactiveCount,castErr = (int)jsonResOfReactive[0].total;
 
+
     sql:Parameter p22 = {sqlType:"varchar", value:"Yes"};
     sql:Parameter p23 = {sqlType:"varchar", value:"No"};
     sql:Parameter p24 = {sqlType:"date", value:startDate};
@@ -131,73 +133,74 @@ function loadDashboard(string startDate,string endDate)(json){
         verifyActualId[loop] = 0;
         loop = loop + 1;
     }
+
+    int unCategorizedCount = 0;
     system:println(reactiveCount);
     system:println(proactiveCount);
     int securityStringLength = strings:length(securityInternal_ID);
-    string finalSecurityIds = strings:subString(securityInternal_ID, 0, securityStringLength-1);
-    system:println(finalSecurityIds);
-    string[] startDateArray = strings:split(startDate, "-");
-    string[] endDateArray = strings:split(endDate, "-");
+    string finalSecurityIds = "";
 
-    int unCategorizedCount = 0;
-    if(JIRA_Connector == null){
-        jiraConnector();
-    }
+    if(securityStringLength>0){
+        finalSecurityIds = strings:subString(securityInternal_ID, 0, securityStringLength-1);
 
-    json payload = {"jql":"created>='"+startDateArray[0]+"/"+startDateArray[1]+"/"+startDateArray[2]+" 00:00' and  created<='"+endDateArray[0]+"/"+endDateArray[1]+"/"+endDateArray[2]+" 23:59' AND issuekey in ("+finalSecurityIds+") AND labels in (CustFoundVuln,ExtFoundVuln,IntFoundVuln)"};
-    message jiraResponse = jira:ClientConnector.searchJira(JIRA_Connector, payload);
-    json jiraRecords = messages:getJsonPayload(jiraResponse);
-    var jiraFetchCount,_ = (int)jiraRecords.total;
+        string[] startDateArray = strings:split(startDate, "-");
+        string[] endDateArray = strings:split(endDate, "-");
 
-    if(jiraFetchCount == 0){
-        unCategorizedCount = fetchPatchCount - jiraFetchCount;
-    }else{
-        int issueLength = lengthof jiraRecords.issues;
-        loop = 0;
-        while(loop<securityLength){
-            int loop2 = 0;
-            var tempCount = 0;
-            while(loop2<issueLength){
-                var id,_ = (string)jiraRecords.issues[loop2].key;
-                if(idPool[loop] == id){
-                    tempCount = idCounts[loop];
-                    verifyActualId[loop] = 1;
+        if(JIRA_Connector == null){
+            jiraConnector();
+        }
 
-                    int loop3 = 0;
-                    int labelInt = lengthof jiraRecords.issues[loop2].fields.labels;
-                    while(loop3<labelInt){
-                        var label,_ = (string)jiraRecords.issues[loop2].fields.labels[loop3];
-                        if(label == "ExtFoundVuln" || label == "CustFoundVuln"){
-                            system:println("Reactive");
-                            reactiveCount = reactiveCount + tempCount;
-                            break;
-                        }else if(label == "IntFoundVuln"){
-                            system:println("Proactive");
-                            proactiveCount = proactiveCount + tempCount;
-                            break;
+        json payload = {"jql":"created>='"+startDateArray[0]+"/"+startDateArray[1]+"/"+startDateArray[2]+" 00:00' and  created<='"+endDateArray[0]+"/"+endDateArray[1]+"/"+endDateArray[2]+" 23:59' AND issuekey in ("+finalSecurityIds+") AND labels in (CustFoundVuln,ExtFoundVuln,IntFoundVuln)"};
+        message jiraResponse = jira:ClientConnector.searchJira(JIRA_Connector, payload);
+        //system:println(jiraResponse);
+        json jiraRecords = messages:getJsonPayload(jiraResponse);
+        system:println(jiraRecords);
+        var jiraFetchCount,_ = (int)jiraRecords.total;
+
+        if(jiraFetchCount == 0){
+            unCategorizedCount = fetchPatchCount - jiraFetchCount;
+        }else{
+            int issueLength = lengthof jiraRecords.issues;
+            loop = 0;
+            while(loop<securityLength){
+                int loop2 = 0;
+                var tempCount = 0;
+                while(loop2<issueLength){
+                    var id,_ = (string)jiraRecords.issues[loop2].key;
+                    if(idPool[loop] == id){
+                        tempCount = idCounts[loop];
+                        verifyActualId[loop] = 1;
+
+                        int loop3 = 0;
+                        int labelInt = lengthof jiraRecords.issues[loop2].fields.labels;
+                        while(loop3<labelInt){
+                            var label,_ = (string)jiraRecords.issues[loop2].fields.labels[loop3];
+                            if(label == "ExtFoundVuln" || label == "CustFoundVuln"){
+                                system:println("Reactive");
+                                reactiveCount = reactiveCount + tempCount;
+                                break;
+                            }else if(label == "IntFoundVuln"){
+                                system:println("Proactive");
+                                proactiveCount = proactiveCount + tempCount;
+                                break;
+                            }
+                            loop3 = loop3 + 1;
                         }
-                        loop3 = loop3 + 1;
                     }
+                    loop2 = loop2 + 1;
                 }
-                loop2 = loop2 + 1;
+                loop =loop +1;
             }
-            loop =loop +1;
-        }
 
-        loop = 0;
-        while(loop<securityLength){
-            if(verifyActualId[loop] == 0){
-                unCategorizedCount = unCategorizedCount + idCounts[loop];
+            loop = 0;
+            while(loop<securityLength){
+                if(verifyActualId[loop] == 0){
+                    unCategorizedCount = unCategorizedCount + idCounts[loop];
+                }
+                loop = loop + 1;
             }
-            loop = loop + 1;
         }
     }
-    system:println(idPool);
-    system:println(idCounts);
-    system:println(verifyActualId);
-    system:println(reactiveCount);
-    system:println(proactiveCount);
-
 
     json loadCounts = {   "yetToStartCount":jsonResOfYetToStartCount[0].qtotal,
                           "inProgressCount":jsonResOfInProgressCount[0].dtotal,
@@ -210,6 +213,7 @@ function loadDashboard(string startDate,string endDate)(json){
                       };
 
     return loadCounts;
+
 }
 
 function queuedDetails(string startDate,string endDate)(json){
@@ -224,7 +228,7 @@ function queuedDetails(string startDate,string endDate)(json){
     datatable dt = dbConnection.select("select PRODUCT_NAME,PRODUCT_VERSION,CLIENT,REPORTER,ASSIGNED_TO,REPORT_DATE from PATCH_QUEUE WHERE ACTIVE=? AND PATCH_QUEUE.REPORT_DATE >= ?
                                             AND PATCH_QUEUE.REPORT_DATE <=?", params);
     var jsonResOfQueueDetails, _ = <json>dt;
-
+   
     return jsonResOfQueueDetails;
 }
 
@@ -242,7 +246,7 @@ function devDetails(string startDate,string endDate)(json){
                                             JOIN PATCH_QUEUE on PATCH_QUEUE.ID=PATCH_ETA.PATCH_QUEUE_ID WHERE PATCH_ETA.STATUS=? AND
                                             PATCH_QUEUE.ACTIVE=?  AND PATCH_ETA.RELEASED_ON IS null AND PATCH_QUEUE.REPORT_DATE >= ? AND PATCH_QUEUE.REPORT_DATE <= ? AND (PATCH_ETA.LC_STATE NOT IN ('OnHold','Broken','Released','N/A')) group by PATCH_ETA.PATCH_NAME", params);
     var jsonResOfDevDetails, _ = <json>dt;
-
+   
     return jsonResOfDevDetails;
 }
 
@@ -261,7 +265,7 @@ function completeDetails(string startDate,string endDate)(json){
                                             PATCH_ETA.RELEASED_ON >= ? AND
                                             PATCH_ETA.RELEASED_ON <= ?", params);
     var jsonResOfCompleteDetails, _ = <json>dt;
-
+   
     return jsonResOfCompleteDetails;
 }
 
@@ -300,7 +304,7 @@ function menuBadgesCounts(string startDate,string endDate)(json){
     var jsonResOfDEVCounts, _ = <json>dt3;
 
     json menuBadgeCount = {"jsonResOfQueuedCount":jsonResOfQueuedCount,"jsonResOfETACounts":jsonResOfETACounts,"jsonResOfDEVCounts":jsonResOfDEVCounts};
-
+   
     return menuBadgeCount;
 }
 
@@ -319,6 +323,7 @@ function reportedPatchGraph(string duration,string start,string end)(json){
     int loop = 0;
     json reportedPatchDrillDown = [];
     json jsonResOfReportedPatches ={};
+    json weekFirstDate ={};
 
     if(duration !="year" && duration !="quarter" && duration !="week"){
         datatable dt = dbConnection.select("SELECT count("+duration+"(PATCH_QUEUE.REPORT_DATE)) as COUNTS,"+duration+"(REPORT_DATE) as TYPE,MONTH(REPORT_DATE) AS MONTH,QUARTER(REPORT_DATE) AS QUARTER, YEAR(REPORT_DATE) AS YEAR
@@ -342,6 +347,8 @@ function reportedPatchGraph(string duration,string start,string end)(json){
             reportedPatchDrillDown[loop],_ = <json>dt2;
             loop=loop+1;
         }
+
+
     }else{
         datatable dt = dbConnection.select("SELECT count("+duration+"(PATCH_QUEUE.REPORT_DATE)) as COUNTS,"+duration+"(REPORT_DATE) as TYPE, YEAR(REPORT_DATE) AS YEAR
                                         FROM PATCH_QUEUE WHERE (PATCH_QUEUE.ACTIVE=? OR PATCH_QUEUE.ACTIVE=?) AND PATCH_QUEUE.REPORT_DATE >=?
@@ -363,6 +370,10 @@ function reportedPatchGraph(string duration,string start,string end)(json){
             reportedPatchDrillDown[loop],_ = <json>dt2;
             loop=loop+1;
         }
+
+        if(duration == "week"){
+            weekFirstDate = getFirstDateFromWeekNumber(start,end);
+        }
     }
 
 
@@ -372,7 +383,7 @@ function reportedPatchGraph(string duration,string start,string end)(json){
 
     json mainArray = [];
     loop = 0;
-
+    system:println(weekFirstDate);
     while(loop<jsonResOfReportedPatchesLength){
         json dump={name:"x",y:2016,drilldown:"y"};
         dump.y = jsonResOfReportedPatches[loop].COUNTS;
@@ -396,8 +407,9 @@ function reportedPatchGraph(string duration,string start,string end)(json){
         }else if(duration == "week"){
             var patchYear, castErr = (int)jsonResOfReportedPatches[loop].YEAR;
             var week, castErr = (int)jsonResOfReportedPatches[loop].TYPE;
-            dump.name = patchYear+"-"+week;
-            dump.drilldown = patchYear+"-"+week;
+            var weekDate, castErr = (string)weekFirstDate[loop].FIRSTWEEK;
+            dump.name = weekDate;
+            dump.drilldown = weekDate;
         }else{
             dump.name = jsonResOfReportedPatches[loop].TYPE;
             dump.drilldown = jsonResOfReportedPatches[loop].TYPE;
@@ -452,8 +464,9 @@ function reportedPatchGraph(string duration,string start,string end)(json){
         }else if(duration == "week"){
             var patchYear, castErr = (int)jsonResOfReportedPatches[loop].YEAR;
             var week, castErr = (int)jsonResOfReportedPatches[loop].TYPE;
-            temp.name = patchYear+"-"+week;
-            temp.id = patchYear+"-"+week;
+            var weekDate, castErr = (string)weekFirstDate[loop].FIRSTWEEK;
+            temp.name = weekDate;
+            temp.id = weekDate;
         }else{
             temp.name = jsonResOfReportedPatches[loop].TYPE;
             temp.id = jsonResOfReportedPatches[loop].TYPE;
@@ -464,6 +477,7 @@ function reportedPatchGraph(string duration,string start,string end)(json){
     }
 
     json reportedPatches = {"isEmpty":isEmpty,"graphMainData":mainArray,"graphDrillDownData":drillDown};
+   
     return reportedPatches;
 }
 
@@ -515,7 +529,7 @@ function totalProductSummaryCounts(string product,string startDate,string endDat
     var jsonResOfDevCounts, _ = <json>dt4;
 
     json totalProductSummaryCount = {"jsonResOfQueuedCounts":jsonResOfQueuedCounts,"jsonResOfDevCounts":jsonResOfDevCounts,"jsonResOfCompleteCounts":jsonResOfCompleteCounts,"jsonResOfBugCount":jsonResOfBugCount};
-
+   
     return totalProductSummaryCount;
 }
 
@@ -534,6 +548,7 @@ function productTotalReleaseTrend(string product,string duration,string start,st
     int jsonResOfReleaseTrendLength=0;
     int loop = 0;
     json jsonResOfReleaseTrend ={};
+    json weekFirstDate = {};
 
     if(duration !="year" && duration !="quarter"){
         datatable dt = dbConnection.select("SELECT COUNT(distinct(PATCH_ETA.PATCH_NAME)) AS total, "+duration+"(PATCH_ETA.RELEASED_ON) AS TYPE,year(PATCH_ETA.RELEASED_ON) AS YEAR, month(PATCH_ETA.RELEASED_ON) AS MONTH  FROM PATCH_ETA LEFT JOIN PATCH_QUEUE ON PATCH_ETA.PATCH_QUEUE_ID = PATCH_QUEUE.ID
@@ -545,6 +560,9 @@ function productTotalReleaseTrend(string product,string duration,string start,st
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
+        if(duration == "week"){
+            weekFirstDate = getReleaseFirstDateFromWeekNumber(start,end);
+        }
     }else{
         datatable dt = dbConnection.select("SELECT COUNT(distinct(PATCH_ETA.PATCH_NAME)) AS total, "+duration+"(PATCH_ETA.RELEASED_ON) AS TYPE,year(PATCH_ETA.RELEASED_ON) AS YEAR
                                             FROM PATCH_ETA LEFT JOIN PATCH_QUEUE ON PATCH_ETA.PATCH_QUEUE_ID = PATCH_QUEUE.ID
@@ -586,7 +604,8 @@ function productTotalReleaseTrend(string product,string duration,string start,st
         }else if(duration == "week"){
             var patchYear, castErr = (int)jsonResOfReleaseTrend[loop].YEAR;
             var week, castErr = (int)jsonResOfReleaseTrend[loop].TYPE;
-            dump.name = patchYear+"-"+week;
+            var weekDate, castErr = (string)weekFirstDate[loop].FIRSTWEEK;
+            dump.name = weekDate;
         }else{
             dump.name = jsonResOfReleaseTrend[loop].TYPE;
         }
@@ -595,6 +614,7 @@ function productTotalReleaseTrend(string product,string duration,string start,st
     }
 
     json reportedPatches = {"isEmpty":isEmpty,"totalReleaseTrend":mainArray};
+   
     return reportedPatches;
 }
 
@@ -647,7 +667,7 @@ function loadProductVersionCounts(string product,string version,string startDate
     var jsonResOfDevCounts, _ = <json>dt4;
 
     json versionProductSummaryCount = {"jsonResOfQueuedCounts":jsonResOfQueuedCounts,"jsonResOfDevCounts":jsonResOfDevCounts,"jsonResOfCompleteCounts":jsonResOfCompleteCounts,"jsonResOfBugCount":jsonResOfBugCount};
-
+   
     return versionProductSummaryCount;
 }
 
@@ -667,6 +687,7 @@ function productVersionReleaseTrend(string product,string version,string duratio
     int jsonResOfReleaseTrendLength=0;
     int loop = 0;
     json jsonResOfReleaseTrend ={};
+    json weekFirstDate ={};
 
     if(duration !="year" && duration !="quarter"){
         datatable dt = dbConnection.select("SELECT COUNT(distinct(PATCH_ETA.PATCH_NAME)) AS total, "+duration+"(PATCH_ETA.RELEASED_ON) AS TYPE,year(PATCH_ETA.RELEASED_ON) AS YEAR, month(PATCH_ETA.RELEASED_ON) AS MONTH  FROM PATCH_ETA LEFT JOIN PATCH_QUEUE ON PATCH_ETA.PATCH_QUEUE_ID = PATCH_QUEUE.ID
@@ -678,6 +699,9 @@ function productVersionReleaseTrend(string product,string version,string duratio
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
+        if(duration == "week"){
+            weekFirstDate = getReleaseFirstDateFromWeekNumber(start,end);
+        }
     }else{
         datatable dt = dbConnection.select("SELECT COUNT(distinct(PATCH_ETA.PATCH_NAME)) AS total, "+duration+"(PATCH_ETA.RELEASED_ON) AS TYPE,year(PATCH_ETA.RELEASED_ON) AS YEAR
                                             FROM PATCH_ETA LEFT JOIN PATCH_QUEUE ON PATCH_ETA.PATCH_QUEUE_ID = PATCH_QUEUE.ID
@@ -719,7 +743,8 @@ function productVersionReleaseTrend(string product,string version,string duratio
         }else if(duration == "week"){
             var patchYear, castErr = (int)jsonResOfReleaseTrend[loop].YEAR;
             var week, castErr = (int)jsonResOfReleaseTrend[loop].TYPE;
-            dump.name = patchYear+"-"+week;
+            var weekDate, castErr = (string)weekFirstDate[loop].FIRSTWEEK;
+            dump.name = weekDate;
         }else{
             dump.name = jsonResOfReleaseTrend[loop].TYPE;
         }
@@ -728,6 +753,7 @@ function productVersionReleaseTrend(string product,string version,string duratio
     }
 
     json reportedPatches = {"isEmpty":isEmpty,"versionReleaseTrend":mainArray};
+   
     return reportedPatches;
 }
 
@@ -742,6 +768,7 @@ function allProductVersionReleaseTrend(string product,string version,string dura
     boolean isEmpty = false;
     int jsonResOfReleaseTrendLength=0;
     json jsonResOfReleaseTrend =[];
+    json weekFirstDate ={};
 
     while(loop < versionLength){
         sql:Parameter p0 = {sqlType:"varchar", value:product};
@@ -780,6 +807,7 @@ function allProductVersionReleaseTrend(string product,string version,string dura
     }
 
     json reportedPatches = {"isEmpty":isEmpty,"versionReleaseTrend":jsonResOfReleaseTrend};
+   
     return reportedPatches;
 }
 
@@ -812,7 +840,7 @@ function allCategoryReleaseTrendGraph(string product,string duration,string star
         jsonResOfcategory, _ = <json>dt;
 
     }
-
+   
     return jsonResOfcategory;
 }
 
@@ -960,6 +988,7 @@ function queuedAgeGraphGenerator1(string duration,string lastMonth)(json){
 
 
     //json reportedPatches = {"isEmpty":1,"versionReleaseTrend":ageGroup};
+   
     return ageGroup;
 }
 
@@ -1062,6 +1091,7 @@ function queuedAgeGraphGenerator(string duration,string lastMonth)(json){
 
     //json reportedPatches = {"isEmpty":1,"versionReleaseTrend":2};
     //return fetchData;
+   
     return ageGroup;
 }
 
@@ -1323,6 +1353,7 @@ function ageDrillDownGraph1(string group,string month,string isToday,string inde
     }
 
     json ageDrillDownGraphJSON = {"mainData":mainArray,"drillDown":drillDownArray};
+   
     return ageDrillDownGraphJSON;
 }
 
@@ -1586,6 +1617,7 @@ function ageDrillDownGraph(string group,string month,string isToday,string index
     system:println(versionData);
     system:println(drillDownArray);
     json ageDrillDownGraphJSON = {"mainData":mainArray,"drillDown":drillDownArray};
+   
     return ageDrillDownGraphJSON;
 }
 
@@ -1709,5 +1741,40 @@ function lifeCycleStackGraph(string start,string end)(json){
     }
     //system:println(feedData);
     json stackArray = {"category":allStates,"products":feedProducts,"counts":feedData};
+   
     return stackArray;
+}
+
+function getFirstDateFromWeekNumber(string start,string end)(json){
+    if(dbConnection == null){
+        dbConnectivity();
+    }
+    json weekFirstDate = {};
+    sql:Parameter[] params = [];
+    sql:Parameter p001 = {sqlType:"varchar", value:start};
+    sql:Parameter p002 = {sqlType:"varchar", value:end};
+    params = [p001,p002];
+    datatable dt00 = dbConnection.select("select DATE_SUB(DATE_ADD(MAKEDATE((year(PATCH_QUEUE.REPORT_DATE)), 1), INTERVAL (week(PATCH_QUEUE.REPORT_DATE)) WEEK),
+  INTERVAL WEEKDAY(DATE_ADD(MAKEDATE((year(PATCH_QUEUE.REPORT_DATE)), 1), INTERVAL (week(PATCH_QUEUE.REPORT_DATE)) WEEK)
+) -1 DAY) as FIRSTWEEK FROM PATCH_QUEUE WHERE PATCH_QUEUE.REPORT_DATE >=? AND PATCH_QUEUE.REPORT_DATE <= ?  GROUP BY FIRSTWEEK", params);
+    weekFirstDate, _ = <json>dt00;
+   
+    return weekFirstDate;
+}
+
+function getReleaseFirstDateFromWeekNumber(string start,string end)(json){
+    if(dbConnection == null){
+        dbConnectivity();
+    }
+    json weekFirstDate = {};
+    sql:Parameter[] params = [];
+    sql:Parameter p001 = {sqlType:"varchar", value:start};
+    sql:Parameter p002 = {sqlType:"varchar", value:end};
+    params = [p001,p002];
+    datatable dt00 = dbConnection.select("select DATE_SUB(DATE_ADD(MAKEDATE((year(PATCH_ETA.RELEASED_ON)), 1), INTERVAL (week(PATCH_ETA.RELEASED_ON)) WEEK),
+  INTERVAL WEEKDAY(DATE_ADD(MAKEDATE((year(PATCH_ETA.RELEASED_ON)), 1), INTERVAL (week(PATCH_ETA.RELEASED_ON)) WEEK)
+) -1 DAY) as FIRSTWEEK FROM PATCH_ETA WHERE PATCH_ETA.RELEASED_ON >=? AND PATCH_ETA.RELEASED_ON <= ?  GROUP BY FIRSTWEEK", params);
+    weekFirstDate, _ = <json>dt00;
+   
+    return weekFirstDate;
 }

@@ -33,9 +33,14 @@ function patchSummaryGraph(duration,start,end) {
     });
 
     if(!flag){
+        if(duration === 'week'){
+            document.getElementById('weekPatchReport').style.display = 'block';
+        }else{
+            document.getElementById('weekPatchReport').style.display = 'none';
+        }
         createSummaryGraph(drilldownTitle,defaultTitle,summaryArray,drillDown,duration);
     }else{
-        document.getElementById('graphDiv').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No any reported patch during this range</h3>'
+        document.getElementById('graphDiv').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No patches reported in the selected time period</h3>'
     }
 
 }
@@ -136,7 +141,7 @@ function totalProductDetails(duration,start,end) {
     if(!flag){
         createVersionChart(releaseTrend,'All');
     }else{
-        document.getElementById('container').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No any released patch during this range</h3>'
+        document.getElementById('container').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No patches released in the selected time period</h3>'
     }
 
 }
@@ -213,16 +218,36 @@ function allProductDetails(duration,start,end){
     if(flag){
         var finalData = [];
         var categories = [];
+        var finalCategory = [];
         var dump = []; //contain zero array length of categories
 
         if(category.length !== 1){
             for(var x=0; x<category.length;x++){
                 categories[x]=category[x].TYPE.toString();
                 dump[x]=0;
+                if(duration === 'quarter'){
+                    finalCategory[x] = category[x].YEAR.toString() +'-'+category[x].TYPE.toString();
+                }else if(duration === 'month'){
+                    finalCategory[x] = category[x].YEAR.toString() +'-'+months[category[x].TYPE -1];
+                }else if(duration === 'week'){
+                    console.log(category[x].TYPE);
+                    finalCategory[x] = getDateRangeOfWeek(parseInt(category[x].TYPE),parseInt(category[x].YEAR));
+                }else{
+                    finalCategory[x] =category[x].TYPE.toString();
+                }
             }
         }else{
             categories[0]=category[0].TYPE.toString();
             dump[0]=0;
+            if(duration === 'quarter'){
+                finalCategory[0] = category[0].YEAR.toString() +'-'+category[0].TYPE.toString();
+            }else if(duration === 'month'){
+                finalCategory[0] = category[0].YEAR.toString() +'-'+months[category[0].TYPE -1];
+            }else if(duration === 'week'){
+                finalCategory[0] = getDateRangeOfWeek(parseInt(category[0].TYPE));
+            }else{
+                finalCategory[0] =category[0].TYPE.toString();
+            }
         }
 
         // console.log(allNames[0].length);
@@ -279,9 +304,9 @@ function allProductDetails(duration,start,end){
 
         console.log(temp1);
 
-        drawAllVersionChart(categories,finalData);
+        drawAllVersionChart(finalCategory,finalData);
     }else{
-        document.getElementById('container').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No any released patch during this range</h3>'
+        document.getElementById('container').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No patches released in the selected time period</h3>'
     }
 
 }
@@ -319,7 +344,7 @@ function versionDetails(duration,start,end) {
     if(!flag){
         createVersionChart(releaseTrendVersion,passVersion);
     }else{
-        document.getElementById('container').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No any released patch during this range</h3>'
+        document.getElementById('container').innerHTML = '<h3 style="text-align:center; margin-top:10vh;">No patches released in the selected time period</h3>'
     }
 }
 
@@ -347,7 +372,13 @@ function drawAllVersionChart(categories,finalData) {
         },
 
         plotOptions: {
-
+            series: {
+                borderWidth: 0,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.y}'
+                }
+            }
         },
 
         series: finalData,
@@ -448,4 +479,34 @@ function closeDiv() {
     document.getElementById('fullDiv').style.height = '730px';
 }
 
+//get firstDate from week number
 
+function getDateRangeOfWeek(week,year) {
+
+    // Jan 1 of 'year'
+    var d = new Date(year, 0, 1),
+        offset = d.getTimezoneOffset();
+
+    // ISO: week 1 is the one with the year's first Thursday
+    // so nearest Thursday: current date + 4 - current day number
+    // Sunday is converted from 0 to 7
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+
+    // 7 days * (week - overlapping first week)
+    d.setTime(d.getTime() + 7 * 24 * 60 * 60 * 1000
+        * (week + (year == d.getFullYear() ? -1 : 0 )));
+
+    // daylight savings fix
+    d.setTime(d.getTime()
+        + (d.getTimezoneOffset() - offset) * 60 * 1000);
+
+    // back to Monday (from Thursday)
+    d.setDate(d.getDate() - 3);
+
+    return d.getFullYear() + "-" +  (d.getMonth()+1)+ "-" + d.getDate();
+}
+
+Date.prototype.getWeek = function() {
+    var dt = new Date(this.getFullYear(),0,1);
+    return Math.ceil((((this - dt) / 86400000) + dt.getDay()+1)/7);
+};

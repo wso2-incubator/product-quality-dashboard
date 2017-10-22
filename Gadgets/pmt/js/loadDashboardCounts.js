@@ -14,7 +14,7 @@ var devDetails = [];
 var etaDetails = [];
 var target = "";
 var BALLERINA_URL = "192.168.56.2:9092";
-// var BALLERINA_URL_LOCAL = "localhost:9092";
+// var BALLERINA_URL = "localhost:9092";
 initLoadDashboard();
 var flag1 = true;
 var flag2 = true;
@@ -22,15 +22,18 @@ var flag2 = true;
 //load Queue age graph when requested
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     target = $(e.target).attr("href"); // activated tab
+
+    if(target === '#lc'){
+        document.getElementById('fullDiv').style.height = '1630px';
+    }else{
+        document.getElementById('fullDiv').style.height = '730px';
+    }
     if(target === '#age' && flag1){
         ageGraph();
         flag1 = false;
     }else if(target === '#lc' && flag2){
         loadStackQueuedGraph();
-        document.getElementById('fullDiv').style.height = '1630px';
         flag2 = false;
-    }else{
-        document.getElementById('fullDiv').style.height = '730px';
     }
 });
 
@@ -44,7 +47,7 @@ function initLoadDashboard() {
     document.getElementById('product').innerHTML = "";
 
     for (var x = 0; x < totalProducts; x++) {
-        document.getElementById('product').innerHTML += "<a href='#collapseProduct"+(parseInt(x)+1)+"' data-toggle='collapse' id='product"+(parseInt(x)+1)+"' class='list-group-item'>"
+        document.getElementById('product').innerHTML += "<a href='#collapseProduct"+(parseInt(x)+1)+"' data-toggle='collapse' id='product"+(parseInt(x)+1)+"' class='list-group-item' style='font-size:1vw;'>"
             + menuDrillDown[x].products +
             "<span id='productETACount"+(parseInt(x)+1)+"' class='badge' style='background-color:#DC143C;display:none;'></span>" +
             "<span id='productDevCount"+(parseInt(x)+1)+"' class='badge' style='background-color:#4BC2DE;padding:3px 6px;'></span>" +
@@ -121,7 +124,7 @@ function setDate(){
 
 function globalSubmit(){
 
-    var dateRange = document.getElementById('config-demo').value;
+    var dateRange = document.getElementById("date-picker").value;
     var dateArray = dateRange.split(' - ');
     startDate=dateArray[0];
     endDate = dateArray[1];
