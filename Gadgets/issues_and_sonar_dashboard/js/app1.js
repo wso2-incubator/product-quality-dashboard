@@ -287,7 +287,11 @@ function selectIssueIssueTypePieChart(issueTypeId) {
     if (issueSeverityIsSelected === true){
         debugger;
         document.getElementById("severity-choice").disabled = true;
-        document.getElementById("issueArrow").innerHTML = '<i class="fa fa-long-arrow-left" aria-hidden="true"></i>';
+        document.getElementById("issueArrow").innerHTML = '<i class="fa fa-long-arrow-left" aria-none="true"></i>';
+        debugger;
+        var refreshBtn = document.getElementById("resetIssueChartsId");
+        refreshBtn.style.display = 'initial';
+        debugger;
     }
 
     var content;
@@ -322,7 +326,9 @@ function selectIssueSeverityPieChart(severityId) {
     if (issueIssueTypeIsSelected === true){
         debugger;
         document.getElementById("issuetype-choice").disabled = true;
-        document.getElementById("issueArrow").innerHTML = '<i class="fa fa-long-arrow-right" aria-hidden="true"></i>';
+        document.getElementById("issueArrow").innerHTML = '<i class="fa fa-long-arrow-right" aria-none="true"></i>';
+        var refreshBtn = document.getElementById("resetIssueChartsId");
+        refreshBtn.style.display = 'initial';
     }
 
     var content;
@@ -359,7 +365,9 @@ function selectSonarIssueTypePieChart(issueTypeId) {
     if (sonarSeverityIsSelected === true){
         debugger;
         document.getElementById("sonar-severity-choice").disabled = true;
-        document.getElementById("sonarArrow").innerHTML = '<i class="fa fa-long-arrow-left" aria-hidden="true"></i>';
+        document.getElementById("sonarArrow").innerHTML = '<i class="fa fa-long-arrow-left" aria-none="true"></i>';
+        var refreshBtn = document.getElementById("resetSonarChartsId");
+        refreshBtn.style.display = 'initial';
     }
 
     var content;
@@ -394,7 +402,9 @@ function selectSonarSeverityPieChart(severityId) {
     if (sonarIssueTypeIsSelected === true){
         debugger;
         document.getElementById("sonar-issuetype-choice").disabled = true;
-        document.getElementById("sonarArrow").innerHTML = '<i class="fa fa-long-arrow-right" aria-hidden="true"></i>';
+        document.getElementById("sonarArrow").innerHTML = '<i class="fa fa-long-arrow-right" aria-none="true"></i>';
+        var refreshBtn = document.getElementById("resetSonarChartsId");
+        refreshBtn.style.display = 'initial';
     }
     var content;
     $.ajax({
@@ -426,6 +436,8 @@ function resetSonarCharts() {
     document.getElementById("sonar-severity-choice").selectedIndex = "0";
 
     document.getElementById("sonarArrow").innerHTML = '';
+    var refreshBtn = document.getElementById("resetSonarChartsId");
+    refreshBtn.style.display = 'none';
 
     debugger;
     $.ajax({
@@ -459,6 +471,8 @@ function resetIssueCharts() {
     document.getElementById("severity-choice").selectedIndex = "0";
 
     document.getElementById("issueArrow").innerHTML = '';
+    var refreshBtn = document.getElementById("resetIssueChartsId");
+    refreshBtn.style.display = 'none';
 
     debugger;
     $.ajax({
@@ -476,6 +490,8 @@ function resetIssueCharts() {
         }
     });
 
+
+
     initChart(content);
     debugger;
 }
@@ -486,7 +502,7 @@ function loadSidePane(sidePaneDetails) {
     debugger;
 
     for (var x = 0; x < totalProducts; x++) {
-        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:-4px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
+        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:-4px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='a"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
             + sidePaneDetails[x].name        +
             "<span id='sonarCount"+(parseInt(x)+1)+"' class='badge' style='width:2.7vw; font-size: 0.75vw; background-color:#206898;padding:3px 6px;'></span>" +
             "<span id='issueCount"+(parseInt(x)+1)+"' class='badge' style='width:2.2vw; font-size: 0.75vw; background-color:#FF9933; padding:3px 6px;'></span></button>" +
@@ -630,6 +646,9 @@ function leftMenuAreaClick(areaId){
     debugger;
 
     if(sameAreaIsSelected === 2){
+        currentCategoryId = 0;
+        currentCategory = "all";
+
         $.ajax({
             type: "GET",
             url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all/',
@@ -662,7 +681,7 @@ function leftMenuAreaClick(areaId){
             sonarCount = sidePaneDetails[y].sonar;
 
             document.getElementById('product'+(areaId)).innerHTML +=
-                "<button onclick='leftMenuProductClick("+(sidePaneDetails[y].id)+")' class='list-group-item list-group-item-info' style='width:100%;text-align: left;' id='" + sidePaneDetails[y].id + "'>" +
+                "<button class='btn-product list-group-item list-group-item-info' onclick='leftMenuProductClick("+(sidePaneDetails[y].id)+")' style='width:100%;text-align: left;' id='" + sidePaneDetails[y].id + "'>"+
                 sidePaneDetails[y].name +
                 "<span id='sonarProductCount"+areaId+(parseInt(y))+"' class='badge' style='min-width:2.7vw; font-size: 0.75vw; background-color:#206898;padding:3px 6px;'></span>" +
                 "<span id='issueProductCount"+areaId+(parseInt (y))+"' class='badge' style='min-width:2.2vw; font-size: 0.75vw; background-color:#FF9933; padding:3px 6px;'></span></button>";
@@ -672,15 +691,15 @@ function leftMenuAreaClick(areaId){
 
         }
     }
-
-
-
-
     initChart(content);
     initSonarChart(content);
 }
 
 function leftMenuProductClick(productId) {
+    debugger;
+
+    $('.btn-product').removeClass('btn-product-active').addClass('btn-product-inactive');
+    $('#'+productId).removeClass('btn-product-inactive').addClass('btn-product-active');
 
     debugger;
     currentCategoryId = productId;
@@ -745,7 +764,7 @@ function leftMenuVersionClick(version) {
     var content;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.110:9092/internal/product-quality/v1.0/jira/issues/summary/' + productId + '/version/' + version,
+        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/jira/issues/summary/' + productId + '/version/' + version,
         async: false,
         success: function(data){
             debugger;
@@ -820,15 +839,6 @@ function loadComponentDropdown(sidePaneDetails) {
         var strUser = e.options[e.selectedIndex].value;
         debugger;
         if(parseInt(strUser) > 0){
-            // for (var i = 0; i < issueMainChart.series[0].data.length; i++) {
-            //     issueMainChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
-            // }
-            // issueMainChart.get(parseInt(strUser)).update({ color: '#118983' }, true, false);
-            //
-            // for (var i = 0; i < sonarMainChart.series[0].data.length; i++) {
-            //     sonarMainChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
-            // }
-            // sonarMainChart.get(parseInt(strUser)).update({ color: '#118983' }, true, false);
             loadComponentDetails(parseInt(strUser));
         }else{
             leftMenuProductClick(currentProductId);
@@ -1185,7 +1195,7 @@ function createMainChart(){
             }
         },
         legend: {
-            enabled: false
+                enabled: false
         },
         plotOptions: {
             series: {
@@ -1575,6 +1585,9 @@ function createIssueTrendChart(data){
         chart: {
             zoomType: 'x'
         },
+        legend: {
+            enabled: false
+        },
         title: {
             text: ""
         },
@@ -1589,11 +1602,6 @@ function createIssueTrendChart(data){
         credits: {
             enabled: false
         },
-        legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'middle'
-        },
         plotOptions: {
             series: {
                 borderWidth: 0,
@@ -1604,7 +1612,7 @@ function createIssueTrendChart(data){
             }
         },
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:11px">Issues</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> of total<br/>'
         },
         series: [{
@@ -1628,6 +1636,9 @@ function createSonarTrendChart(data){
         credits: {
             enabled: false
         },
+        legend: {
+                enabled: false
+        },
         xAxis: {
             type: 'category'
         },
@@ -1635,11 +1646,6 @@ function createSonarTrendChart(data){
             title: {
                 text: 'Number of Issues'
             }
-        },
-        legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'middle'
         },
         plotOptions: {
             series: {
@@ -1651,7 +1657,7 @@ function createSonarTrendChart(data){
             }
         },
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:11px">Sonar</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> of total<br/>'
         },
         series: [{
