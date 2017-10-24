@@ -80,6 +80,19 @@ service<http> pmtserives {
     }
 
     @http:GET {}
+        @http:Path {value:"/load-menu-version-badgeCounts/{startDate}/{endDate}" }
+
+    resource getMenuVersionBadgeCounts (message m,@http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {
+        json menuVersionBadgeCount = menuVersionBadgesCounts(startDate,endDate);
+
+        message response = {};
+        messages:setJsonPayload(response, menuVersionBadgeCount);
+        messages:setHeader(response, "Access-Control-Allow-Origin", "*");
+        reply response;
+    }
+
+
+    @http:GET {}
     @http:Path {value:"/load-total-product-summary/{product}/{startDate}/{endDate}" }
 
     resource loadProductSummaryCounts (message m,@http:PathParam {value:"product"} string product,@http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {

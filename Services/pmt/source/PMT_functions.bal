@@ -24,7 +24,7 @@ function dbConnectivity() {
 }
 
 function jiraConnector(){
-    JIRA_Connector = create jira:ClientConnector(configuration:baseURL,"sajithal@wso2.com","Capn@sv12");
+    JIRA_Connector = create jira:ClientConnector(configuration:baseURL,"USERNAME","PASSWORD");
 }
 
 function loadDashboard(string startDate,string endDate)(json){
@@ -305,6 +305,45 @@ function menuBadgesCounts(string startDate,string endDate)(json){
 
     json menuBadgeCount = {"jsonResOfQueuedCount":jsonResOfQueuedCount,"jsonResOfETACounts":jsonResOfETACounts,"jsonResOfDEVCounts":jsonResOfDEVCounts};
    
+    return menuBadgeCount;
+}
+
+function menuVersionBadgesCounts(string startDate,string endDate)(json){
+    if(dbConnection == null){
+        dbConnectivity();
+    }
+    sql:Parameter[] params = [];
+    sql:Parameter p1 = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter p2 = {sqlType:"date", value:startDate};
+    sql:Parameter p3 = {sqlType:"date", value:endDate};
+    params = [p1,p2,p3];
+    datatable dt = dbConnection.select("select COUNT(PATCH_QUEUE.PRODUCT_NAME) as total,PATCH_QUEUE.PRODUCT_NAME,PATCH_QUEUE.PRODUCT_VERSION FROM PATCH_QUEUE left outer join PATCH_ETA on PATCH_QUEUE.ID=PATCH_ETA.PATCH_QUEUE_ID
+                                                WHERE PATCH_QUEUE.ACTIVE=? AND REPORT_DATE >= ? AND REPORT_DATE <= ?
+                                                group by PATCH_QUEUE.PRODUCT_NAME,PATCH_QUEUE.PRODUCT_VERSION", params);
+    var jsonResOfQueuedCount, _ = <json>dt;
+
+    sql:Parameter p4 = {sqlType:"varchar", value:"No"};
+    sql:Parameter p5 = {sqlType:"varchar", value:"0"};
+    sql:Parameter p6 = {sqlType:"date", value:startDate};
+    sql:Parameter p7 = {sqlType:"date", value:endDate};
+    params = [p4,p5,p6,p7];
+    datatable dt2 = dbConnection.select("select COUNT(PATCH_QUEUE.PRODUCT_NAME) as total,PATCH_QUEUE.PRODUCT_NAME,PATCH_QUEUE.PRODUCT_VERSION FROM PATCH_QUEUE left outer join PATCH_ETA on PATCH_QUEUE.ID=PATCH_ETA.PATCH_QUEUE_ID  WHERE
+                                            PATCH_QUEUE.ACTIVE = ?  AND PATCH_ETA.RELEASED_ON IS null AND PATCH_ETA.STATUS=? AND PATCH_ETA.WORST_CASE_ESTIMATE<CURDATE() AND REPORT_DATE >= ? AND
+                                            REPORT_DATE <= ?  AND (PATCH_ETA.LC_STATE NOT IN ('OnHold','Broken','Released','N/A')) group by PATCH_QUEUE.PRODUCT_NAME,PATCH_QUEUE.PRODUCT_VERSION", params);
+    var jsonResOfETACounts, _ = <json>dt2;
+
+    sql:Parameter p8 = {sqlType:"varchar", value:"0"};
+    sql:Parameter p9 = {sqlType:"varchar", value:"No"};
+    sql:Parameter p10 = {sqlType:"date", value:startDate};
+    sql:Parameter p11 = {sqlType:"date", value:endDate};
+    params = [p8,p9,p10,p11];
+    datatable dt3 = dbConnection.select("select COUNT(distinct(PATCH_ETA.PATCH_NAME)) as total,PATCH_QUEUE.PRODUCT_NAME,PATCH_QUEUE.PRODUCT_VERSION FROM PATCH_QUEUE left outer join PATCH_ETA on PATCH_QUEUE.ID=PATCH_ETA.PATCH_QUEUE_ID
+                                             WHERE  PATCH_ETA.STATUS=?  AND PATCH_ETA.RELEASED_ON IS null AND PATCH_QUEUE.ACTIVE=? AND REPORT_DATE >= ? AND REPORT_DATE <= ?  AND (PATCH_ETA.LC_STATE NOT IN ('OnHold','Broken','Released','N/A'))
+                                             group by PATCH_QUEUE.PRODUCT_NAME,PATCH_QUEUE.PRODUCT_VERSION", params);
+    var jsonResOfDEVCounts, _ = <json>dt3;
+
+    json menuBadgeCount = {"jsonResOfQueuedCount":jsonResOfQueuedCount,"jsonResOfETACounts":jsonResOfETACounts,"jsonResOfDEVCounts":jsonResOfDEVCounts};
+
     return menuBadgeCount;
 }
 
