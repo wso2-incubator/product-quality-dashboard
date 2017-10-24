@@ -79,6 +79,14 @@
         .btn-product-inactive{
             background:#d9edf7;
         }
+        .fixedIssesDiv{
+            width:77.8vw;
+            background-color:#FFF7F2;
+        }
+        .fixedSonarDiv{
+            width:77.8vw;
+            background-color:#F2F7FF;
+        }
     </style>
     <style type="text/css">
         .demo i {
@@ -140,7 +148,7 @@
                                     <div class="mam-container" style="background-color:#FFF7F2; padding: 15px; border: solid #a9a9a9 1px;">
                                         <div class="container-fluid" >
                                             <div>
-                                                <div class="row">
+                                                <div class="row fixedIssesDiv" style="z-index: 1;">
                                                     <div class="col-xs-2 col-md-2" style="text-align:center">&nbsp;</div>
                                                     <div class="form-group col-xs-3 col-md-3"  style="text-align:center">
                                                         <h4 style="font-size:1vw">Issue Type</h4>
@@ -157,13 +165,13 @@
                                                             <option value="0">All</option>
                                                         </select>
                                                     </div>
-                                                    <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:40px;">
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:36px;">
                                                         <button  type="button" class="btn btn-default" onclick="resetIssueCharts()" id="resetIssueChartsId" style="font-size:1.1vw;display:none;" data-placement="bottom" title="Reset Filters">
-                                                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                                                           <img src="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
                                                         </button>
                                                     </div>
                                                 </div>
-                                               </div>
+                                            </div>
                                         </div>
 
 
@@ -259,10 +267,10 @@
                                 <div class=" col-xs-12 col-md-12">
 
                                     <h3 style="font-size:1.3vw">Sonar</h3>
-                                    <div class="card" style="background-color:#F2F7FF; padding: 15px; border: solid #a9a9a9 1px;">
+                                    <div class="card" style="background-color:#F2F7FF; padding: 15px; margin-bottom:150px; border: solid #a9a9a9 1px;">
                                         <div class="container-fluid" >
                                             <div>
-                                                <div class="row">
+                                                <div class="row fixedSonarDiv" style="z-index: 1;">
                                                     <div class="col-xs-2 col-md-2" style="text-align:center">&nbsp;</div>
                                                     <div class="form-group col-xs-3 col-md-3"  style="text-align:center">
                                                         <h4 style="font-size:1vw">Issue Type</h4>
@@ -279,9 +287,9 @@
                                                             <option value="0">All</option>
                                                         </select>
                                                     </div>
-                                                    <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:40px">
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:36px">
                                                         <button type="button" class="btn btn-default" onclick="resetSonarCharts()" id="resetSonarChartsId" style="font-size:1.1vw;display:none;" data-placement="bottom" title="Reset Filters">
-                                                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                                                            <img src="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -407,7 +415,49 @@
 
 
 $(window).on('load', function() {
-   initPage();
+    initPage();
+
+   //temp start
+    var fixedIssesDivTop = $('.fixedIssesDiv').offset().top;
+
+    $('.right-scrolling-body').scroll(function() {
+        var currentScroll = $('.right-scrolling-body').scrollTop();
+        var scrollTop = $('.right-scrolling-body').offset().top;
+        console.log(scrollTop,currentScroll);
+        if (currentScroll >= fixedIssesDivTop && currentScroll<=1390) {
+            $('.fixedIssesDiv').css({
+                position: 'fixed',
+                top: scrollTop
+
+
+            });
+        } else {
+            $('.fixedIssesDiv').css({
+                position: 'static'
+            });
+        }
+    });window
+
+    var fixedSonarDivTop = $('.fixedSonarDiv').offset().top;
+
+    $('.right-scrolling-body').scroll(function() {
+        var currentScroll = $('.right-scrolling-body').scrollTop();
+        var scrollTop = $('.right-scrolling-body').offset().top;
+        console.log(scrollTop,currentScroll);
+        if (currentScroll >= fixedSonarDivTop ) {
+            $('.fixedSonarDiv').css({
+                position: 'fixed',
+                top: scrollTop
+
+
+            });
+        } else {
+            $('.fixedSonarDiv').css({
+                position: 'static'
+            });
+        }
+    });window
+    // temp end
 });
 
     $(".right-scrolling-body").scroll(function() {
@@ -536,9 +586,7 @@ $(window).on('load', function() {
         <!--setSonarCalender();-->
         getSonarTrendLineHistory("day");
     });
-
 </script>
-
 
 </body>
 </html>

@@ -68,7 +68,7 @@ var sonarSeverityPieChartTitle;
 
 
 function initPage() {
-    debugger;
+    
     var sidePaneDetails;
     var content;
     $.ajax({
@@ -77,13 +77,13 @@ function initPage() {
         // url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all',
         async: false,
         success: function(data){
-            debugger;
+            
             sidePaneDetails = data.data.items;
             content = data.data;
             currentData = data.data;
         }
     });
-    debugger;
+    
     issueIssueTypeIsSelected = false;
     issueSeverityIsSelected = false;
     sonarIssueTypeIsSelected = false;
@@ -100,10 +100,10 @@ function initPage() {
     sameAreaIsSelected = 0;
 
     loadSidePane(sidePaneDetails);
-    debugger;
+    
     loadTypeAndSeverityDropdowns();
     initChart(content);
-    debugger;
+    
     initSonarChart(content);
 
 
@@ -119,13 +119,13 @@ function loadTypeAndSeverityDropdowns() {
         url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/getIssueTypesAndSeverities',
         async: false,
         success: function(data){
-            debugger;
+            
             issueIssueTypes = data.data.issueIssuetypes;
             issueSeverities = data.data.issueSeverities;
-            debugger;
+            
             sonarIssueTypes = data.data.sonarIssuetypes;
             sonarSeverities = data.data.sonarSeverities;
-            debugger;
+            
         }
     });
     loadTypeAndSeverityDropdownsForIssues(issueIssueTypes, issueSeverities);
@@ -154,10 +154,10 @@ function loadTypeAndSeverityDropdownsForSonar(issueTypes, severities) {
 
         // document.getElementById("sonarSeverityChartHeader").innerHTML = "Issue Type Breakdown for "+ selectedSonarTypeName;
 
-        debugger;
+        
 
         if(parseInt(selectedSonarType) !== 0){
-            debugger;
+            
             for (var i = 0; i < sonarIssuetypeChart.series[0].data.length; i++) {
                 sonarIssuetypeChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
@@ -187,12 +187,12 @@ function loadTypeAndSeverityDropdownsForSonar(issueTypes, severities) {
 
         // document.getElementById("sonarIssueTypeChartHeader").innerHTML = "Issue Type Breakdown for "+ selectedSonarSeverityName;
 
-        debugger;
+        
 
         if(parseInt(selectedSonarSeverity) !== 0){
-            debugger;
+            
             for (var i = 0; i < sonarSeverityChart.series[0].data.length; i++) {
-                debugger;
+                
                 sonarSeverityChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
             sonarSeverityChart.get(parseInt(selectedSonarSeverity)).update({ color: '#118983' }, true, false);
@@ -223,10 +223,10 @@ function loadTypeAndSeverityDropdownsForIssues(issueTypes, severities) {
 
         // document.getElementById("issueSeverityChartHeader").innerHTML = "Issue Type Breakdown for "+ selectedTypeName;
 
-        debugger;
+        
 
         if(parseInt(selectedType) !== 0){
-            debugger;
+            
             for (var i = 0; i < issueIssuetypeChart.series[0].data.length; i++) {
                 issueIssuetypeChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
@@ -257,10 +257,10 @@ function loadTypeAndSeverityDropdownsForIssues(issueTypes, severities) {
 
         // document.getElementById("issueIssueTypeChartHeader").innerHTML = "Severity Breakdown for "+ selectedSeverityName;
 
-        debugger;
+        
 
         if(parseInt(selectedSeverity) !== 0){
-            debugger;
+            
             for (var i = 0; i < issueSeverityChart.series[0].data.length; i++) {
                 issueSeverityChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
@@ -285,13 +285,13 @@ function selectIssueIssueTypePieChart(issueTypeId) {
     var url = 'https://10.100.4.222:9092/internal/product-quality/v1.0/github/issues/issuetype/'+issueTypeId+'/severity/'+currentIssueSeverity;
 
     if (issueSeverityIsSelected === true){
-        debugger;
+        
         document.getElementById("severity-choice").disabled = true;
         document.getElementById("issueArrow").innerHTML = '<i class="fa fa-long-arrow-left" aria-none="true"></i>';
-        debugger;
+        
         var refreshBtn = document.getElementById("resetIssueChartsId");
         refreshBtn.style.display = 'initial';
-        debugger;
+        
     }
 
     var content;
@@ -304,7 +304,7 @@ function selectIssueIssueTypePieChart(issueTypeId) {
         },
         async: false,
         success: function(data){
-            debugger;
+            
             content = data.data;
             currentData = content;
         }
@@ -324,7 +324,7 @@ function selectIssueSeverityPieChart(severityId) {
 
 
     if (issueIssueTypeIsSelected === true){
-        debugger;
+        
         document.getElementById("issuetype-choice").disabled = true;
         document.getElementById("issueArrow").innerHTML = '<i class="fa fa-long-arrow-right" aria-none="true"></i>';
         var refreshBtn = document.getElementById("resetIssueChartsId");
@@ -341,7 +341,7 @@ function selectIssueSeverityPieChart(severityId) {
         },
         async: false,
         success: function(data){
-            debugger;
+            
             content = data.data;
             currentData = content;
         }
@@ -351,19 +351,19 @@ function selectIssueSeverityPieChart(severityId) {
 
 function selectSonarIssueTypePieChart(issueTypeId) {
 
-    debugger;
+    
     currentSonarIssueType = issueTypeId;
     if(issueTypeId !== 0){
-        debugger;
+        
         sonarIssueTypeIsSelected = true;
     }else{
-        debugger;
+        
         sonarIssueTypeIsSelected = false;
     }
     var url = 'https://10.100.4.222:9092/internal/product-quality/v1.0/sonar/issues/issuetype/'+issueTypeId+'/severity/'+currentSonarSeverity;
 
     if (sonarSeverityIsSelected === true){
-        debugger;
+        
         document.getElementById("sonar-severity-choice").disabled = true;
         document.getElementById("sonarArrow").innerHTML = '<i class="fa fa-long-arrow-left" aria-none="true"></i>';
         var refreshBtn = document.getElementById("resetSonarChartsId");
@@ -380,7 +380,7 @@ function selectSonarIssueTypePieChart(issueTypeId) {
         },
         async: false,
         success: function(data){
-            debugger;
+            
             content = data.data;
             currentData = content;
         }
@@ -391,16 +391,16 @@ function selectSonarIssueTypePieChart(issueTypeId) {
 function selectSonarSeverityPieChart(severityId) {
     currentSonarSeverity = severityId;
     if(severityId !== 0){
-        debugger;
+        
         sonarSeverityIsSelected = true;
     }else{
-        debugger;
+        
         sonarSeverityIsSelected = false;
     }
     var url = 'https://10.100.4.222:9092/internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+severityId;
 
     if (sonarIssueTypeIsSelected === true){
-        debugger;
+        
         document.getElementById("sonar-issuetype-choice").disabled = true;
         document.getElementById("sonarArrow").innerHTML = '<i class="fa fa-long-arrow-right" aria-none="true"></i>';
         var refreshBtn = document.getElementById("resetSonarChartsId");
@@ -416,7 +416,7 @@ function selectSonarSeverityPieChart(severityId) {
         },
         async: false,
         success: function(data){
-            debugger;
+            
             content = data.data;
             currentData = content;
         }
@@ -439,7 +439,7 @@ function resetSonarCharts() {
     var refreshBtn = document.getElementById("resetSonarChartsId");
     refreshBtn.style.display = 'none';
 
-    debugger;
+    
     $.ajax({
         type: "GET",
         url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+currentSonarSeverity,
@@ -449,14 +449,14 @@ function resetSonarCharts() {
             categoryId: currentCategoryId
         },
         success: function(data){
-            debugger;
+            
             content = data.data;
             currentData = content;
         }
     });
 
     initSonarChart(content);
-    debugger;
+    
 }
 
 function resetIssueCharts() {
@@ -474,7 +474,7 @@ function resetIssueCharts() {
     var refreshBtn = document.getElementById("resetIssueChartsId");
     refreshBtn.style.display = 'none';
 
-    debugger;
+    
     $.ajax({
         type: "GET",
         url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+currentIssueSeverity,
@@ -484,7 +484,7 @@ function resetIssueCharts() {
             categoryId: currentCategoryId
         },
         success: function(data){
-            debugger;
+            
             content = data.data;
             currentData = content;
         }
@@ -493,13 +493,13 @@ function resetIssueCharts() {
 
 
     initChart(content);
-    debugger;
+    
 }
 
 function loadSidePane(sidePaneDetails) {
-    debugger;
+    
     var totalProducts = sidePaneDetails.length;
-    debugger;
+    
 
     for (var x = 0; x < totalProducts; x++) {
         document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:-4px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='a"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
@@ -521,9 +521,9 @@ function loadSidePane(sidePaneDetails) {
 }
 
 function loadSidePaneAtReset(sidePaneDetails) {
-    debugger;
+    
     var totalProducts = sidePaneDetails.length;
-    debugger;
+    
     document.getElementById('area').innerHTML = "";
 
 
@@ -547,7 +547,7 @@ function loadSidePaneAtReset(sidePaneDetails) {
 }
 
 function allAreaClick() {
-    debugger;
+    
     var sidePaneDetails;
     var content;
     $.ajax({
@@ -556,13 +556,13 @@ function allAreaClick() {
         // url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all',
         async: false,
         success: function(data){
-            debugger;
+            
             sidePaneDetails = data.data.items;
             content = data.data;
             currentData = data.data;
         }
     });
-    debugger;
+    
     issueIssueTypeIsSelected = false;
     issueSeverityIsSelected = false;
     sonarIssueTypeIsSelected = false;
@@ -591,10 +591,10 @@ function allAreaClick() {
 
     sameAreaIsSelected = 0;
 
-    document.getElementById('componentChoice').innerHTML = "&nbsp";
+    document.getElementById('componentChoice').innerHTML = "&nbsp;";
     loadSidePaneAtReset(sidePaneDetails);
     initChart(content);
-    debugger;
+    
     initSonarChart(content);
 }
 
@@ -625,8 +625,8 @@ function leftMenuAreaClick(areaId){
     currentSonarSeverity = 0;
 
 
-    debugger;
-    document.getElementById('componentChoice').innerHTML = "&nbsp";
+    
+    document.getElementById('componentChoice').innerHTML = "&nbsp;";
     document.getElementById('product'+(areaId)).innerHTML = "";
     document.getElementById("issuetype-choice").disabled = false;
     document.getElementById("severity-choice").disabled = false;
@@ -643,7 +643,7 @@ function leftMenuAreaClick(areaId){
 
     var sidePaneDetails;
     var content;
-    debugger;
+    
 
     if(sameAreaIsSelected === 2){
         currentCategoryId = 0;
@@ -654,25 +654,25 @@ function leftMenuAreaClick(areaId){
             url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all/',
             async: false,
             success: function(data){
-                debugger;
+                
                 content = data.data;
                 currentData = content;
             }
         });
-        debugger;
+        
     }else{
         $.ajax({
             type: "GET",
             url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/area/'+ areaId,
             async: false,
             success: function(data){
-                debugger;
+                
                 sidePaneDetails = data.data.items;
                 content = data.data;
                 currentData = content;
             }
         });
-        debugger;
+        
 
         var totalProducts = sidePaneDetails.length;
 
@@ -696,12 +696,12 @@ function leftMenuAreaClick(areaId){
 }
 
 function leftMenuProductClick(productId) {
-    debugger;
+    
 
     $('.btn-product').removeClass('btn-product-active').addClass('btn-product-inactive');
     $('#'+productId).removeClass('btn-product-inactive').addClass('btn-product-active');
 
-    debugger;
+    
     currentCategoryId = productId;
     currentProductId = productId;
     currentCategory = "product";
@@ -736,7 +736,7 @@ function leftMenuProductClick(productId) {
         url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/product/'+productId ,
         async: false,
         success: function(data){
-            debugger;
+            
             sidePaneDetails = data.data.items;
             content = data.data;
             currentData = data.data;
@@ -746,7 +746,7 @@ function leftMenuProductClick(productId) {
     loadComponentDropdown(sidePaneDetails);
 
     initChart(content);
-    debugger;
+    
     initSonarChart(content);
 }
 
@@ -767,7 +767,7 @@ function leftMenuVersionClick(version) {
         url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/jira/issues/summary/' + productId + '/version/' + version,
         async: false,
         success: function(data){
-            debugger;
+            
             sidePaneDetails = data.data.items;
             content = data.data;
             currentData = data.data;
@@ -776,13 +776,13 @@ function leftMenuVersionClick(version) {
 
     currentCategory = "version";
     initChart("version", content);
-    debugger;
+    
     loadComponentDropdown(sidePaneDetails);
 }
 
 
 function loadComponentDropdown(sidePaneDetails) {
-    debugger;
+    
 
     document.getElementById('componentChoice').innerHTML = "";
     var item = document.getElementById('componentChoice');
@@ -793,19 +793,19 @@ function loadComponentDropdown(sidePaneDetails) {
     headingTag.appendChild(heading);
     div1.appendChild(headingTag);
     item.appendChild(div1);
-    debugger;
+    
     var div2 = document.createElement('div');
     div2.setAttribute("class","col-xs-2 col-md-2");
     div2.setAttribute("style","text-align: left");
 
     var div3 = document.createElement('div');
     div3.setAttribute("class","form-group");
-    debugger;
+    
     var select = document.createElement('select');
     select.setAttribute("class","form-control");
     select.setAttribute("id","sel1");
     select.setAttribute("style","width:300px; padding: 5px 0px 5px 0px;");
-    debugger;
+    
 
     if(sidePaneDetails.length !== 0){
         var optionAll =  document.createElement('option');
@@ -827,17 +827,17 @@ function loadComponentDropdown(sidePaneDetails) {
             select.appendChild(option);
         }
     }
-    debugger;
+    
 
     div3.appendChild(select);
     div2.appendChild(div3);
     item.appendChild(div2);
 
-    debugger;
+    
     select.addEventListener('change',function(){
         var e = document.getElementById("sel1");
         var strUser = e.options[e.selectedIndex].value;
-        debugger;
+        
         if(parseInt(strUser) > 0){
             loadComponentDetails(parseInt(strUser));
         }else{
@@ -850,7 +850,7 @@ function loadComponentDropdown(sidePaneDetails) {
 
 
 function loadComponentDetails(componentId) {
-    debugger;
+    
     currentCategoryId = componentId;
     currentCategory = "component";
 
@@ -878,19 +878,19 @@ function loadComponentDetails(componentId) {
     document.getElementById("sonarArrow").innerHTML = '';
 
 
-    debugger;
+    
     var content;
     $.ajax({
         type: "GET",
         url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/component/' + componentId,
         async: false,
         success: function(data){
-            debugger;
+            
             content = data.data;
             currentData = data.data;
         }
     });
-debugger;
+
 
     console.log("content");
     console.log(content);
@@ -900,10 +900,10 @@ debugger;
 
 
 function initChart(content) {
-    debugger;
+    
     //set the data for main chart
     if (currentCategory !== "component"){
-        debugger;
+        
         productData = content.items;
 
         mainSeriesData = [];
@@ -930,7 +930,7 @@ function initChart(content) {
         createMainChart();
     }
     if (currentCategory === "component"){
-        debugger;
+        
         productData = content.items;
 
         mainSeriesData = [];
@@ -963,7 +963,7 @@ function initChart(content) {
 
     //set the data for the issuetype chart
     if(issueIssueTypeIsSelected === false){
-        debugger;
+        
         issuetypeData = content.issueIssuetype;
 
         issuetypeSeriesData = [];
@@ -991,7 +991,7 @@ function initChart(content) {
 
 
     if(issueSeverityIsSelected === false){
-        debugger;
+        
         //set the data for the severity chart
         severityData = content.issueSeverity;
 
@@ -1020,21 +1020,21 @@ function initChart(content) {
 
     // createIssueCharts(category);
 
-    debugger;
+    
     var dateFrom = moment().subtract(29, 'days');
     var dateTo= moment();
     issueStartDate = dateFrom.format('YYYY-MM-DD');
     issueEndDate = dateTo.format('YYYY-MM-DD');
     getIssueTrendLineHistory("day");
-    debugger;
+    
 }
 
 function initSonarChart(content) {
-    debugger;
+    
 
     //set the data for main chart
     if (currentCategory !== "component"){
-        debugger;
+        
         productData = content.items;
 
         mainSeriesData = [];
@@ -1065,7 +1065,7 @@ function initSonarChart(content) {
     }
 
     if (currentCategory === "component"){
-        debugger;
+        
         productData = content.items;
 
         mainSeriesData = [];
@@ -1100,24 +1100,24 @@ function initSonarChart(content) {
     //set the data for the issuetype chart
     if(sonarIssueTypeIsSelected === false){
 
-        debugger;
+        
         issuetypeData = content.sonarIssuetype;
         console.log(issuetypeData);
 
-        debugger;
+        
         issuetypeSeriesData = [];
         totalIssuetypeIssues = 0;
 
         if(issuetypeData.length !== 0){
 
             for(var i = 0; i < issuetypeData.length; i++){
-                debugger;
+                
                 name = issuetypeData[i].name;
                 console.log(name);
-                debugger;
+                
                 id = issuetypeData[i].id;
                 console.log(id);
-                debugger;
+                
                 y = issuetypeData[i].sonar;
                 totalIssuetypeIssues += y;
 
@@ -1162,20 +1162,20 @@ function initSonarChart(content) {
         createSonarSeverityChart();
     }
 
-    debugger;
+    
     var dateFrom = moment().subtract(29, 'days');
     var dateTo= moment();
     sonarStartDate = dateFrom.format('YYYY-MM-DD');
     sonarEndDate = dateTo.format('YYYY-MM-DD');
     getSonarTrendLineHistory("day");
-    debugger;
+    
 
 }
 
 
 function createMainChart(){
     //Create the chart
-    debugger;
+    
     this.issueMainChart = Highcharts.chart('main-chart-container', {
         chart: {
             type: 'column'
@@ -1226,7 +1226,7 @@ function createMainChart(){
 
 function createMainChartForComponent(){
     //Create the chart
-    debugger;
+    
     this.issueMainChart = Highcharts.chart('main-chart-container', {
         chart: {
             type: 'column'
@@ -1276,7 +1276,7 @@ function createMainChartForComponent(){
 }
 function createSonarMainChart(){
     //Create the chart
-    debugger;
+    
     this.sonarMainChart = Highcharts.chart('main-chart-container-sonar', {
         chart: {
             type: 'column'
@@ -1325,7 +1325,7 @@ function createSonarMainChart(){
 }
 
 function createIssueTypeChart(){
-    debugger;
+    
     // Create the chart
     this.issueIssuetypeChart = Highcharts.chart('issuetype-chart-container', {
         chart: {
@@ -1371,7 +1371,7 @@ function createIssueTypeChart(){
     });
 }
 function createSonarIssueTypeChart(){
-    debugger;
+    
     // Create the chart
     this.sonarIssuetypeChart = Highcharts.chart('issuetype-chart-container-sonar', {
         chart: {
@@ -1420,7 +1420,7 @@ function createSonarIssueTypeChart(){
 
 function createSeverityChart(){
     // Create the chart
-    debugger;
+    
     this.issueSeverityChart = Highcharts.chart('severity-chart-container', {
         chart: {
             type: 'pie'
@@ -1468,7 +1468,7 @@ function createSeverityChart(){
 
 function createSonarSeverityChart(){
     // Create the chart
-    debugger;
+    
     this.sonarSeverityChart = Highcharts.chart('severity-chart-container-sonar', {
         chart: {
             type: 'pie'
@@ -1512,7 +1512,7 @@ function createSonarSeverityChart(){
 
 
 function getIssueTrendLineHistory(period) {
-    debugger;
+    
     var history;
     $.ajax({
         type: "GET",
@@ -1531,7 +1531,7 @@ function getIssueTrendLineHistory(period) {
             history = data.data;
         }
     });
-    debugger;
+    
     historySeriesData = [];
 
     for(var i = 0; i < history.length; i++){
@@ -1540,12 +1540,12 @@ function getIssueTrendLineHistory(period) {
         y = history[i].count;
         historySeriesData.push({name: name, y: y});
     }
-    debugger;
+    
     createIssueTrendChart(historySeriesData);
 }
 
 function getSonarTrendLineHistory(period) {
-    debugger;
+    
     var history;
     $.ajax({
         type: "GET",
@@ -1563,7 +1563,7 @@ function getSonarTrendLineHistory(period) {
             console.log(history);
         }
     });
-    debugger;
+    
     historySeriesData = [];
 
     for(var i = 0; i < history.length; i++){
@@ -1573,14 +1573,14 @@ function getSonarTrendLineHistory(period) {
         y = history[i].count;
         historySeriesData.push({name: name, y: y});
     }
-    debugger;
+    
     createSonarTrendChart(historySeriesData);
 
 }
 
 
 function createIssueTrendChart(data){
-    debugger;
+    
     Highcharts.chart('trend-chart-container', {
         chart: {
             zoomType: 'x'
@@ -1625,7 +1625,7 @@ function createIssueTrendChart(data){
 
 }
 function createSonarTrendChart(data){
-    debugger;
+    
     Highcharts.chart('trend-chart-container-sonar', {
         chart: {
             zoomType: 'x'
