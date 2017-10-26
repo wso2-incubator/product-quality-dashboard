@@ -1,13 +1,12 @@
-package services;
+package releaseTrainpkg;
 
-import conf;
+
 import ballerina.net.http;
 import ballerina.data.sql;
-import ballerina.lang.system;
 import ballerina.lang.messages;
 import org.wso2.ballerina.connectors.basicauth;
 import ballerina.lang.time;
-
+import ballerina.utils.logger;
 
 
 
@@ -15,13 +14,14 @@ import ballerina.lang.time;
                      keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> releaseTrainService {
 
-    basicauth:ClientConnector redmineConnector = create basicauth:ClientConnector("https://redmine.wso2.com/",
-                                                                                  conf:rmUsername,conf:rmPassword);
+    json confJson = readConfig("config.json");
 
-    map props = {"jdbcUrl":"jdbc:mysql://"+conf:dbIP+":"+conf:dbPort+"/"+conf:dbName+"?useSSL=false",
-                                                 "username":conf:dbUsername, "password":conf:dbPassword};
+    basicauth:ClientConnector redmineConnector = setRedmineConfig(confJson);
+    map props = setDatabaseConfig(confJson);
     sql:ClientConnector rmDB = create sql:ClientConnector(props);
+
     sql:Parameter[] params = [];
+
 
 
     @http:GET {}
@@ -30,7 +30,11 @@ service<http> releaseTrainService {
 
         message send={};
 
-        messages:setStringPayload(send,"Test");
+        logger:info("test");
+
+
+
+        messages:setJsonPayload(send,"test");
         reply send;
 
     }
@@ -47,6 +51,7 @@ service<http> releaseTrainService {
         reply m;
 
         worker updateProjectTable {
+            logger:info("RM_PROJECT TABLE SYNC STARTED...");
             message  context;
             context <- default;
             message response ={};
@@ -58,24 +63,19 @@ service<http> releaseTrainService {
             var limit = 100;
             var cycles = getCycles("/projects.json?", limit);
 
-            system:println(cycles);
-
-
-
+            var insertrows=0;
+            var updaterows=0;
             var i = 0;
             while (i < cycles) {
 
                 message n = {};
                 json jsn1 = {};
-
                 response = redmineConnector.get("/projects.json?offset=" + offset + "&limit=" + limit, n);
                 jsn1 = messages:getJsonPayload(response);
 
                 var projectsCount = lengthof jsn1.projects;
-
                 var j = 0;
                 while (j < projectsCount) {
-
 
                     //insert data
                     time:Time dbUpdatedTimeStamp = time:currentTime();
@@ -103,13 +103,8 @@ service<http> releaseTrainService {
                     params2 = [para1, para2, para3, para4, para5, para6, para7, para8, para9];
                     params3 = [para2, para3, para4, para5, para6, para7, para8, para9, para1];
 
-
-
-
                     //last update time on redmine
                     time:Time lastTimeUpdateStamp = time:parse(updatedOn, "yyyy-MM-dd'T'HH:mm:ssz");
-
-
 
                     //get the row count of the RM_PROJECT table
                     datatable dt = rmDB.select("SELECT COUNT(*) rowCount, ROW_UPDATE_EPOCH_TIME_STAMP epochTime from RM_PROJECT WHERE PROJECT_ID=?", params1);
@@ -124,15 +119,15 @@ service<http> releaseTrainService {
                     transaction {
 
                         if (rows1 == 0) { //if rows ==0,this record is new one.
-                            system:println("INSERTED");
+                            logger:info("NEW RECORD INSERTED");
+                            insertrows = insertrows + 1;
                             int ret1 = rmDB.update("Insert into RM_PROJECT (PROJECT_ID,PROJECT_NAME,PROJECT_IDENTIFIER,PROJECT_DESCRIPTION,PROJECT_STATUS,PROJECT_IS_PUBLIC,PROJECT_CREATED_ON,PROJECT_UPDATE_ON,ROW_UPDATE_EPOCH_TIME_STAMP) values (?,?,?,?,?,?,?,?,?)", params2);
 
                         } else { // else ,this record is not new one
 
-                            system:println("NOT A NEW RECORD");
-
                             if (lastTimeUpdateStamp.time > epochTime) { // checking the record which is already in the table got updated or not.
-                                system:println("UPDATED");
+                                logger:info("OLD RECORD UPDATED");
+                                updaterows = updaterows +1;
 
                                 int ret2 = rmDB.update("Update RM_PROJECT SET PROJECT_NAME=?, PROJECT_IDENTIFIER=?, PROJECT_DESCRIPTION=?, PROJECT_STATUS=?, PROJECT_IS_PUBLIC=?, PROJECT_CREATED_ON=?, PROJECT_UPDATE_ON=?, ROW_UPDATE_EPOCH_TIME_STAMP=? WHERE PROJECT_ID=?", params3);
 
@@ -149,7 +144,14 @@ service<http> releaseTrainService {
 
             }
 
-            system:println("Project Update Done");
+
+            if(insertrows>0){
+                logger:info(insertrows +" RECORDS ARE INSERTED... PLEASE UPDATE THE MAPPING OF PROJECT/S IN RM_MAPPING TABLE MANUALLY...");
+            }else{
+                logger:info(insertrows + " RECORDS ARE INSERTED");
+            }
+            logger:info(updaterows + " RECORDS ARE UPDATED");
+            logger:info("RM_PROJECT TABLE SYNC DONE.");
 
         }
 
@@ -169,7 +171,7 @@ service<http> releaseTrainService {
         reply m;
 
         worker updateUserTable {
-
+            logger:info("RM_USER TABLE SYNC STARTED...");
             message  context;
             context <- default;
             message response = {};
@@ -181,10 +183,7 @@ service<http> releaseTrainService {
             var limit = 100;
             var cycles = getCycles("/users.json?", limit);
 
-
-
-
-
+            var insertrows=0;
             var i = 0;
             while (i < cycles) {
 
@@ -235,7 +234,8 @@ service<http> releaseTrainService {
 
                         if (rows1 == 0) { //if rows ==0,this record is new one.
                             //insert
-                            system:println("INSERTED");
+                            logger:info("NEW RECORD INSERTED");
+                            insertrows = insertrows + 1;
                             int ret1 = rmDB.update("Insert into RM_USER (USER_ID,USER_FIRST_NAME,USER_LAST_NAME,USER_EMAIL,USER_CREATED_ON,USER_LAST_LOGIN_ON) values (?,?,?,?,?,?)", params2);
                         }
                     }
@@ -248,7 +248,8 @@ service<http> releaseTrainService {
 
 
             }
-            system:println("User Update Done");
+            logger:info(insertrows + " RECORDS ARE INSERTED");
+            logger:info("RM_USER TABLE SYNC DONE.");
 
         }
 
@@ -267,6 +268,7 @@ service<http> releaseTrainService {
         reply m;
 
         worker updateVersionTable {
+            logger:info("RM_VERSION TABLE SYNC STARTED...");
             message  context;
             context <- default;
             message response = {};
@@ -284,11 +286,12 @@ service<http> releaseTrainService {
             var projectCount = lengthof jsonResPro;
 
 
-
+            var insertrows=0;
+            var updaterows=0;
             var l = 0;
 
             while (l < projectCount) {
-                //while (l<10){
+
 
 
                 var projectId, _ = (int)jsonResPro[l].ID;
@@ -386,7 +389,7 @@ service<http> releaseTrainService {
                             var z = 0;
                             while (z < customFieldLength) { //switch case for identify the custom fields
                                 var customFieldId, _ = (int)(jsn1.versions[j].custom_fields[z].id);
-                                system:println("inside switch case");
+
                                 if (customFieldId == 20) {
                                     if (jsn1.versions[j].custom_fields[z].value != null) {
                                         versionMarketingDes, _ = (string)(jsn1.versions[j].custom_fields[z].value);
@@ -456,7 +459,7 @@ service<http> releaseTrainService {
                             //get the row count of the RM_PROJECT table
                             //datatable dtversion1 = rmDB.select("SELECT COUNT(*) rowCount from redmine_dump.RM_VERSION WHERE VERSION_ID=? and PARENT_PROJECT_ID=?", params1);
                             datatable dtversion = rmDB.select("SELECT ROW_UPDATE_EPOCH_TIME_STAMP epochTime from RM_VERSION WHERE VERSION_ID=? and PARENT_PROJECT_ID=?", params1);
-                            //system:println(dtversion);
+
                             var jsonRes1, err = <json>dtversion;
 
                             var rows1 = lengthof jsonRes1;
@@ -470,16 +473,18 @@ service<http> releaseTrainService {
 
                                 if (rows1 == 0) { //if rows ==0,this record is new one.
                                     //insert
-                                    system:println("INSERT");
+                                    logger:info("NEW RECORD INSERTED");
+                                    insertrows = insertrows + 1;
                                     int ret1 = rmDB.update("Insert into RM_VERSION (VERSION_ID,PROJECT_ID,PARENT_PROJECT_ID,VERSION_NAME,VERSION_DESCRIPTION,VERSION_STATUS,VERSION_DUE_DATE,VERSION_SHARING,VERSION_MARKETING_DESCRIPTION,VERSION_CARBON_VERSION,VERSION_DEPENDS_ON,VERSION_VISION_DOCUMENT,VERSION_START_DATE,VERSION_RELEASE_MANAGER,VERSION_WARRANTY_MANAGER,VERSION_CREATED_ON,VERSION_UPDATED_ON,ROW_UPDATE_EPOCH_TIME_STAMP)
                                 values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", params2);
 
                                 } else { // else ,this record is not new one
-                                    system:println("NOT A NEW RECORD");
+
 
 
                                     if (lastTimeUpdateStamp.time > epochTime) { // checking the record which is already in the table got updated or not.
-                                        system:println("UPDATE");
+                                        logger:info("OLD RECORD UPDATED");
+                                        updaterows = updaterows + 1;
 
                                         int ret2 = rmDB.update("Update RM_VERSION SET VERSION_NAME=?,VERSION_DESCRIPTION=?, VERSION_STATUS=?,VERSION_DUE_DATE=?, VERSION_SHARING=?, VERSION_MARKETING_DESCRIPTION=?, VERSION_CARBON_VERSION=?,  VERSION_DEPENDS_ON=?,VERSION_VISION_DOCUMENT=?, VERSION_START_DATE=?, VERSION_RELEASE_MANAGER=?, VERSION_WARRANTY_MANAGER=?, VERSION_CREATED_ON=?, VERSION_UPDATED_ON=?, ROW_UPDATE_EPOCH_TIME_STAMP=? WHERE VERSION_ID=? and PARENT_PROJECT_ID=?", params3);
                                     }
@@ -502,7 +507,9 @@ service<http> releaseTrainService {
 
                 l = l + 1;
             }
-            system:println("Version Update Done");
+            logger:info(insertrows + " RECORDS ARE INSERTED");
+            logger:info(updaterows + " RECORDS ARE UPDATED");
+            logger:info("RM_VERSION TABLE SYNC DONE.");
         }
 
 
@@ -519,7 +526,7 @@ service<http> releaseTrainService {
         reply m;
 
         worker updateIssueTable {
-
+            logger:info("RM_ISSUE TABLE SYNC STARTED...");
             message  context;
             context <- default;
             message response = {};
@@ -533,10 +540,8 @@ service<http> releaseTrainService {
             var limit = 100;
             var cycles = getCycles("/issues.json?", limit);
 
-
-
-
-
+            var insertrows=0;
+            var updaterows=0;
             var i = 0;
             while (i < cycles) {
 
@@ -547,9 +552,10 @@ service<http> releaseTrainService {
                 jsn1 = messages:getJsonPayload(response);
 
                 var issuesCount = lengthof jsn1.issues;
-                system:println(issuesCount);
+
                 totaldataCount = totaldataCount + issuesCount;
                 var j = 0;
+
                 while (j < issuesCount) {
 
 
@@ -611,16 +617,19 @@ service<http> releaseTrainService {
 
                         if (rows1 == 0) { //if rows ==0,this record is new one.
                             //insert
-                            system:println("INSERT");
+                            logger:info("NEW RECORD INSERTED");
+                            insertrows = insertrows + 1;
+
                             int ret1 = rmDB.update("Insert into RM_ISSUE (ISSUE_ID,ISSUE_PROJECT_ID,ISSUE_PROJECT_NAME,ISSUE_TRACKER_ID,ISSUE_TRACKER_NAME,ISSUE_FIXED_VERSION_ID,ISSUE_FIXED_VERSION_NAME,ISSUE_TRACKER_SUBJECT,ISSUE_CREATED_ON,ISSUE_UPDATED_ON, ROW_UPDATE_EPOCH_TIME_STAMP)
                                 values (?,?,?,?,?,?,?,?,?,?,?)", params2);
 
                         } else { // else ,this record is not new one
-                            system:println("NOT A NEW RECORD");
+
 
 
                             if (lastTimeUpdateStamp.time > epochTime) { // checking the record which is already in the table got updated or not.
-                                system:println("UPDATE");
+                                logger:info("OLD RECORD UPDATED");
+                                updaterows = updaterows + 1;
 
                                 int ret2 = rmDB.update("Update RM_ISSUE SET ISSUE_TRACKER_SUBJECT=?, ROW_UPDATE_EPOCH_TIME_STAMP=? WHERE ISSUE_ID=?", params3);
 
@@ -637,8 +646,9 @@ service<http> releaseTrainService {
 
             }
 
-            system:println("Issues Upadate Done");
-
+            logger:info(insertrows + " RECORDS ARE INSERTED");
+            logger:info(updaterows + " RECORDS ARE UPDATED");
+            logger:info("RM_ISSUE TABLE SYNC DONE.");
 
         }
     }
@@ -666,7 +676,7 @@ service<http> releaseTrainService {
         var i=0;
         var unicId=0;
         while (i<distinctDates){
-
+            //system:println(jsonRes1[i].releaseDate);
             json data={};
 
             var id=i+1;
@@ -678,7 +688,7 @@ service<http> releaseTrainService {
             datatable q2= rmDB.select("select a.VERSION_ID,c.PROJECT_ID,c.PROJECT_NAME,c.PRODUCT_AREA,a.VERSION_NAME as releaseProduct,d.USER_FIRST_NAME as releaseManagerF,d.USER_LAST_NAME as releaseManagerL,e.USER_FIRST_NAME as warrantyManagerF,e.USER_LAST_NAME as warrantyManagerL,a.VERSION_DUE_DATE as start from RM_VERSION as a left join  RM_MAPPING as c ON a.PARENT_PROJECT_ID=c.PROJECT_ID left join RM_USER as d ON a.VERSION_RELEASE_MANAGER=d.USER_ID left join RM_USER as e ON a.VERSION_WARRANTY_MANAGER=e.USER_ID
  where a.VERSION_DUE_DATE=?;", params2);
             var releases, err = <json>q2;
-            system:println(releases);
+
 
             var releasesLength=lengthof releases;
             var j=0;
@@ -775,7 +785,7 @@ service<http> releaseTrainService {
         var i=0;
         var unicId=0;
         while (i<distinctDates){
-
+            //system:println(jsonRes1[i].releaseDate);
             json data={};
 
             var id=i+1;
@@ -852,8 +862,6 @@ service<http> releaseTrainService {
 
 
 
-
-
         messages:setJsonPayload(send,dataSet1);
         messages:setHeader(send,"Access-Control-Allow-Origin","*");
         reply send;
@@ -869,8 +877,6 @@ service<http> releaseTrainService {
         message send={};
 
         json manager=[];
-        system:println(product +  endDate);
-        system:println(startDate);
 
         sql:Parameter[] params1 = [];
         sql:Parameter[] params2 = [];
@@ -889,7 +895,7 @@ service<http> releaseTrainService {
 
 
         }else{
-            datatable q2= rmDB.select("select a.VERSION_ID,c.PROJECT_ID,c.PROJECT_NAME,c.PRODUCT_AREA,a.VERSION_NAME as releaseProduct,d.USER_FIRST_NAME as releaseManagerF,d.USER_LAST_NAME as releaseManagerL,e.USER_FIRST_NAME as warrantyManagerF,e.USER_LAST_NAME as warrantyManagerL,a.VERSION_DUE_DATE as start from RM_VERSION as a left join  RM_MAPPING as c ON a.PARENT_PROJECT_ID=c.PROJECT_ID left join RM_USER as d ON a.VERSION_RELEASE_MANAGER=d.USER_ID left join RM_USER as e ON a.VERSION_WARRANTY_MANAGER=e.USER_ID
+            datatable q2= rmDB.select("select a.VERSION_ID,c.PROJECT_ID,c.PROJECT_NAME,c.PRODUCT_AREA,a.VERSION_NAME as releaseProduct,d.USER_FIRST_NAME as releaseManagerF,d.USER_LAST_NAME as releaseManagerL,e.USER_FIRST_NAME as warrantyManagerF,e.USER_LAST_NAME as warrantyManagerL,a.VERSION_DUE_DATE as start from RM_VERSION as a left join RM_MAPPING as c ON a.PARENT_PROJECT_ID=c.PROJECT_ID left join RM_USER as d ON a.VERSION_RELEASE_MANAGER=d.USER_ID left join RM_USER as e ON a.VERSION_WARRANTY_MANAGER=e.USER_ID
  where a.VERSION_DUE_DATE between ? and ? and c.PRODUCT_AREA =? ORDER BY a.VERSION_DUE_DATE ASC;", params2);
             manager, _ = <json>q2;
 
@@ -934,7 +940,7 @@ service<http> releaseTrainService {
         messages:setJsonPayload(send,manager);
         messages:setHeader(send,"Access-Control-Allow-Origin","*");
 
-        //messages:setStringPayload(send,h);
+
         reply send;
 
     }
@@ -964,8 +970,6 @@ service<http> releaseTrainService {
         where ISSUE_TRACKER_ID=? and ISSUE_FIXED_VERSION_ID=?;", params1);
 
         trackerSubjects, _ = <json>q1;
-
-
 
 
         messages:setJsonPayload(send,trackerSubjects);

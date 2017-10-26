@@ -1,5 +1,5 @@
-  var url="10.100.4.2";
-  
+  var url="192.168.56.2";
+  var port="9092";
   // create a handlebars template
   var source   = document.getElementById('item-template').innerHTML;
   var template = Handlebars.compile(document.getElementById('item-template').innerHTML);
@@ -30,7 +30,7 @@
 
   // get the initial data to the time line
   $.ajax({
-      url:"https://"+url+":9092/base/getAllReleases",
+      url:"https://"+url+":"+port+"/base/getAllReleases",
       async:false,
       success: function(data){
         Data1=data;  
@@ -48,7 +48,6 @@
         }
         else if (this.value == 'API Manager') {
             $('#featureTable').hide();
-            console.log(Data2);
             getData(f2,"apim");
             x(Data2,template);
         }
@@ -88,6 +87,9 @@
   $('#storySummary').hide();
   $('#featureSummary').hide();
 
+  
+
+  
   // Create a Timeline
   var timeline = new vis.Timeline(container);
 
@@ -102,7 +104,7 @@
         template: template,
         zoomable:false,
         timeAxis: {scale: 'day', step:1 },
-        height:"275px",
+        height:"40vh",
 
       };
 
@@ -112,27 +114,28 @@
 
       for(var i=Data.length-1;i>=0;i--){
         
-            console.log(Data[i].start);
+            
             var currentLoopDate=new Date(Data[i].start);
 
             if(start<=currentLoopDate  &&  currentLoopDate<= end){
-              console.log("if1");
-              $("#leftArrow").css("display","none");
-              $("#rightArrow").css("display","none");
-              $("#toggleRollingMode").css("display","block");
+              
+              
+              
+
               options1= jQuery.extend(options, {start:start,end:end});
               break;
             }else if (end<currentLoopDate){
 
               flagDate=currentLoopDate;
-              console.log("if2");
+              
 
             }else if (currentLoopDate<start){
-                console.log("if3");
+                
             
 
                 if(flagDate==null){
 
+                  
                   
                   
                   start=moment(Data[i].start).add(-28, 'days');
@@ -156,17 +159,19 @@
       
 
       document.getElementById('toggleRollingMode').onclick = function () { 
-       
+        
 
         options = {
         
 
         start: now.clone().add(-28, 'days'),
         end: now.clone().add(28, 'days'),
+
+        
         template: template,
         zoomable:false,
         timeAxis: {scale: 'day', step:1 },
-        height:"275px",
+        height:"40vh",
 
       };
 
@@ -183,8 +188,9 @@
       
   };
 
+
   timeline.on('rangechanged', function (properties) {
-    console.log(properties);
+    
     var now = moment().minutes(0).seconds(0).milliseconds(0);
     var start=moment(properties.start);
     var end=moment(properties.end);
@@ -214,16 +220,12 @@
     }
   
 
-    console.log(days1);
-    console.log(days2);
+    
 
 
   });
 
-  timeline.on('click', function (properties) {
-
-        console.log(properties);
-  });
+  
 
 
   $('#featureTable').hide();
