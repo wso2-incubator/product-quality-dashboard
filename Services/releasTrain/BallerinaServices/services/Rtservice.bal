@@ -1,48 +1,35 @@
-package releaseTrainpkg;
+package org.wso2.internalapps.pqd;
 
 
 import ballerina.net.http;
 import ballerina.data.sql;
 import ballerina.lang.messages;
-import org.wso2.ballerina.connectors.basicauth;
 import ballerina.lang.time;
 import ballerina.utils.logger;
-
 
 
 @http:configuration {basePath:"/base",httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks",
                      keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> releaseTrainService {
 
+
+
     json confJson = readConfig("config.json");
 
-    basicauth:ClientConnector redmineConnector = setRedmineConfig(confJson);
+
     map props = setDatabaseConfig(confJson);
     sql:ClientConnector rmDB = create sql:ClientConnector(props);
 
     sql:Parameter[] params = [];
 
-
-
-    @http:GET {}
-    @http:Path{value:"/"}
-    resource resource1 (message m) {
-
-        message send={};
-
-        logger:info("test");
-
-
-
-        messages:setJsonPayload(send,"test");
-        reply send;
-
-    }
-
+    
 
     @http:GET {}
     @http:Path{value:"/project"}
     resource resource2 (message m) {
+        if(redmineConnector == null){
+            redmineConnectivity();
+        }
 
         m -> updateProjectTable;
 
@@ -76,7 +63,7 @@ service<http> releaseTrainService {
                 var projectsCount = lengthof jsn1.projects;
                 var j = 0;
                 while (j < projectsCount) {
-
+                    logger:info("RM_PROJECT SYNCING...");
                     //insert data
                     time:Time dbUpdatedTimeStamp = time:currentTime();
                     var id, _ = (int)(jsn1.projects[j].id);
@@ -164,6 +151,10 @@ service<http> releaseTrainService {
     @http:GET {}
     @http:Path{value:"/user"}
     resource resource3 (message m) {
+        if(redmineConnector == null){
+            redmineConnectivity();
+        }
+
         m -> updateUserTable;
 
         http:setStatusCode(m,202);
@@ -197,7 +188,7 @@ service<http> releaseTrainService {
 
                 var j = 0;
                 while (j < usersCount) {
-
+                    logger:info("RM_USER SYNCING...");
 
 
                     //insert data
@@ -261,6 +252,11 @@ service<http> releaseTrainService {
     @http:GET {}
     @http:Path{value:"/version"}
     resource resource4 (message m) {
+        if(redmineConnector == null){
+            redmineConnectivity();
+        }
+
+
         m -> updateVersionTable;
 
         http:setStatusCode(m,202);
@@ -327,7 +323,7 @@ service<http> releaseTrainService {
                         var j = 0;
                         while (j < versionsCount) {
 
-
+                            logger:info("RM_VERSION SYNCING...");
 
                             //insert data pre process start
                             time:Time dbUpdatedTimeStamp = time:currentTime();
@@ -519,6 +515,11 @@ service<http> releaseTrainService {
     @http:GET {}
     @http:Path{value:"/issue"}
     resource resource5 (message m) {
+
+        if(redmineConnector == null){
+            redmineConnectivity();
+        }
+
         m -> updateIssueTable;
 
         http:setStatusCode(m,202);
@@ -558,7 +559,7 @@ service<http> releaseTrainService {
 
                 while (j < issuesCount) {
 
-
+                    logger:info("RM_ISSUES SYNCING...");
 
                     //insert data
                     time:Time dbUpdatedTimeStamp = time:currentTime();
