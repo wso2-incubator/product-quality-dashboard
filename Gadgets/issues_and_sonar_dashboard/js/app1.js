@@ -1,6 +1,5 @@
-/**
- * Created by sajinie on 10/8/17.
- */
+var baseUrl='https://192.168.56.2:9092/';
+
 var currentArea;
 var currentProduct;
 var currentVersion;
@@ -73,8 +72,8 @@ function initPage() {
     var content;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all',
-        // url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all',
+        url: baseUrl+'internal/product-quality/v1.0/issues/all',
+        // url: baseUrl+'internal/product-quality/v1.0/issues/all',
         async: false,
         success: function(data){
             
@@ -115,8 +114,8 @@ function loadTypeAndSeverityDropdowns() {
     var sonarSeverities;
     $.ajax({
         type: "GET",
-        // url: 'https://192.168.8.100:9092/internal/product-quality/v1.0/jira/getIssueTypesAndSeverities',
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/getIssueTypesAndSeverities',
+        // url: baseURL+'internal/product-quality/v1.0/jira/getIssueTypesAndSeverities',
+        url: baseUrl+'internal/product-quality/v1.0/getIssueTypesAndSeverities',
         async: false,
         success: function(data){
             
@@ -282,7 +281,7 @@ function selectIssueIssueTypePieChart(issueTypeId) {
         issueIssueTypeIsSelected = false;
     }
 
-    var url = 'https://10.100.4.222:9092/internal/product-quality/v1.0/github/issues/issuetype/'+issueTypeId+'/severity/'+currentIssueSeverity;
+    var url = baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+issueTypeId+'/severity/'+currentIssueSeverity;
 
     if (issueSeverityIsSelected === true){
         
@@ -320,7 +319,7 @@ function selectIssueSeverityPieChart(severityId) {
     }else{
         issueSeverityIsSelected = false;
     }
-    var url = 'https://10.100.4.222:9092/internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+severityId;
+    var url = baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+severityId;
 
 
     if (issueIssueTypeIsSelected === true){
@@ -360,7 +359,7 @@ function selectSonarIssueTypePieChart(issueTypeId) {
         
         sonarIssueTypeIsSelected = false;
     }
-    var url = 'https://10.100.4.222:9092/internal/product-quality/v1.0/sonar/issues/issuetype/'+issueTypeId+'/severity/'+currentSonarSeverity;
+    var url = baseUrl+'internal/product-quality/v1.0/sonar/issues/issuetype/'+issueTypeId+'/severity/'+currentSonarSeverity;
 
     if (sonarSeverityIsSelected === true){
         
@@ -397,7 +396,7 @@ function selectSonarSeverityPieChart(severityId) {
         
         sonarSeverityIsSelected = false;
     }
-    var url = 'https://10.100.4.222:9092/internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+severityId;
+    var url = baseUrl+'internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+severityId;
 
     if (sonarIssueTypeIsSelected === true){
         
@@ -442,7 +441,7 @@ function resetSonarCharts() {
     
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+currentSonarSeverity,
+        url: baseUrl+'internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+currentSonarSeverity,
         async: false,
         data:{
             category: currentCategory,
@@ -477,7 +476,7 @@ function resetIssueCharts() {
     
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+currentIssueSeverity,
+        url: baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+currentIssueSeverity,
         async: false,
         data:{
             category: currentCategory,
@@ -552,8 +551,8 @@ function allAreaClick() {
     var content;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all',
-        // url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all',
+        url: baseUrl+'internal/product-quality/v1.0/issues/all',
+        // url: baseUrl+'internal/product-quality/v1.0/issues/all',
         async: false,
         success: function(data){
             
@@ -651,7 +650,7 @@ function leftMenuAreaClick(areaId){
 
         $.ajax({
             type: "GET",
-            url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/all/',
+            url: baseUrl+'internal/product-quality/v1.0/issues/all/',
             async: false,
             success: function(data){
                 
@@ -663,7 +662,7 @@ function leftMenuAreaClick(areaId){
     }else{
         $.ajax({
             type: "GET",
-            url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/area/'+ areaId,
+            url: baseUrl+'internal/product-quality/v1.0/issues/area/'+ areaId,
             async: false,
             success: function(data){
                 
@@ -733,7 +732,7 @@ function leftMenuProductClick(productId) {
     var content;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/product/'+productId ,
+        url: baseUrl+'internal/product-quality/v1.0/issues/product/'+productId ,
         async: false,
         success: function(data){
             
@@ -764,7 +763,7 @@ function leftMenuVersionClick(version) {
     var content;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/jira/issues/summary/' + productId + '/version/' + version,
+        url: baseUrl+'internal/product-quality/v1.0/jira/issues/summary/' + productId + '/version/' + version,
         async: false,
         success: function(data){
             
@@ -882,7 +881,7 @@ function loadComponentDetails(componentId) {
     var content;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/issues/component/' + componentId,
+        url: baseUrl+'internal/product-quality/v1.0/issues/component/' + componentId,
         async: false,
         success: function(data){
             
@@ -1516,7 +1515,7 @@ function getIssueTrendLineHistory(period) {
     var history;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/github/issues/history/'+ currentCategory + '/' + currentCategoryId,
+        url: baseUrl+'internal/product-quality/v1.0/github/issues/history/'+ currentCategory + '/' + currentCategoryId,
         data:{
             severityId: currentIssueSeverity,
             issuetypeId: currentIssueIssueType,
@@ -1549,7 +1548,7 @@ function getSonarTrendLineHistory(period) {
     var history;
     $.ajax({
         type: "GET",
-        url: 'https://10.100.4.222:9092/internal/product-quality/v1.0/sonar/issues/history/'+ currentCategory + '/' + currentCategoryId,
+        url: baseUrl+'internal/product-quality/v1.0/sonar/issues/history/'+ currentCategory + '/' + currentCategoryId,
         data:{
             issuetypeId: currentSonarIssueType,
             severityId: currentSonarSeverity,

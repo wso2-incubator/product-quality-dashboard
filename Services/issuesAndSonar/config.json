@@ -11,10 +11,6 @@
   "JIRAusername": "",
   "JIRApassword": "",
 
-  "githubIssueTypeTag": "",
-  "githubSeverityTag": "",
-  "githubVersionTag": "",
-
   "sonarUrl":"https://wso2.org/sonar",
   "sonarAccessToken":""
 }
