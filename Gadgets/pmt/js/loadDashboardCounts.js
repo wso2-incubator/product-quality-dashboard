@@ -16,7 +16,9 @@ var devVersionDetails = [];
 var etaDetails = [];
 var etaVersionDetails = [];
 var target = "";
-var BALLERINA_URL = "192.168.56.2:9092";
+
+var BALLERINA_URL = "digitalops.services.wso2.com:9092";
+// var BALLERINA_URL = "192.168.56.2:9092";
 // var BALLERINA_URL = "localhost:9092";
 initLoadDashboard();
 var flag1 = true;
@@ -28,6 +30,8 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 
     if(target === '#lc'){
         document.getElementById('fullDiv').style.height = '1630px';
+    }else if(target == '#age'){
+        document.getElementById('fullDiv').style.height = '730px';
     }else{
         document.getElementById('fullDiv').style.height = '730px';
     }
@@ -37,6 +41,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     }else if(target === '#lc' && flag2){
         loadStackQueuedGraph();
         flag2 = false;
+
     }
 });
 
@@ -57,7 +62,7 @@ function initLoadDashboard() {
             "<span id='productCount"+(parseInt(x)+1)+"' class='badge' style='background-color:#F4A94E; padding:3px 6px;'></span></a>" +
             "<div id='collapseProduct"+(parseInt(x)+1)+"' class='panel-collapse collapse' role='tabpanel' aria-labelledby='headingOne'>" +
             "<div>" +
-            "<ul id='productVersion"+(parseInt(x)+1)+"'>"+
+            "<ul id='productVersion"+(parseInt(x)+1)+"' style='font-size:1vw;'>"+
             ""+
             "</ul>"+
             "</div>" +
@@ -78,9 +83,9 @@ function initLoadDashboard() {
                 document.getElementById('productVersion' + (parseInt(x) + 1)).innerHTML +=
                     "<button onclick='leftMenuClick(" + (parseInt(x) + 1) + "," + (parseInt(y) + 1) + ")'  class='list-group-item list-group-item-info' style='width:100%;text-align: left;' id='subVersion" + (parseInt(y) + 1) + "'>Version " +
                     menuVersionDrillDown[y].VERSION +
-                    "<span id='productVersionETACount"+(parseInt(y)+1)+"' class='badge' style='background-color:#DC143C;display:none;'>5</span>" +
-                    "<span id='productVersionDevCount"+(parseInt(y)+1)+"' class='badge' style='background-color:#4BC2DE;padding:3px 6px;'>5</span>" +
-                    "<span id='productVersionCount"+(parseInt(y)+1)+"' class='badge' style='background-color:#F4A94E; padding:3px 6px;'>15</span>"+
+                    "<span id='productVersionETACount"+(parseInt(y)+1)+"' class='badge' style='background-color:#DC143C;display:none;'></span>" +
+                    "<span id='productVersionDevCount"+(parseInt(y)+1)+"' class='badge' style='background-color:#4BC2DE;padding:3px 6px;'></span>" +
+                    "<span id='productVersionCount"+(parseInt(y)+1)+"' class='badge' style='background-color:#F4A94E; padding:3px 6px;'></span>"+
                     "</button>";
             }
         }
@@ -140,6 +145,7 @@ function globalSubmit(){
     //show total patch count in dashboard
     showTotal(startDate,endDate);
     loadPatchCountDrillDown(startDate,endDate);
+
     //generate graphs related to date range
     var date1 = new Date(startDate);
     var date2 = new Date(endDate);
@@ -149,7 +155,7 @@ function globalSubmit(){
     const YEAR = 365;
     const MONTH = 31;
     const WEEK = 7;
-
+    // console.log(diffDays);
     document.getElementById('day').style.display = 'block';
     document.getElementById('week').style.display = 'block';
 
@@ -169,6 +175,7 @@ function globalSubmit(){
         changeDurationButtonCSS('week');
         patchSummaryGraph('week',startDate,endDate);
     }else{
+        // console.log(diffDays);
         patchSummaryGraph('day',startDate,endDate);
     }
 
@@ -180,6 +187,7 @@ function globalSubmit(){
         document.getElementById('fullDiv').style.height = '1630px';
     }
 
+    loadPatchCountVersionDrillDown(startDate,endDate);
     loadingIcon();
 }
 
@@ -202,7 +210,7 @@ function leftMenuClick(x,y) {
     // alert(listID+'-'+versionID);
 
     product = document.getElementById('product' + x).innerHTML.split("<span")[0].trim(); //product name
-    version = document.getElementById('subVersion' + y).innerHTML; //full version name
+    version = document.getElementById('subVersion' + y).innerHTML.split("<span")[0].trim(); //full version name
     passVersion = version.split(" ")[1]; //query version name
 
 
@@ -544,7 +552,6 @@ function loadPatchCountVersionDrillDown(start,end){
         }
     });
 
-
     //set Queued patch count in version break down
     if(!jQuery.isEmptyObject(queuedVersionDetails)){
         var count = queuedVersionDetails.length;
@@ -567,8 +574,9 @@ function loadPatchCountVersionDrillDown(start,end){
 
                     for(var c=0;c<childVersions.length;c++){
                         if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+queuedVersionDetails.PRODUCT_VERSION.trim()){
-                            var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[13];
-                            document.getElementById(id).innerHTML = queuedVersionDetails.total;
+                            var id_dump = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                            var id_num = id_dump.split("Count")[1];
+                            document.getElementById("productVersionCount"+id_num).innerHTML = queuedVersionDetails.total;
                             break;
                         }
                     }
@@ -589,8 +597,9 @@ function loadPatchCountVersionDrillDown(start,end){
 
                         for(var c=0;c<childVersions.length;c++){
                             if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+queuedVersionDetails[x].PRODUCT_VERSION.trim()){
-                                var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[13];
-                                document.getElementById(id).innerHTML = queuedVersionDetails[x].total;
+                                var id_dump = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                                var id_num = id_dump.split("Count")[1];
+                                document.getElementById("productVersionCount"+id_num).innerHTML = queuedVersionDetails[x].total;
                                 break;
                             }
                         }
@@ -629,8 +638,9 @@ function loadPatchCountVersionDrillDown(start,end){
 
                     for(var c=0;c<childVersions.length;c++){
                         if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+etaVersionDetails.PRODUCT_VERSION.trim()){
-                            var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
-                            document.getElementById(id).innerHTML = etaVersionDetails.total;
+                            var id_dump = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                            var id_num = id_dump.split("Count")[1];
+                            document.getElementById("productVersionETACount"+id_num).innerHTML = etaVersionDetails.total;
                             break;
                         }
                     }
@@ -651,8 +661,9 @@ function loadPatchCountVersionDrillDown(start,end){
 
                         for(var c=0;c<childVersions.length;c++){
                             if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+etaVersionDetails[x].PRODUCT_VERSION.trim()){
-                                var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
-                                document.getElementById(id).innerHTML = etaVersionDetails[x].total;
+                                var id_dump = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                                var id_num = id_dump.split("Count")[1];
+                                document.getElementById("productVersionETACount"+id_num).innerHTML = etaVersionDetails[x].total;
                                 break;
                             }
                         }
@@ -691,8 +702,9 @@ function loadPatchCountVersionDrillDown(start,end){
 
                     for(var c=0;c<childVersions.length;c++){
                         if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+devVersionDetails.PRODUCT_VERSION.trim()){
-                            var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[7];
-                            document.getElementById(id).innerHTML = " <span class='badge' style='background-color:#DC143C;padding:1px 3px 1px 2px;border-radius:0;border-top-left-radius:90%;border-bottom-left-radius:90%; width:13px;margin-left:-4px; margin-right:3px !important;'>"+ document.getElementById(document.getElementById(childVersions[c]).innerHTML.split("\"")[1]).innerHTML+"</span><span style='margin-top:2px;'>" + devVersionDetails.total+"</span>";
+                            var id_dump = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                            var id_num = id_dump.split("Count")[1];
+                            document.getElementById("productVersionDevCount"+id_num).innerHTML = " <span class='badge' style='background-color:#DC143C;padding:1px 3px 1px 2px;border-radius:0;border-top-left-radius:90%;border-bottom-left-radius:90%; width:13px;margin-left:-4px; margin-right:3px !important;'>"+ document.getElementById(document.getElementById(childVersions[c]).innerHTML.split("\"")[1]).innerHTML+"</span><span style='margin-top:2px;'>" + devVersionDetails.total+"</span>";
                             break;
                         }
                     }
@@ -713,8 +725,9 @@ function loadPatchCountVersionDrillDown(start,end){
 
                         for(var c=0;c<childVersions.length;c++){
                             if(document.getElementById(childVersions[c]).innerHTML.trim().split("<")[0] === "Version "+devVersionDetails[x].PRODUCT_VERSION.trim()){
-                                var id = document.getElementById(childVersions[c]).innerHTML.split("\"")[7];
-                                document.getElementById(id).innerHTML = " <span class='badge' style='background-color:#DC143C;padding:1px 3px 1px 2px;border-radius:0;border-top-left-radius:90%;border-bottom-left-radius:90%; width:13px;margin-left:-4px; margin-right:3px !important;'>"+ document.getElementById(document.getElementById(childVersions[c]).innerHTML.split("\"")[1]).innerHTML+"</span><span style='margin-top:2px;'>" + devVersionDetails[x].total+"</span>";
+                                var id_dump = document.getElementById(childVersions[c]).innerHTML.split("\"")[1];
+                                var id_num = id_dump.split("Count")[1];
+                                document.getElementById("productVersionDevCount"+id_num).innerHTML = " <span class='badge' style='background-color:#DC143C;padding:1px 3px 1px 2px;border-radius:0;border-top-left-radius:90%;border-bottom-left-radius:90%; width:13px;margin-left:-4px; margin-right:3px !important;'>"+ document.getElementById(document.getElementById(childVersions[c]).innerHTML.split("\"")[1]).innerHTML+"</span><span style='margin-top:2px;'>" + devVersionDetails[x].total+"</span>";
                                 break;
                             }
                         }
@@ -733,7 +746,7 @@ function loadPatchCountVersionDrillDown(start,end){
 }
 
 function changeDurationButtonCSS(val){
-    var duration = ['day','week','month','quater','year'];
+    var duration = ['day','week','month','quarter','year'];
     for(var i=0;i<duration.length;i++){
         if(val === duration[i]){
             document.getElementById(duration[i]).className = 'btn btn-default active';
@@ -744,7 +757,7 @@ function changeDurationButtonCSS(val){
 }
 
 function changeDurationButtonCSS2(val){
-    var duration = ['week','month','quater','year'];
+    var duration = ['week','month','quarter','year'];
     for(var i=0;i<duration.length;i++){
         if(val === duration[i]){
             document.getElementById(duration[i]+'2').className = 'btn btn-default active';

@@ -172,9 +172,10 @@ function allProductDetails(duration,start,end){
     }
 
     for(var y=0;y<array.length-2;y++){
-        allVersions[y] = document.getElementById(array[y+2]).innerHTML.split(' ')[1];
+        allVersions[y] = document.getElementById(array[y+2]).innerHTML.split(' ')[1].split('<')[0];
         versionString += allVersions[y]+'-';
     }
+    // console.log(allVersions)
     versionString = versionString.substring(0, versionString.length-1);
     // console.log(allVersions);
 
@@ -230,7 +231,7 @@ function allProductDetails(duration,start,end){
                 }else if(duration === 'month'){
                     finalCategory[x] = category[x].YEAR.toString() +'-'+months[category[x].TYPE -1];
                 }else if(duration === 'week'){
-                    console.log(category[x].TYPE);
+                    // console.log(category[x].TYPE);
                     finalCategory[x] = getDateRangeOfWeek(parseInt(category[x].TYPE),parseInt(category[x].YEAR));
                 }else{
                     finalCategory[x] =category[x].TYPE.toString();
@@ -251,7 +252,7 @@ function allProductDetails(duration,start,end){
         }
 
         // console.log(allNames[0].length);
-        console.log(allCounts);
+        // console.log(allCounts);
         // console.log(category);
         // console.log(categories);
         var temp1 = [];
@@ -302,7 +303,7 @@ function allProductDetails(duration,start,end){
             finalData.push(json)
         }
 
-        console.log(temp1);
+        // console.log(temp1);
 
         drawAllVersionChart(finalCategory,finalData);
     }else{
