@@ -1,4 +1,4 @@
-package releaseTrainpkg;
+package org.wso2.internalapps.pqd;
 
 
 import ballerina.lang.messages;
@@ -9,6 +9,22 @@ import ballerina.lang.errors;
 import ballerina.lang.files;
 import ballerina.lang.blobs;
 
+basicauth:ClientConnector redmineConnector = null;
+
+function redmineConnectivity(){
+    json configData = readConfig("config.json");
+
+    string rmUsername;
+    string rmPassword;
+    string rmUrl;
+
+    rmUsername = jsons:getString(configData, "$.REDMINE.RM_USERNAME");
+    rmPassword = jsons:getString(configData, "$.REDMINE.RM_PASSWORD");
+    rmUrl = jsons:getString(configData, "$.REDMINE.RM_URL");
+
+    redmineConnector = create basicauth:ClientConnector(rmUrl,rmUsername,rmPassword);
+
+}
 
 function getCycles(string path, int limit)(int){
 
@@ -110,33 +126,7 @@ function setDatabaseConfig(json configData)(map){
 
 }
 
-function setRedmineConfig(json configData)(basicauth:ClientConnector){
 
-
-    string rmUsername;
-    string rmPassword;
-    string rmUrl;
-
-    try {
-
-        rmUsername = jsons:getString(configData, "$.REDMINE.RM_USERNAME");
-        rmPassword = jsons:getString(configData, "$.REDMINE.RM_PASSWORD");
-        rmUrl = jsons:getString(configData, "$.REDMINE.RM_URL");
-
-    } catch (errors:Error err) {
-        logger:error("Properties not defined in config.json: " + err.msg );
-
-        rmUsername = jsons:getString(configData, "$.REDMINE.RM_USERNAME");
-        rmPassword = jsons:getString(configData, "$.REDMINE.RM_PASSWORD");
-        rmUrl = jsons:getString(configData, "$.REDMINE.RM_URL");
-    }
-
-
-    basicauth:ClientConnector redmineConnector = create basicauth:ClientConnector(rmUrl,rmUsername,rmPassword);
-
-    return null;
-
-}
 
 
 
