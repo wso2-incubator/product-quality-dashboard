@@ -1,4 +1,4 @@
-var baseUrl='https://192.168.56.2:9092/';
+var baseUrl='https://digitalops.services.wso2.com:9092/';
 
 var currentArea;
 var currentProduct;
