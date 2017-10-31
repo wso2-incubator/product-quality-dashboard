@@ -8,22 +8,28 @@
       <head>
 
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
 	<link href="/portal/store/carbon.super/fs/gadget/pmt/css/daterangepicker.css" rel="stylesheet">
     <link href="/portal/store/carbon.super/fs/gadget/pmt/css/paper-dashboard.css" rel="stylesheet">
     <link href="/portal/store/carbon.super/fs/gadget/pmt/css/animate.min.css" rel="stylesheet">
     <link href="/portal/store/carbon.super/fs/gadget/pmt/css/demo.css" rel="stylesheet">
-
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
  	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="/portal/store/carbon.super/fs/gadget/pmt/css/themify-icons.css" rel="stylesheet">
-<!--     <link href="/portal/store/carbon.super/fs/gadget/pmt/css/theme-wso2.css" rel="stylesheet"> -->
 
-    <style type="text/css">
+   <style type="text/css">
         .demo { position: relative; }
         .demo i {
             position: absolute; bottom: 10px; right: 24px; top: auto; cursor: pointer;
         }
+        .column-2{
+            width:30px;
+        }
+        .column-12{
+            display:none;
+        }
+        tr.row_selected td{background-color:#d6d6d6 !important;}
     </style>
 <body>
 <div class="container-fluid" id="contents" style="background-color:#f4f3ef;">
@@ -56,7 +62,7 @@
                                 <div class="col-xs-8">
                                     <div class="numbers">
                                         <p style="font-size:1vw;">Reactive Fixes <span id="reactive" style="font-size:23px; margin-left:15px;"></span></p>
-                                        <p style="font-size:1vw; margin-top:7px;">Proactive Fixes<span id="proactive" style="font-size:23px; margin-left:15px; "></span></p>
+                                        <p style="font-size:1vw;margin-top:7px;">Proactive Fixes<span id="proactive" style="font-size:23px; margin-left:15px;"></span></p>
                                         <hr>
                                     </div>
                                 </div>
@@ -311,52 +317,43 @@
                                                     <h4 class="title"><u>Product wise Patch Life Cycle and Details</u></h4>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-xs-3">
-                                                        <div id="lcProduct" class="list-group" style="min-height:580px !important;overflow:hidden; overflow-y:auto; margin-top:40px;">
-                                                        </div>
+                                                    <div class="col-xs-12" >
+                                                       <select id="lcProduct" onchange='selectProductByMenu(this.value)' style="margin-top:20px;margin-left:20px;">
+                                                       </select>
                                                     </div>
-                                                    <div class="col-xs-9">
-                                                        <div id="stateGraph" style="width:1000px; min-height: 350px; margin: 20px auto;"></div>
-                                                        <div class="row">
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <center>
+                                                            <div id="stateGraph" style="width:auto; min-height: 350px; margin: 20px auto;"></div>
+                                                        </center>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <div id="patchLifeCycleDetailTable" class="row" style=" margin-top:-10px;">
                                                             <div class="col-xs-12">
                                                                 <div class="header">
-                                                                    <h4 class="title"><u>Patch State Details</u></h4>
+                                                                    <h4 class="title" style="margin-bottom:30px;"><u>Patch State Details</u></h4>
                                                                 </div>
-                                                                <table class="table table-striped table-bordered" style="margin-top:30px;">
+                                                                <table id="patchDetailsLC" class="table table-striped table-hover table-bordered" style="margin-top:60px; font-size:12px;cursor: pointer; cursor: hand;">
                                                                     <thead>
-                                                                    <tr style="font-size:13px; text-align: center;">
-                                                                        <th>Patch No</th>
-                                                                        <th>Current State</th>
-                                                                        <th>Queued Date</th>
-                                                                        <th>Dev Started Date</th>
-                                                                        <th>QA Started Date</th>
-                                                                        <th>Testing Started Date</th>
-                                                                        <th>Released Date</th>
-                                                                        <th>Broken / OnHold Date</th>
+                                                                    <tr>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
                                                                     </tr>
                                                                     </thead>
-                                                                    <tbody>
-                                                                    <tr>
-                                                                        <td>Patch No 1</td>
-                                                                        <td>Testing State</td>
-                                                                        <td>2017-09-01</td>
-                                                                        <td>2017-09-02</td>
-                                                                        <td>2017-09-02</td>
-                                                                        <td>2017-09-03</td>
-                                                                        <td>N/A</td>
-                                                                        <td>N/A</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td>Patch No 2</td>
-                                                                        <td>Released State</td>
-                                                                        <td>2017-09-01</td>
-                                                                        <td>2017-09-02</td>
-                                                                        <td>2017-09-02</td>
-                                                                        <td>2017-09-03</td>
-                                                                        <td>2017-09-04</td>
-                                                                        <td>N/A</td>
-                                                                    </tr>
-                                                                    </tbody>
                                                                 </table>
                                                             </div>
                                                         </div>
@@ -405,19 +402,19 @@
     </div>
 </div>
 
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="js/moment.js"></script>
 <script src="js/hicharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/modules/drilldown.js"></script>
 <script type="text/javascript" src="js/daterangepicker.js"></script>
-<script type="text/javascript" src="assets/js/theme-wso2.min.js"></script>
 
 
 <script type="text/javascript" src="js/require.js"></script>
-<script src="js/xml2json.js"></script>
 <script src="js/lifeCycle.js"></script>
 <script src="js/ageGraph.js"></script>
 <script src="js/productWiseAnalysis.js"></script>
@@ -425,7 +422,7 @@
 <script src="js/ageGraph.js"></script>
 <script src="js/searchProduct.js"></script>
 <script>
-    $('.config-demo').on('apply.daterangepicker', function(ev, picker) {
+     $('.config-demo').on('apply.daterangepicker', function(ev, picker) {
         globalSubmit()
     });
 </script>
