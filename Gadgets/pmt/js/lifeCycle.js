@@ -33,15 +33,19 @@ function loadStackQueuedGraph(){
     }
 
     drawStackChart(products,chart);
+    // console.log(products);
+    document.getElementById('lcProduct').innerHTML = "";
+    for (var x = 0; x < products.length+1; x++) {
+        if(x === 0){
+            document.getElementById('lcProduct').innerHTML += "<a href='#' id='lifeCycleProduct"+x+"' class='list-group-item active' style='font-size:1vw;'>All Products</a>";
+        }else{
+            document.getElementById('lcProduct').innerHTML += "<a href='#' id='lifeCycleProduct"+x+"' class='list-group-item' style='font-size:1vw;'>"
+                + products[x-1] +
+                "</a>";
+        }
 
-    // document.getElementById('product2').innerHTML = "";
-    // for (var x = 0; x < products.length; x++) {
-    //     document.getElementById('product2').innerHTML += "<a href='#' class='list-group-item' style='font-size:1vw;'>"
-    //         + products[x] +
-    //         "</a>";
-    // }
+    }
 
-    console.log(products);
 }
 
 function drawStackChart(products,chartData){

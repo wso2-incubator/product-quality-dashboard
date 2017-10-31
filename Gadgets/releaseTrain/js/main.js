@@ -1,4 +1,4 @@
-  var url="192.168.56.2";
+  var url="digitalops.services.wso2.com";
   var port="9092";
   // create a handlebars template
   var source   = document.getElementById('item-template').innerHTML;

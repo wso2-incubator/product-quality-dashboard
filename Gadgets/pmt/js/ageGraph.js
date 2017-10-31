@@ -59,7 +59,7 @@ function ageGraph() {
     // console.log(durationString);
     var queuedGraphData = [];
 
-    console.log('https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-queued-age-graph/'+durationString+'/'+lastMonth);
+    // console.log('https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-queued-age-graph/'+durationString+'/'+lastMonth);
     $.ajax({
         type: "GET",
         url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-queued-age-graph/'+durationString+'/'+lastMonth,
@@ -165,7 +165,7 @@ function showStackBarChart(date,vars){
     }
 
     var index = lastMonthsNumber.indexOf(getMonth);
-    console.log(index);
+    // console.log(index);
     var mainData = [];
     var drillDownData = [];
     $.ajax({
@@ -177,8 +177,8 @@ function showStackBarChart(date,vars){
             drillDownData = data.drillDown;
         }
     });
-    console.log(mainData);
-    console.log(drillDownData);
+    // console.log(mainData);
+    // console.log(drillDownData);
     drawStackBar(vars,date,mainData,drillDownData);
 
     $('html,body').animate({
