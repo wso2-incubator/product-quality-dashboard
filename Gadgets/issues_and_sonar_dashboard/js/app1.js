@@ -229,7 +229,6 @@ function loadTypeAndSeverityDropdownsForIssues(issueTypes, severities) {
             for (var i = 0; i < issueIssuetypeChart.series[0].data.length; i++) {
                 issueIssuetypeChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
-            console.log(selectedType);
             issueIssuetypeChart.get(parseInt(selectedType)).update({ color: '#118983' }, true, false);
             issueIssuetypeChart.get(parseInt(selectedType)).select();
         }
@@ -501,7 +500,7 @@ function loadSidePane(sidePaneDetails) {
     
 
     for (var x = 0; x < totalProducts; x++) {
-        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:-4px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='a"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
+        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:0px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='a"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
             + sidePaneDetails[x].name        +
             "<span id='sonarCount"+(parseInt(x)+1)+"' class='badge' style='width:2.7vw; font-size: 0.75vw; background-color:#206898;padding:3px 6px;'></span>" +
             "<span id='issueCount"+(parseInt(x)+1)+"' class='badge' style='width:2.2vw; font-size: 0.75vw; background-color:#FF9933; padding:3px 6px;'></span></button>" +
@@ -520,14 +519,14 @@ function loadSidePane(sidePaneDetails) {
 }
 
 function loadSidePaneAtReset(sidePaneDetails) {
-    
+
     var totalProducts = sidePaneDetails.length;
-    
+
     document.getElementById('area').innerHTML = "";
 
 
     for (var x = 0; x < totalProducts; x++) {
-        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:-4px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
+        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:0px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
             + sidePaneDetails[x].name        +
             "<span id='sonarCount"+(parseInt(x)+1)+"' class='badge' style='width:2.7vw; font-size: 0.75vw; background-color:#206898;padding:3px 6px;'></span>" +
             "<span id='issueCount"+(parseInt(x)+1)+"' class='badge' style='width:2.2vw; font-size: 0.75vw; background-color:#FF9933; padding:3px 6px;'></span></button>" +
@@ -787,23 +786,20 @@ function loadComponentDropdown(sidePaneDetails) {
     var item = document.getElementById('componentChoice');
     var div1 = document.createElement('div');
     div1.setAttribute("class","col-xs-2 col-md-2");
-    var headingTag = document.createElement("h4");
+    var headingTag = document.createElement("h5");
     var heading = document.createTextNode("Component:");
     headingTag.appendChild(heading);
     div1.appendChild(headingTag);
     item.appendChild(div1);
     
     var div2 = document.createElement('div');
-    div2.setAttribute("class","col-xs-2 col-md-2");
-    div2.setAttribute("style","text-align: left");
+    div2.setAttribute("class","col-xs-3 col-md-3 form-group");
+    div2.setAttribute("style","text-align: left;font-size: 0.8vw;margin:0");
 
-    var div3 = document.createElement('div');
-    div3.setAttribute("class","form-group");
-    
     var select = document.createElement('select');
     select.setAttribute("class","form-control");
     select.setAttribute("id","sel1");
-    select.setAttribute("style","width:300px; padding: 5px 0px 5px 0px;");
+    select.setAttribute("style","width:20.1vw;font-size: 0.8vw;");
     
 
     if(sidePaneDetails.length !== 0){
@@ -828,8 +824,7 @@ function loadComponentDropdown(sidePaneDetails) {
     }
     
 
-    div3.appendChild(select);
-    div2.appendChild(div3);
+    div2.appendChild(select);
     item.appendChild(div2);
 
     
@@ -890,9 +885,6 @@ function loadComponentDetails(componentId) {
         }
     });
 
-
-    console.log("content");
-    console.log(content);
     initChart(content);
     initSonarChart(content);
 }
@@ -1101,9 +1093,7 @@ function initSonarChart(content) {
 
         
         issuetypeData = content.sonarIssuetype;
-        console.log(issuetypeData);
 
-        
         issuetypeSeriesData = [];
         totalIssuetypeIssues = 0;
 
@@ -1112,11 +1102,9 @@ function initSonarChart(content) {
             for(var i = 0; i < issuetypeData.length; i++){
                 
                 name = issuetypeData[i].name;
-                console.log(name);
-                
+
                 id = issuetypeData[i].id;
-                console.log(id);
-                
+
                 y = issuetypeData[i].sonar;
                 totalIssuetypeIssues += y;
 
@@ -1210,7 +1198,7 @@ function createMainChart(){
         },
 
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b>'
         },
 
@@ -1261,7 +1249,7 @@ function createMainChartForComponent(){
         },
 
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b>'
         },
 
@@ -1310,7 +1298,7 @@ function createSonarMainChart(){
         },
 
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b>'
         },
 
@@ -1358,7 +1346,7 @@ function createIssueTypeChart(){
         },
         // colors: ['#fff698', '#c8f0a8', '#50a35a', '#006d7c', '#66a6ae', '#d6a36e', '#b4e6ff', '#033656', '#deaa96'],
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
         },
 
@@ -1404,7 +1392,7 @@ function createSonarIssueTypeChart(){
         },
         // colors: ['#fff698', '#c8f0a8', '#50a35a', '#006d7c', '#66a6ae', '#d6a36e', '#b4e6ff', '#033656', '#deaa96'],
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
         },
 
@@ -1453,7 +1441,7 @@ function createSeverityChart(){
         },
         // colors: ['#ffdba2', '#ffafa2', '#dd5f5f', '#bf0a0a', '#781f1f', '#8d3f3f', '#450000'],
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
         },
 
@@ -1495,7 +1483,7 @@ function createSonarSeverityChart(){
         },
 
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
         },
 
@@ -1525,9 +1513,7 @@ function getIssueTrendLineHistory(period) {
         },
         async: false,
         success: function(data){
-            console.log("checking");
-            console.log(data.data);
-            history = data.data;
+           history = data.data;
         }
     });
     
@@ -1559,7 +1545,6 @@ function getSonarTrendLineHistory(period) {
         async: false,
         success: function(data){
             history = data.data;
-            console.log(history);
         }
     });
     
@@ -1611,7 +1596,7 @@ function createIssueTrendChart(data){
             }
         },
         tooltip: {
-            headerFormat: '<span style="font-size:11px">Issues</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">Issues</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> of total<br/>'
         },
         series: [{
@@ -1656,7 +1641,7 @@ function createSonarTrendChart(data){
             }
         },
         tooltip: {
-            headerFormat: '<span style="font-size:11px">Sonar</span><br>',
+            headerFormat: '<span style="font-size:0.7387508394895903vw">Sonar</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> of total<br/>'
         },
         series: [{
@@ -1673,16 +1658,12 @@ function setIssueDate(start, end) {
     issueStartDate = start;
     issueEndDate = end;
     issueHistoryTitle =  startDate + " - " + endDate;
-    console.log(issueStartDate);
-    console.log(issueEndDate);
 }
 
 function setSonarDate(start, end) {
     sonarStartDate = start;
     sonarEndDate = end;
     sonarHistoryTitle =  startDate + " - " + endDate;
-    console.log(sonarStartDate);
-    console.log(sonarEndDate);
 }
 
 

@@ -28,6 +28,7 @@
         body {
             overflow:hidden;
             font-size:0.8vw !important;
+            font-family:"Helvetica Neue",Helvetica,Arial,sans-serif !important;
         }
 
         .sidebarInside{
@@ -52,22 +53,22 @@
         }
 
         .mam-light-issues{
-	        color:#fff!important;
-	        background-color:#FF9933!important;
-	    }
+            color:#fff!important;
+            background-color:#FF9933!important;
+        }
 
         .mam-light-sonar{
-	        color:#fff!important;
-	        background-color:#206898!important
+            color:#fff!important;
+            background-color:#206898!important
         }
 
         .mam-container{
-	        padding:0.01em 16px
+            padding:0.01em 16px
         }
 
         .mam-card{
-	        box-shadow:0 2px 5px 0 rgba(0,0,0,0.2),0 2px 10px 0 rgba(0,0,0,0.19);
-	        background-color:#FFFFFF
+            box-shadow:0 2px 5px 0 rgba(0,0,0,0.2),0 2px 10px 0 rgba(0,0,0,0.19);
+            background-color:#FFFFFF
         }
         .btn-product{
             color:#000000;
@@ -80,11 +81,9 @@
             background:#d9edf7;
         }
         .fixedIssesDiv{
-            width:77.8vw;
-            background-color:#FFF7F2;
+           background-color:#FFF7F2;
         }
         .fixedSonarDiv{
-            width:77.8vw;
             background-color:#F2F7FF;
         }
     </style>
@@ -98,30 +97,30 @@
 <body>
 
 <div class="container-fluid" id="contents" >
-    <div class="row" style="margin: 5px">
+    <div class="row" style="margin:10px 10px 5px 10px">
 
-        <div class="col-xs-2">
-            <div class="row" style="margin-top:15px;">
+        <div class="col-xs-2" style="padding:0">
+            <div class="row" style="">
                 <div class="col-xs-6">
                     <div class="row">
-                        <div class="col-xs-2"><div style="background-color:#FF9933; height:15px; width:15px;"></div></div>
-                        <div class="col-xs-10"><p style="margin-left:18px; margin-top:-19px;"><a href="#issueDiv">Issues</a></p></div>
+                        <div class="col-xs-2"><div style="background-color:#FF9933; height:1vw; width:0.9vw;"></div></div>
+                        <div class="col-xs-9"><p style=""><a href="#issueDiv" style="font-size: 1vw">Issues</a></p></div>
                     </div>
                 </div>
                 <div class="col-xs-6">
                     <div class="row">
-                        <div class="col-xs-2"><div style="background-color:#206898; height:15px; width:15px;"></div></div>
-                        <div class="col-xs-10"><p style="margin-left:18px; margin-top:-19px;"><a href="#sonarDiv">Sonar</a></p></div>
+                        <div class="col-xs-2"><div style="background-color:#206898; height:1vw; width:0.9vw;"></div></div>
+                        <div class="col-xs-9"><p style=""><a href="#sonarDiv" style="font-size: 1vw">Sonar</a></p></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xs-10" style="padding-top:15px">
+        <div class="col-xs-10" style="padding:0">
             <div class="row">
                 <div class="col-xs-6">
                     <div id="componentChoice" class="row" style="">&nbsp;</div>
                 </div>
-                <div class="col-xs-6" style="text-align:right;padding-right:0px">
+                <div class="col-xs-6" style="">
                     <button type="button" id="resetView" class="btn btn-default pull-right" style="font-size:0.8vw">Reset to All Products</button>
                 </div>
             </div>
@@ -132,7 +131,7 @@
             <div id="fullDiv" style="background-color:#FFFFFF; height:auto;">
                 <div class="col-xs-12" style="">
                     <div class="row">
-                        <div class="col-xs-2" style="">
+                        <div class="col-xs-2" style="padding-left: 0;">
                             <!-- Tab panes -->
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane active" id="home" style="">
@@ -417,23 +416,24 @@
 $(window).on('load', function() {
     initPage();
 
-   //temp start
     var fixedIssesDivTop = $('.fixedIssesDiv').offset().top;
-
+    console.log($(window).width());
     $('.right-scrolling-body').scroll(function() {
         var currentScroll = $('.right-scrolling-body').scrollTop();
         var scrollTop = $('.right-scrolling-body').offset().top;
-        console.log(scrollTop,currentScroll);
         if (currentScroll >= fixedIssesDivTop && currentScroll<=1390) {
             $('.fixedIssesDiv').css({
                 position: 'fixed',
-                top: scrollTop
-
+                top: scrollTop,
+               'box-shadow': '0 2px 5px rgba(0,0,0,0.2),0 2px 5px rgba(0,0,0,0.19)',
+               'width':'76.35997313633311vw'
 
             });
         } else {
             $('.fixedIssesDiv').css({
-                position: 'static'
+                position: 'static',
+                'box-shadow': '0px 0px 0px',
+                width:'auto'
             });
         }
     });window
@@ -443,21 +443,23 @@ $(window).on('load', function() {
     $('.right-scrolling-body').scroll(function() {
         var currentScroll = $('.right-scrolling-body').scrollTop();
         var scrollTop = $('.right-scrolling-body').offset().top;
-        console.log(scrollTop,currentScroll);
         if (currentScroll >= fixedSonarDivTop ) {
             $('.fixedSonarDiv').css({
                 position: 'fixed',
-                top: scrollTop
-
+                top: scrollTop,
+                'box-shadow': '0 2px 5px rgba(0,0,0,0.2),0 2px 5px rgba(0,0,0,0.19)',
+                width:'76.35997313633311vw'
 
             });
         } else {
             $('.fixedSonarDiv').css({
-                position: 'static'
+                position: 'static',
+                'box-shadow': '0px 0px 0px',
+                width:'auto'
             });
         }
     });window
-    // temp end
+
 });
 
     $(".right-scrolling-body").scroll(function() {
@@ -571,8 +573,6 @@ $(window).on('load', function() {
         startDate = picker.startDate.format('YYYY-MM-DD');
         endDate = picker.endDate.format('YYYY-MM-DD');
         setIssueDate(startDate, endDate);
-        console.log(startDate);
-        console.log(endDate);
         <!--setIssueCalender();-->
         getIssueTrendLineHistory("day");
     });
@@ -581,8 +581,6 @@ $(window).on('load', function() {
         startDate = picker.startDate.format('YYYY-MM-DD');
         endDate = picker.endDate.format('YYYY-MM-DD');
         setSonarDate(startDate, endDate);
-        console.log(startDate);
-        console.log(endDate);
         <!--setSonarCalender();-->
         getSonarTrendLineHistory("day");
     });
