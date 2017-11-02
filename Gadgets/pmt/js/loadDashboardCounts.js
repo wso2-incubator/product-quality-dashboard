@@ -17,7 +17,7 @@ var etaDetails = [];
 var etaVersionDetails = [];
 var target = "";
 
-var BALLERINA_URL = "digitalops.services.wso2.com:9092";
+var BALLERINA_URL = "digitalops.services.wso2.com:9092"
 // var BALLERINA_URL = "192.168.56.2:9092";
 // var BALLERINA_URL = "localhost:9092";
 initLoadDashboard();
@@ -29,7 +29,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     target = $(e.target).attr("href"); // activated tab
 
     if(target === '#lc'){
-        document.getElementById('fullDiv').style.height = '1630px';
+        document.getElementById('fullDiv').style.height = '1930px';
     }else if(target == '#age'){
         document.getElementById('fullDiv').style.height = '730px';
     }else{
@@ -145,6 +145,7 @@ function globalSubmit(){
     //show total patch count in dashboard
     showTotal(startDate,endDate);
     loadPatchCountDrillDown(startDate,endDate);
+    loadPatchCountVersionDrillDown(startDate,endDate);
 
     //generate graphs related to date range
     var date1 = new Date(startDate);
@@ -155,7 +156,7 @@ function globalSubmit(){
     const YEAR = 365;
     const MONTH = 31;
     const WEEK = 7;
-    // console.log(diffDays);
+
     document.getElementById('day').style.display = 'block';
     document.getElementById('week').style.display = 'block';
 
@@ -175,7 +176,6 @@ function globalSubmit(){
         changeDurationButtonCSS('week');
         patchSummaryGraph('week',startDate,endDate);
     }else{
-        // console.log(diffDays);
         patchSummaryGraph('day',startDate,endDate);
     }
 
@@ -187,7 +187,6 @@ function globalSubmit(){
         document.getElementById('fullDiv').style.height = '1630px';
     }
 
-    loadPatchCountVersionDrillDown(startDate,endDate);
     loadingIcon();
 }
 
@@ -812,7 +811,7 @@ function loadPatchDetails(type) {
                 document.getElementById('popupInner').innerHTML = "";
 
                 if(count === undefined){
-                    if(data.WORST_CASE_ESTIMATE.split('+')[0] < today ){
+                    if(data.WORST_CASE_ESTIMATE.split('+')[0] < end ){
                         document.getElementById('popupInner').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
                             "<td>"+1+"</td>" +
                             "<td>"+data.PRODUCT_NAME+"</td>" +
@@ -835,7 +834,7 @@ function loadPatchDetails(type) {
                     }
                 }else{
                     for(var x=0;x<count;x++){
-                        if(data[x].WORST_CASE_ESTIMATE.split('+')[0] < today ){
+                        if(data[x].WORST_CASE_ESTIMATE.split('+')[0] < end ){
                             document.getElementById('popupInner').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
                                 "<td>"+(parseInt(x)+1)+"</td>" +
                                 "<td>"+data[x].PRODUCT_NAME+"</td>" +

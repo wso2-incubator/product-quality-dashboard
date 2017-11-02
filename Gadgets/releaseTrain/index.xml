@@ -170,7 +170,7 @@
         
 
         <ul class="nav nav-tabs">
-          <li class="active"><a data-toggle="tab" href="#releasetrain" onclick="hideSummaryTable()">Release Train</a></li>
+          <li class="active"><a data-toggle="tab" href="#releasetrain" onclick="hideSummaryTable()">Releases</a></li>
           <li><a data-toggle="tab" href="#managers" onclick="hideSummaryTable()">Managers</a></li>
     
         </ul>
@@ -235,7 +235,7 @@
                     
             </div>
               <div class=col-sm-9 style="padding-left:2px;width: 82%">
-                  <div class="container-fluid" style="background-color:#29313E;color: white">Release Train</div>
+                  <div class="container-fluid" style="background-color:#29313E;color: white">Releases</div>
                 <div id="visualization">
                   <div class="todayposition"> 
                       <table class="badge" style="background-color:#29313E;border: 2px solid gray;">
@@ -276,7 +276,9 @@
                     <option value="identity">Identity and Access Management</option>
                     <option value="other">Other</option>
                   </select>
-                </div>     
+                </div> 
+	
+		
           </div>
 
           <div class="managertbl managerTable1">
