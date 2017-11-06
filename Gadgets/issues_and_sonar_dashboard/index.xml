@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="Issues from jira by issueStatus"
+                 height="300"
+                 description="Drill Down Enabled piechart for showing issues by issueStatus from Jira"
+                 tags="drill-down">
+        <Require feature="dynamic-height"/>
+        <Require feature="pubsub-2"/>
+    </ModulePrefs>
+    <Content type="html">
+        <![CDATA[
+<html>
+<head>
+    <title>
+        Issues and Sonar Dashboard Gadget
+    </title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/css/daterangepicker.css" rel="stylesheet"/>
+    <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
+    <link href='css/font-awesome/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+
+    <style type="text/css">
+        body {
+            overflow:hidden;
+            font-size:0.8vw !important;
+            font-family:"Helvetica Neue",Helvetica,Arial,sans-serif !important;
+        }
+
+        .sidebarInside{
+            max-height:500px !important;
+            overflow:hidden;
+            overflow-y:auto;
+            font-size:0.8vw !important;
+        }
+
+        .left {
+            height:100vh;
+            max-height: 100vh;
+            overflow-y : scroll;
+        }
+        .right-scrolling-body {
+            margin-top:0px;
+            margin-bottom:10px;
+            height: 830px;
+            overflow-y: scroll;
+            position: relative;
+            font-size:0.8vw !important;
+        }
+
+        .mam-light-issues{
+            color:#fff!important;
+            background-color:#FF9933!important;
+        }
+
+        .mam-light-sonar{
+            color:#fff!important;
+            background-color:#206898!important
+        }
+
+        .mam-container{
+            padding:0.01em 16px
+        }
+
+        .mam-card{
+            box-shadow:0 2px 5px 0 rgba(0,0,0,0.2),0 2px 10px 0 rgba(0,0,0,0.19);
+            background-color:#FFFFFF
+        }
+        .btn-product{
+            color:#000000;
+        }
+        .btn-product-active{
+            background:#a1bdcc;
+            font-weight:bold;
+        }
+        .btn-product-inactive{
+            background:#d9edf7;
+        }
+        .fixedIssesDiv{
+           background-color:#FFF7F2;
+        }
+        .fixedSonarDiv{
+            background-color:#F2F7FF;
+        }
+    </style>
+    <style type="text/css">
+        .demo i {
+            position: relative; bottom: 10px; right: 24px; top: auto; cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-fluid" id="contents" >
+    <div class="row" style="margin:10px 10px 5px 10px">
+
+        <div class="col-xs-2" style="padding:0">
+            <div class="row" style="">
+                <div class="col-xs-6">
+                    <div class="row">
+                        <div class="col-xs-2"><div style="background-color:#FF9933; height:1vw; width:0.9vw;"></div></div>
+                        <div class="col-xs-9"><p style=""><a href="#issueDiv" style="font-size: 1vw">Issues</a></p></div>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <div class="row">
+                        <div class="col-xs-2"><div style="background-color:#206898; height:1vw; width:0.9vw;"></div></div>
+                        <div class="col-xs-9"><p style=""><a href="#sonarDiv" style="font-size: 1vw">Sonar</a></p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-10" style="padding:0">
+            <div class="row">
+                <div class="col-xs-6">
+                    <div id="componentChoice" class="row" style="">&nbsp;</div>
+                </div>
+                <div class="col-xs-6" style="">
+                    <button type="button" id="resetView" class="btn btn-default pull-right" style="font-size:0.8vw">Reset to All Products</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div id="fullDiv" style="background-color:#FFFFFF; height:auto;">
+                <div class="col-xs-12" style="">
+                    <div class="row">
+                        <div class="col-xs-2" style="padding-left: 0;">
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="home" style="">
+                                    <div  id="area" class="panel-group" style=""></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="right-scrolling-body col-xs-10 col-md-10" style="border: solid #a9a9a9 1px">
+                            <div  id="issueDiv" class="row">
+                                <div class=" col-xs-12 col-md-12">
+
+                                    <h3 style="font-size:1.3vw">Issues</h3>
+                                    <div class="mam-container" style="background-color:#FFF7F2; padding: 15px; border: solid #a9a9a9 1px;">
+                                        <div class="container-fluid" >
+                                            <div>
+                                                <div class="row fixedIssesDiv" style="z-index: 1;">
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center">&nbsp;</div>
+                                                    <div class="form-group col-xs-3 col-md-3"  style="text-align:center">
+                                                        <h4 style="font-size:1vw">Issue Type</h4>
+                                                        <select class="form-control" id='issuetype-choice' style=" padding: 5px;font-size:0.8vw;">
+                                                            <option value="0">All</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center; margin-top: 20px;">
+                                                        <span style="font-size: 4vw" id="issueArrow"></span>
+                                                    </div>
+                                                    <div class="form-group col-xs-3 col-md-3" style="text-align:center">
+                                                        <h4 style="font-size:1vw">Severity</h4>
+                                                        <select class="form-control" id='severity-choice' style="padding: 5px;font-size:0.8vw;">
+                                                            <option value="0">All</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:36px;">
+                                                        <button  type="button" class="btn btn-default" onclick="resetIssueCharts()" id="resetIssueChartsId" style="font-size:1.1vw;display:none;" data-placement="bottom" title="Reset Filters">
+                                                           <img src="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-xs-12" style="padding:15px">
+                                                <div class="mam-card">
+                                                    <header class="mam-container mam-light-issues"  id="main-graph-header">
+                                                        <h4 style="font-size:1vw" id="issueMainChartHeader">Issue Count Breakdown</h4>
+                                                    </header>
+                                                    <div>
+                                                        <div  id="main-chart-container" class="" style="min-width: window.document.body.scrollWidth; height: window.document.body.scrollHeight - 40; margin: 0 auto"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="mam-container col-xs-6" style="">
+                                                <div class="mam-card">
+                                                    <header class="mam-container mam-light-issues"  id="issuetype-graph-header">
+                                                        <h4 style="font-size:1vw" id="issueIssueTypeChartHeader">Issue Type Breakdown</h4>
+                                                    </header>
+                                                    <div class="">
+                                                        <div  id="issuetype-chart-container" style="min-width: window.document.body.scrollWidth; height: window.document.body.scrollHeight - 40; margin: 0 auto"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6">
+                                                <div class="mam-card">
+                                                    <header class="mam-container mam-light-issues" id="severity-graph-header">
+                                                        <h4 style="font-size:1vw" id="issueSeverityHeader">Severity Breakdown</h4>
+                                                    </header>
+                                                    <div>
+                                                        <div  id="severity-chart-container" style="min-width: window.document.body.scrollWidth; height: window.document.body.scrollHeight - 40; margin: 0 auto"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="padding:15px 0px 15px 0px;">
+                                            <div class="col-xs-12" style="">
+                                                <div class="mam-card">
+                                                    <header class="mam-light-issues" id="trend-graph-header">
+                                                        <div class="row" style="margin:0px 3px 0px 3px">
+                                                            <div class="col-xs-4">
+                                                                <h4 style="font-size:1vw">Historical Trend</h4>
+                                                            </div>
+                                                            <div class="col-xs-8">
+                                                                <div class="row">
+                                                                    <div class="col-xs-3">&nbsp;</div>
+                                                                    <div class="col-xs-4">
+                                                                        <p style="text-align: right; margin-top:10px">Select a Date Range:</p>
+                                                                    </div>
+                                                                    <div class="col-xs-5" style="margin-top:5px; margin-right:0px;margin-left:0px">
+                                                                        <label class="pull-right" id="issue-calender" style="padding:5px 20px 5px 20px; background: #fff;color:#000 ;cursor: pointer; #ccc;">
+                                                                            <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                                                                            <span></span> <b class="caret"></b>
+                                                                        </label>
+                                                                <!--<input type="text" id="issue-calender" style="border:1px solid #bcb7b3; background-color: #FFFFFF; width:100%;" class="form-control">-->
+                                                                <!--<i class="fa fa-calendar" style="float:right; margin-top:-12px;"></i>-->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </header>
+
+                                                    <div class="content-body">
+                                                        <div class="container-fluid" >
+                                                            <div class="row" style="padding-left:0;">
+                                                                <div class="btn-group pull-right" role="group" style="margin-top:10px; margin-right:20px;">
+                                                                    <button id="dailyBtn" type="button" class="btn btn-default" >Day</button>
+                                                                    <button id="monthlyBtn" type="button" class="btn btn-default" >Month</button>
+                                                                    <button id="quarterlyBtn" type="button" class="btn btn-default" >Quarter</button>
+                                                                    <button id="yearlyBtn" type="button" class="btn btn-default" >Year</button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-xs-12">
+                                                                    <div id="trend-chart-container" style="min-width: auto; max-width: auto; height: 375px; margin: 0 auto"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="sonarDiv" class="row">
+                                <div class=" col-xs-12 col-md-12">
+
+                                    <h3 style="font-size:1.3vw">Sonar</h3>
+                                    <div class="card" style="background-color:#F2F7FF; padding: 15px; margin-bottom:150px; border: solid #a9a9a9 1px;">
+                                        <div class="container-fluid" >
+                                            <div>
+                                                <div class="row fixedSonarDiv" style="z-index: 1;">
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center">&nbsp;</div>
+                                                    <div class="form-group col-xs-3 col-md-3"  style="text-align:center">
+                                                        <h4 style="font-size:1vw">Issue Type</h4>
+                                                        <select class="form-control" id='sonar-issuetype-choice' style="padding: 5px;font-size:0.8vw;">
+                                                            <option value="0">All</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center; margin-top: 20px;">
+                                                        <span style="font-size: 4vw" id="sonarArrow"></span>
+                                                    </div>
+                                                    <div class="form-group col-xs-3 col-md-3" style="text-align:center">
+                                                        <h4 style="font-size:1vw">Severity</h4>
+                                                        <select class="form-control" id='sonar-severity-choice' style=" padding: 5px;font-size:0.8vw;">
+                                                            <option value="0">All</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:36px">
+                                                        <button type="button" class="btn btn-default" onclick="resetSonarCharts()" id="resetSonarChartsId" style="font-size:1.1vw;display:none;" data-placement="bottom" title="Reset Filters">
+                                                            <img src="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-12" style="padding:15px">
+                                                <div class="mam-card">
+                                                    <header class="mam-container mam-light-sonar" id="main-graph-header-sonar">
+                                                        <h4 style="font-size:1vw" style="font-size:1vw" id="sonarMainChartHeader">Sonar Issue Count Breakdown</h4>
+                                                    </header>
+                                                    <div>
+                                                        <div  id="main-chart-container-sonar" class="" style="min-width: window.document.body.scrollWidth; height: window.document.body.scrollHeight - 40; margin: 0 auto"></div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-xs-6" style="">
+                                                <div class="mam-card">
+                                                    <header class="mam-container mam-light-sonar" id="issuetype-graph-header-sonar">
+                                                        <h4 style="font-size:1vw" style="font-size:1vw" id="sonarIssueTypeChartCHeader">Issue Type Breakdown</h4>
+                                                    </header>
+                                                    <div class="">
+                                                        <div  id="issuetype-chart-container-sonar" style="min-width: window.document.body.scrollWidth; height: window.document.body.scrollHeight - 40; margin: 0 auto"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6">
+                                                <div class="mam-card">
+                                                    <header class="mam-container mam-light-sonar" id="severity-graph-header-sonar" style="background-colour:">
+                                                        <h4 style="font-size:1vw" style="font-size:1vw" id="sonarSeverityChartHeader">Severity Breakdown</h4>
+                                                    </header>
+                                                    <div class="">
+                                                        <div  id="severity-chart-container-sonar" style="min-width: window.document.body.scrollWidth; height: window.document.body.scrollHeight - 40; margin: 0 auto"></div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="padding:15px 0px 15px 0px;">
+                                            <div class="col-xs-12" style="">
+                                                <div class="mam-card">
+                                                    <header class="mam-light-sonar" id="trend-graph-header">
+                                                        <div class="row" style="margin:0px 3px 0px 3px">
+                                                            <div class="col-xs-4">
+                                                                <h4 style="font-size:1vw" style="font-size:1vw">Historical Trend</h4>
+                                                            </div>
+                                                            <div class="col-xs-8">
+                                                                <div class="row">
+                                                                    <div class="col-xs-3">&nbsp;</div>
+                                                                    <div class="col-xs-4">
+                                                                        <p style="text-align: right; margin-top:10px">Select a Date Range:</p>
+                                                                    </div>
+                                                                    <div class="col-xs-5" style="margin-top:5px; margin-right:0px;margin-left:0px">
+                                                                        <label class="pull-right" id="sonar-calender" style="padding:5px 20px 5px 20px; background: #fff;color:#000 ;cursor: pointer; #ccc;">
+                                                                            <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                                                                            <span></span> <b class="caret"></b>
+                                                                        </label>
+                                                                <!--<input class="pull-right" type="text" id="sonar-calender" style="border:1px solid #bcb7b3; background-color: #FFFFFF; width:100%;" class="form-control">-->
+                                                                <!--<i class="fa fa-calendar" style="float:right; margin-top:-12px;"></i>-->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </header>
+                                                    <div class="content-body">
+                                                        <div class="container-fluid" >
+                                                            <div class="row" style="padding-left:0;">
+                                                                <div class="btn-group pull-right" role="group" style="margin-top:10px; margin-right:20px;">
+                                                                    <button id="dailyBtnSonar" type="button" class="btn btn-default" >Day</button>
+                                                                    <button id="monthlyBtnSonar" type="button" class="btn btn-default" >Month</button>
+                                                                    <button id="quarterlyBtnSonar" type="button" class="btn btn-default" >Quarter</button>
+                                                                    <button id="yearlyBtnSonar" type="button" class="btn btn-default" >Year</button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-xs-12">
+                                                                    <div id="trend-chart-container-sonar" style="min-width: auto; max-width: auto; height: 375px; margin: 0 auto"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--   Core JS Files   -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script type="text/javascript" src="js/moment.js"></script>
+<script type="text/javascript" src="js/daterangepicker.js"></script>
+
+<!-- Highcharts JS-->
+<script src="code/highcharts.js"></script>
+<script src="code/modules/data.js"></script>
+<script src="code/modules/drilldown.js"></script>
+
+<!--Custom JS-->
+<script src="js/dashboard.js"></script>
+<script type="text/javascript" src="js/data.js"></script>
+<script type="text/javascript" src="js/app1.js"></script>
+<script type="text/javascript" src="js/mapping.js"></script>
+<script>
+
+
+$(window).on('load', function() {
+    initPage();
+
+    var fixedIssesDivTop = $('.fixedIssesDiv').offset().top;
+    console.log($(window).width());
+    $('.right-scrolling-body').scroll(function() {
+        var currentScroll = $('.right-scrolling-body').scrollTop();
+        var scrollTop = $('.right-scrolling-body').offset().top;
+        if (currentScroll >= fixedIssesDivTop && currentScroll<=1390) {
+            $('.fixedIssesDiv').css({
+                position: 'fixed',
+                top: scrollTop,
+               'box-shadow': '0 2px 5px rgba(0,0,0,0.2),0 2px 5px rgba(0,0,0,0.19)',
+               'width':'76.35997313633311vw'
+
+            });
+        } else {
+            $('.fixedIssesDiv').css({
+                position: 'static',
+                'box-shadow': '0px 0px 0px',
+                width:'auto'
+            });
+        }
+    });window
+
+    var fixedSonarDivTop = $('.fixedSonarDiv').offset().top;
+
+    $('.right-scrolling-body').scroll(function() {
+        var currentScroll = $('.right-scrolling-body').scrollTop();
+        var scrollTop = $('.right-scrolling-body').offset().top;
+        if (currentScroll >= fixedSonarDivTop ) {
+            $('.fixedSonarDiv').css({
+                position: 'fixed',
+                top: scrollTop,
+                'box-shadow': '0 2px 5px rgba(0,0,0,0.2),0 2px 5px rgba(0,0,0,0.19)',
+                width:'76.35997313633311vw'
+
+            });
+        } else {
+            $('.fixedSonarDiv').css({
+                position: 'static',
+                'box-shadow': '0px 0px 0px',
+                width:'auto'
+            });
+        }
+    });window
+
+});
+
+    $(".right-scrolling-body").scroll(function() {
+      $(".daterangepicker").hide();
+      $('#issue-calender').blur();
+    });
+
+    $(window).resize(function() {
+      $(".daterangepicker").hide();
+      $('#issue-calender').blur();
+    });
+
+    $(".right-scrolling-body").scroll(function() {
+      $(".daterangepicker").hide();
+      $('#sonar-calender').blur();
+    });
+
+    $(window).resize(function() {
+      $(".daterangepicker").hide();
+      $('#sonar-calender').blur();
+    });
+
+</script>
+
+
+
+
+<script type="text/javascript">
+
+    var start = moment().subtract(29, 'days');
+    var end = moment();
+    var startDate = start.format('YYYY-MM-DD');
+    var endDate = end.format('YYYY-MM-DD');
+
+    $(function() {
+
+        function cb(start, end) {
+            $('#sonar-calender span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        }
+
+        $('#sonar-calender').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+                <!--'Today': [moment(), moment()],-->
+                <!--'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],-->
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+
+        cb(start, end);
+
+        function cd(start, end) {
+            $('#issue-calender span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        }
+
+        $('#issue-calender').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+                <!--'Today': [moment(), moment()],-->
+                <!--'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],-->
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cd);
+
+        cd(start, end);
+
+    });
+
+    $('#dailyBtn').click(function(){
+        getIssueTrendLineHistory("day");
+    });
+    $('#monthlyBtn').click(function(){
+        getIssueTrendLineHistory("Month");
+    });
+    $('#quarterlyBtn').click(function(){
+        getIssueTrendLineHistory("Quarter");
+    });
+    $('#yearlyBtn').click(function(){
+        getIssueTrendLineHistory("Year");
+    });
+
+
+    $('#dailyBtnSonar').click(function(){
+        getSonarTrendLineHistory("day");
+    });
+    $('#monthlyBtnSonar').click(function(){
+        getSonarTrendLineHistory("Month");
+    });
+    $('#quarterlyBtnSonar').click(function(){
+        getSonarTrendLineHistory("Quarter");
+    });
+    $('#yearlyBtnSonar').click(function(){
+        getSonarTrendLineHistory("Year");
+    });
+
+    $('#resetView').click(function(){
+        allAreaClick();
+    });
+
+
+    $('#issue-calender').on('apply.daterangepicker', function(ev, picker) {
+
+        startDate = picker.startDate.format('YYYY-MM-DD');
+        endDate = picker.endDate.format('YYYY-MM-DD');
+        setIssueDate(startDate, endDate);
+        <!--setIssueCalender();-->
+        getIssueTrendLineHistory("day");
+    });
+    $('#sonar-calender').on('apply.daterangepicker', function(ev, picker) {
+
+        startDate = picker.startDate.format('YYYY-MM-DD');
+        endDate = picker.endDate.format('YYYY-MM-DD');
+        setSonarDate(startDate, endDate);
+        <!--setSonarCalender();-->
+        getSonarTrendLineHistory("day");
+    });
+</script>
+
+</body>
+</html>
+
+
+
+        ]]>
+    </Content>
+</Module>
