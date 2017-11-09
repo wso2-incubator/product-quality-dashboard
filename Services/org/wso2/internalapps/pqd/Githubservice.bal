@@ -660,9 +660,9 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
         if (issueTypeId == 0 && severityId == 0){
 
             sql:Parameter[] emptyParams = [];
-            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_QUERY, emptyParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY, emptyParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY, emptyParams);
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_QUERY, emptyParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY, emptyParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY, emptyParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -712,8 +712,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
         } else if (issueTypeId == 0){
             sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
             sql:Parameter[] sqlParams = [severityIdParam];
-            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -751,8 +751,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
         } else if (severityId == 0){
             sql:Parameter issueTypeIdParam = {sqlType : "integer", value: issueTypeId};
             sql:Parameter[] sqlParams = [issueTypeIdParam];
-            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -789,7 +789,7 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
             sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
             sql:Parameter[] sqlParams = [issueTypeIdParam, severityIdParam];
-            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
+            json areaIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -813,9 +813,9 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
         if (issueTypeId == 0 && severityId == 0){
             sql:Parameter areaIdParam = { sqlType: "integer", value: categoryId};
             sql:Parameter[] sqlParams = [areaIdParam];
-            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_QUERY, sqlParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_ISSUETYPE_CURRENT_ISSUES_QUERY, sqlParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_SEVERITY_CURRENT_ISSUES_QUERY, sqlParams);
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -866,8 +866,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter areaIdParam = { sqlType: "integer", value: categoryId};
             sql:Parameter severityIdParam = { sqlType: "integer", value: severityId};
             sql:Parameter[] sqlParams = [areaIdParam, severityIdParam];
-            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -906,8 +906,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter areaIdParam = { sqlType: "integer", value: categoryId};
             sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId};
             sql:Parameter[] sqlParams = [areaIdParam, issueTypeIdParam];
-            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -945,7 +945,7 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
             sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
             sql:Parameter[] sqlParams = [areaIdParam, issueTypeIdParam, severityIdParam];
-            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
+            json productIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -970,9 +970,9 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
         if (issueTypeId == 0 && severityId == 0){
             sql:Parameter productIdParam = { sqlType: "integer", value: categoryId};
             sql:Parameter[] sqlParams = [productIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY, sqlParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_ISSUETYPE_CURRENT_ISSUES_QUERY, sqlParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_SEVERITY_CURRENT_ISSUES_QUERY, sqlParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -1024,8 +1024,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter productIdParam = { sqlType: "integer", value: categoryId};
             sql:Parameter severityIdParam = { sqlType: "integer", value:severityId};
             sql:Parameter[] sqlParams = [productIdParam, severityIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -1063,8 +1063,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter productIdParam = { sqlType: "integer", value: categoryId};
             sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId};
             sql:Parameter[] sqlParams = [productIdParam, issueTypeIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -1102,7 +1102,7 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId};
             sql:Parameter severityIdParam = { sqlType: "integer", value: severityId};
             sql:Parameter[] sqlParams = [productIdParam, issueTypeIdParam, severityIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -1151,9 +1151,9 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
 
             sql:Parameter productIdParam = { sqlType: "integer", value: productId};
             sql:Parameter[] productParams = [productIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY, productParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_ISSUETYPE_CURRENT_ISSUES_QUERY, componentParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_SEVERITY_CURRENT_ISSUES_QUERY, componentParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY, productParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_QUERY, componentParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_QUERY, componentParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -1217,8 +1217,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter severityIdParam = { sqlType: "integer", value: severityId };
             sql:Parameter[] productIdParams = [productIdParam, severityIdParam];
             sql:Parameter[] sqlParams = [componentIdParam, severityIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, productIdParams);
-            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, productIdParams);
+            json issueTypeJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -1270,8 +1270,8 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
             sql:Parameter[] productIdParams = [productIdParam, issueTypeIdParam];
             sql:Parameter[] sqlParams = [componentIdParam, issueTypeIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, productIdParams);
-            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, productIdParams);
+            json severityJson = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY, sqlParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -1321,7 +1321,7 @@ function getGithubIssuesData(sql:ClientConnector sqlCon, string category, int ca
             sql:Parameter issueTypeIdParam = { sqlType: "integer", value: issueTypeId };
             sql:Parameter severityIdParam = { sqlType: "integer", value: severityId };
             sql:Parameter[] productIdParams = [productIdParam, issueTypeIdParam, severityIdParam];
-            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, productIdParams);
+            json componentIssueJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY, productIdParams);
 
             json responseJson = {"error":false, "data":{"items": [], "issueIssuetype":[], "issueSeverity":[]}};
 
@@ -2143,7 +2143,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
         if(category=="all"){
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY, params);
 
                 int index = 0;
 
@@ -2162,7 +2162,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2180,7 +2180,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2200,7 +2200,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2220,7 +2220,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [areaIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_DAY, params);
 
                 int index = 0;
 
@@ -2238,7 +2238,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [areaIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_DAY_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2256,7 +2256,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2276,7 +2276,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2296,7 +2296,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [productIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_DAY, params);
 
                 int index = 0;
 
@@ -2314,7 +2314,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [productIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_DAY_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2331,7 +2331,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2351,7 +2351,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2372,7 +2372,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [componentIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_DAY, params);
 
                 int index = 0;
 
@@ -2391,7 +2391,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [componentIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_DAY_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2409,7 +2409,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2429,7 +2429,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2451,7 +2451,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
         if(category=="all"){
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH, params);
 
                 int index = 0;
 
@@ -2472,7 +2472,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2492,7 +2492,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2514,7 +2514,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2536,7 +2536,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [areaIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_MONTH, params);
 
                 int index = 0;
 
@@ -2556,7 +2556,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [areaIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2576,7 +2576,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2598,7 +2598,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2620,7 +2620,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [productIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_MONTH, params);
 
                 int index = 0;
 
@@ -2640,7 +2640,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [productIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2659,7 +2659,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2681,7 +2681,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2704,7 +2704,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [componentIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_MONTH, params);
 
                 int index = 0;
 
@@ -2725,7 +2725,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [componentIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_MONTH_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2745,7 +2745,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2767,7 +2767,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2793,7 +2793,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
         if(category=="all"){
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER, params);
 
                 int index = 0;
 
@@ -2814,7 +2814,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2834,7 +2834,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2856,7 +2856,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2878,7 +2878,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [areaIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_QUARTER, params);
 
                 int index = 0;
 
@@ -2898,7 +2898,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [areaIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -2918,7 +2918,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -2940,7 +2940,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -2962,7 +2962,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [productIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER, params);
 
                 int index = 0;
 
@@ -2982,7 +2982,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [productIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -3001,7 +3001,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -3023,7 +3023,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -3046,7 +3046,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [componentIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER, params);
 
                 int index = 0;
 
@@ -3067,7 +3067,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [componentIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -3087,7 +3087,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -3109,7 +3109,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -3134,7 +3134,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
         if(category=="all"){
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR, params);
 
                 int index = 0;
 
@@ -3154,7 +3154,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -3173,7 +3173,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -3194,7 +3194,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -3215,7 +3215,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [areaIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_YEAR, params);
 
                 int index = 0;
 
@@ -3234,7 +3234,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [areaIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -3253,7 +3253,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -3274,7 +3274,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [areaIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -3295,7 +3295,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [productIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_YEAR, params);
 
                 int index = 0;
 
@@ -3314,7 +3314,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [productIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -3332,7 +3332,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -3353,7 +3353,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [productIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 
@@ -3375,7 +3375,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
 
             if ((issueTypeId == 0) && (severityId == 0)){
                 sql:Parameter[] params = [componentIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_YEAR, params);
 
                 int index = 0;
 
@@ -3395,7 +3395,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (issueTypeId == 0){
                 sql:Parameter severityIdParam = {sqlType:"integer", value: severityId};
                 sql:Parameter[] params = [componentIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_YEAR_FILTER_SEVERITY, params);
 
                 int index = 0;
 
@@ -3414,7 +3414,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
             } else if (severityId == 0){
                 sql:Parameter issueTypeIdParam = {sqlType: "integer", value: issueTypeId};
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE, params);
 
                 int index = 0;
 
@@ -3435,7 +3435,7 @@ function getGithubHistory(sql:ClientConnector sqlCon, string category, int categ
                 sql:Parameter severityIdParam = {sqlType: "integer", value: severityId};
 
                 sql:Parameter[] params = [componentIdParam, issueTypeIdParam, severityIdParam, startDateParam, endDateParam];
-                json response = getDataFromDatabase(sqlCon, GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
+                json response = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY, params);
 
                 int index = 0;
 

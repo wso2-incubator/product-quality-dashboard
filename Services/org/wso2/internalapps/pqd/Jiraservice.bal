@@ -1252,7 +1252,7 @@ function countIssuesTESTING2(json projectList, json issueTypeList, json severity
             projectDetails.component_jira_id = componentId;
             json componentIssues = jsons:getJson(issuesForProduct, "$[*].components[?(@.id == '"+jiraComponentId+"')]");
 
-            countTypeIssuesTESTING2(date, projectDetails, issueTypeList, severityList, issuesForProduct, "$", sqlCon);
+            countTypeIssuesTESTING2(date, projectDetails, issueTypeList, severityList, componentIssues, "$", sqlCon);
         }
         datatables:close(componentsDatatable);
 
