@@ -595,7 +595,7 @@ service<http> releaseTrainService {
 
                     params1 = [para1];
                     params2 = [para1, para2, para3, para4, para5, para6, para7, para8, para9, para10, para11];
-                    params3 = [para8, para11, para1];
+                    params3 = [para2, para3, para4, para5, para6, para7, para8, para9, para10, para11, para1];
                     //last update time on redmine
                     time:Time lastTimeUpdateStamp = time:parse(updatedOn, "yyyy-MM-dd'T'HH:mm:ssz");
 
@@ -631,7 +631,7 @@ service<http> releaseTrainService {
                                 logger:info("OLD RECORD UPDATED");
                                 updaterows = updaterows + 1;
 
-                                int ret2 = rmDB.update("Update RM_ISSUE SET ISSUE_TRACKER_SUBJECT=?, ROW_UPDATE_EPOCH_TIME_STAMP=? WHERE ISSUE_ID=?", params3);
+                                int ret2 = rmDB.update("Update RM_ISSUE SET ISSUE_PROJECT_ID=?, ISSUE_PROJECT_NAME=?, ISSUE_TRACKER_ID=?, ISSUE_TRACKER_NAME=?, ISSUE_FIXED_VERSION_ID=?, ISSUE_FIXED_VERSION_NAME=?, ISSUE_TRACKER_SUBJECT=?, ISSUE_CREATED_ON=?, ISSUE_UPDATED_ON=?, ROW_UPDATE_EPOCH_TIME_STAMP=? WHERE ISSUE_ID=?", params3);
 
                             }
                         }
