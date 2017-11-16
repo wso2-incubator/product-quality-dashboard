@@ -84,7 +84,7 @@ map propertiesMap = getSQLconfigData(configData);
 string basicurl = jsons:getString(configData, "$.SONAR.SONAR_URL");
 string version =  API_VERSION;
 
-@http:configuration {basePath:"/internal/product-quality/v1.0/sonar", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
+@http:configuration {basePath:"/internal/product-quality/v1.0/sonar"}
 service<http> SonarService {
 
     @http:GET {}
@@ -197,11 +197,11 @@ service<http> SonarService {
 
     @http:GET {}
     @http:Path {value:"issues/history/{category}/{categoryId}"}
-    resource SonarGetHistory2(message m, @http:PathParam {value:"dateFrom"} string start,
+    resource SonarGetHistory2(message m, @http:QueryParam {value:"dateFrom"} string start,
                               @http:QueryParam {value:"dateTo"} string end,
-                              @http:PathParam {value:"period"} string period,
+                              @http:QueryParam {value:"period"} string period,
                               @http:PathParam {value:"category"} string category,
-                              @http:QueryParam {value:"categoryId"} int selected,
+                              @http:PathParam {value:"categoryId"} int selected,
                               @http:QueryParam {value:"issuetypeId"} int issueType,
                               @http:QueryParam {value:"severityId"} int severity){
         json data = getSelectionHistory(start,end,period,category,selected,issueType,severity);
@@ -246,7 +246,7 @@ function saveIssues (json projects)  {
 
         }
         datatables:close(dt);
-        transaction {
+        //transaction {
 
             sql:Parameter snapshotid = {sqlType:"integer", value:snapshot_id};
             int i = 0;
@@ -311,7 +311,7 @@ function saveIssues (json projects)  {
                 int ret1 = sql:ClientConnector.update(dbConnector, INSERT_SONAR_ISSUES, params);
                 i = i + 1;
             }
-        }
+        //}
         string customEndTimeString = time:format(time:currentTime(), "yyyy-MM-dd");
         logger:info("End time: " + customEndTimeString);
         dbConnector.close();
