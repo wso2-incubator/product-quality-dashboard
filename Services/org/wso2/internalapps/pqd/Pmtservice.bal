@@ -4,7 +4,7 @@ import ballerina.lang.messages;
 import ballerina.net.http;
 
 
-@http:configuration {basePath:"/pmt-dashboard-serives"}
+@http:configuration {basePath:"/pmt-dashboard-serives", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> pmtserives {
       @http:GET {}
     @http:Path {value:"/loaddashboard/{startDate}/{endDate}" }

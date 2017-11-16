@@ -85,7 +85,7 @@ struct GithubAreaIssue{
 }
 
 
-@http:configuration {basePath:"/internal/product-quality/v1.0/github"}
+@http:configuration {basePath:"/internal/product-quality/v1.0/github", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> GithubService {
     json configData = getConfigData(CONFIG_PATH);
 

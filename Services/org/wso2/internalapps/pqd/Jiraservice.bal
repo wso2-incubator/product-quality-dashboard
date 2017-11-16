@@ -167,7 +167,7 @@ struct PQDAreaIssuesCount{
 }
 
 
-@http:configuration {basePath:"/internal/product-quality/v1.0/jira"}
+@http:configuration {basePath:"/internal/product-quality/v1.0/jira", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> JiraService {
 
     jira:ClientConnector jiraConnector = create jira:ClientConnector(jiraURL, jiraUsername, jiraPassword);

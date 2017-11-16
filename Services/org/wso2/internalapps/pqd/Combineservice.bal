@@ -17,7 +17,7 @@ struct ComponentRepo{
 
 
 
-@http:configuration {basePath:"/internal/product-quality/v1.0"}
+@http:configuration {basePath:"/internal/product-quality/v1.0", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> ProductQualityService {
 
     json configData = getConfigData(CONFIG_PATH);

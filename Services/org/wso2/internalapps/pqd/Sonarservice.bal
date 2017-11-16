@@ -84,7 +84,7 @@ map propertiesMap = getSQLconfigData(configData);
 string basicurl = jsons:getString(configData, "$.SONAR.SONAR_URL");
 string version =  API_VERSION;
 
-@http:configuration {basePath:"/internal/product-quality/v1.0/sonar"}
+@http:configuration {basePath:"/internal/product-quality/v1.0/sonar", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> SonarService {
 
     @http:GET {}

@@ -8,7 +8,7 @@ import ballerina.lang.time;
 import ballerina.utils.logger;
 
 
-@http:configuration {basePath:"/base"}
+@http:configuration {basePath:"/base", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> releaseTrainService {
 
 
