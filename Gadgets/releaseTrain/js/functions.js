@@ -405,26 +405,161 @@ function changeButton(divId){
   
 }
 
-function showFixedIssues(divId){
+function showFixedIssues(repoId,versionId,divId){
     changeButton(divId);
-    $(".detailedinfo").empty();
-  
-    var html    = "<div class=well ><p> This feature is not implemented yet. </p></div>";
-        
-    $( ".detailedinfo" ).append(  html );
+    
+     var dataSet1;
+      $.ajax({
+        url:"https://"+url+":"+port+"/base/getRepoAndVersion"+"/"+repoId+"/"+versionId,
+        async:false,
+        success: function(data){
+          dataSet1=data;  
+        }
+      });
 
-   
+     var versionName =dataSet1.versionName; 
+     var repoNames = dataSet1.repoNames;
+
+    
+     
+
+     var dataSet2=[];
+     for(i=0;i<repoNames.length;i++){
+       var repoName = repoNames[i].repoName;
+       
+       if ((repoName != "") && (versionName != "")){
+         $.ajax({
+          url:"https://"+url+":"+port+"/base/getFixedGitIssues/"+repoName+"?versionName="+versionName,
+          async:false,
+          success: function(data){
+            dataSet2=data;  
+          }
+         });
+       }
+
+       if(dataSet2.length > 0){
+        break;
+       }
+       
+     }
  
-}
-
-function showReportedIssues(divId){
-    changeButton(divId);
-    $(".detailedinfo").empty();
-  
-    var html    = "<div class=well ><p> This feature is not implemented yet. </p></div>";
-        
-    $( ".detailedinfo" ).append(  html );
     
 
-}
+    if (dataSet2.length == 0){
+      $('.detailedinfo').empty();
+      var note = "<div class=well ><p> Nothing to display </p></div>";
+      $( ".detailedinfo" ).append(  note );
+    }else {
+
+
+
+      $('.detailedinfo').empty();
+    
+      var html='<table class="table table-bordered table-striped table-hover ">' +
+                  '<thead style="background-color: #29313E;color:white">' +
+                    '<tr>'+
+                      '<th>#</th>' +
+                      '<th>Fixed Issues</th>' +
+                    '</tr>'+
+                  '</thead>' +
+                  '<tbody>'
+
+      var rowNumber=0;
+      for(i=0;i<dataSet2.length;i++){
+        for(j=0;j<dataSet2[i].length;j++){
+          rowNumber ++;
+          html= html +  '<tr>'+
+                        '<td>'+ rowNumber +'</td>' +
+                        '<td>'+ 
+                          '<a href=' +  dataSet2[i][j].url +'>' + 
+                           dataSet2[i][j].title + 
+                        '</td>' +
+                        '</tr>'
+        }
+      }
+          
+        html= html + '</tbody>'+
+                     '</table>'
+      $( ".detailedinfo" ).append(  html );
+    } 
+  }
+
+function showReportedIssues(repoId,versionId,divId){
+    changeButton(divId);
+    
+     var dataSet1;
+      $.ajax({
+        url:"https://"+url+":"+port+"/base/getRepoAndVersion"+"/"+repoId+"/"+versionId,
+        async:false,
+        success: function(data){
+          dataSet1=data;  
+        }
+      });
+
+     var versionName =dataSet1.versionName; 
+     var repoNames = dataSet1.repoNames;
+
+    
+     
+
+     var dataSet2=[];
+     for(i=0;i<repoNames.length;i++){
+       var repoName = repoNames[i].repoName;
+       
+       if ((repoName != "") && (versionName != "")){
+         $.ajax({
+          url:"https://"+url+":"+port+"/base/getReportedGitIssues/"+repoName+"?versionName="+versionName,
+          async:false,
+          success: function(data){
+            dataSet2=data;  
+          }
+         });
+       }
+
+       if(dataSet2.length > 0){
+        break;
+       }
+       
+     }
+ 
+   
+
+    if (dataSet2.length == 0){
+      $('.detailedinfo').empty();
+      var note = "<div class=well ><p> Nothing to display </p></div>";
+      $( ".detailedinfo" ).append(  note );
+    }else {
+
+
+
+      $('.detailedinfo').empty();
+    
+      var html='<table class="table table-bordered table-striped table-hover ">' +
+                  '<thead style="background-color: #29313E;color:white">' +
+                    '<tr>'+
+                      '<th>#</th>' +
+                      '<th>Reported Issues</th>' +
+                    '</tr>'+
+                  '</thead>' +
+                  '<tbody>'
+
+      var rowNumber=0;
+      for(i=0;i<dataSet2.length;i++){
+        for(j=0;j<dataSet2[i].length;j++){
+          rowNumber ++;
+          html= html +  '<tr>'+
+                        '<td>'+ rowNumber +'</td>' +
+                        '<td>'+ 
+                          '<a href=' +  dataSet2[i][j].url +'>' + 
+                           dataSet2[i][j].title + 
+                        '</td>' +
+                        '</tr>'
+        }
+      }
+          
+        html= html + '</tbody>'+
+                     '</table>'
+      $( ".detailedinfo" ).append(  html );
+    } 
+  }
 

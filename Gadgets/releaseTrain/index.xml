@@ -97,17 +97,17 @@
           
 
           
-            <li id="Fixed_Issues" align="left" onclick="showFixedIssues(this.id)">
+            <li id="Fixed_Issues" align="left" onclick="showFixedIssues({{PROJECT_ID}},{{VERSION_ID}},this.id)">
               <span class="btn label btn-success"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
-                <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues: {{fixedIssuesCount}}
+                <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues
               </span>
             </li>
           
 
           
-            <li id="Reported_Issues" align="left" onclick="showReportedIssues(this.id)">
+            <li id="Reported_Issues" align="left" onclick="showReportedIssues({{PROJECT_ID}},{{VERSION_ID}},this.id)">
               <span class="btn label btn-warning"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
-                <span class="glyphicon glyphicon-alert"></span> Reported Issues: {{reportedIssuesCount}}
+                <span class="glyphicon glyphicon-alert"></span> Reported Issues
               </span>
             </li>
           
