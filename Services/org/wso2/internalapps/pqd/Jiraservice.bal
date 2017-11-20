@@ -172,24 +172,19 @@ service<http> JiraService {
 
     jira:ClientConnector jiraConnector = create jira:ClientConnector(jiraURL, jiraUsername, jiraPassword);
 
-    @http:GET {}
-    @http:Path {value:"/issues/summary"}
-    resource AllJiraIssuesByProject (message m) {
-        json projectList = {"projects":[]};
-        string[] issueTypeList = [];
-        string[] severityList =[];
-        getProjectsIssueTypesAndSeverities(projectList, issueTypeList, severityList);
-        message response = getJiraIssuesSummary(projectList, issueTypeList, severityList, jiraConnector);
-        reply response;
-    }
+
     @http:GET {}
     @http:Path {value:"/issues/summary/testing"}
     resource AllJiraIssuesByProjectTESTING (message m) {
         json projectList = {"projects":[]};
         json issueTypeList = {"issuetypes":[]};
         json severityList ={"severities":[]};
-        getProjectsIssueTypesAndSeveritiesTESTING2(projectList, issueTypeList, severityList);
-        message response = getJiraIssuesSummaryTESTING2(projectList, issueTypeList, severityList, jiraConnector);
+
+        logger:debug("creating sql client connector..");
+        sql:ClientConnector dbConnector = create sql:ClientConnector(propertiesMap);
+
+        getProjectNamesIssueTypesAndSeveritiesTESTING2(projectList, issueTypeList, severityList, dbConnector);
+        message response = getJiraIssuesSummaryTESTING2(projectList, issueTypeList, severityList, jiraConnector, dbConnector);
         reply response;
     }
 
@@ -444,12 +439,13 @@ function enterData()(message){
 
 
 
-function getProjectsIssueTypesAndSeverities(json projectList, string[] issueTypeList, string[] severityList){
-    sql:ClientConnector dbConnector = create sql:ClientConnector(propertiesMap);
+function getProjectsIssueTypesAndSeverities(json projectList, string[] issueTypeList, string[] severityList, sql:ClientConnector dbConnector){
     sql:Parameter[] params = [];
 
+    logger:debug("getting JIRA product names from the database. Accessing query: GET_PRODUCT_DB_QUERY");
     datatable productDatatable = sql:ClientConnector.select(dbConnector, GET_PRODUCT_DB_QUERY, params);
 
+    logger:debug("Iterating through productDatatable records.");
     while (datatables:hasNext(productDatatable)) {
         any productDataStruct = datatables:next(productDatatable);
         var productRowSet, _ = (JIRAProduct)productDataStruct;
@@ -462,9 +458,11 @@ function getProjectsIssueTypesAndSeverities(json projectList, string[] issueType
     }
     datatables:close(productDatatable);
 
+    logger:debug("getting JIRA issue types names from the database. Accessing query: GET_ISSUE_TYPE_DB_QUERY");
     datatable issueTypeDatatable = sql:ClientConnector.select(dbConnector, GET_ISSUE_TYPE_DB_QUERY, params);
     int index = 0;
 
+    logger:debug("Iterating through productDatatable records.");
     while (datatables:hasNext(issueTypeDatatable)) {
         any issueTypeDataStruct = datatables:next(issueTypeDatatable);
         var issueTypeRowSet, _ = (JIRAIssueType)issueTypeDataStruct;
@@ -480,6 +478,7 @@ function getProjectsIssueTypesAndSeverities(json projectList, string[] issueType
     datatable severityDatatable = sql:ClientConnector.select(dbConnector, GET_SEVERITY_DB_QUERY, params);
     index = 0;
 
+    logger:debug("Iterating through productDatatable records.");
     while (datatables:hasNext(severityDatatable)) {
         any severityDataStruct = datatables:next(severityDatatable);
         var severityRowSet, _ = (JIRASeverity )severityDataStruct;
@@ -492,12 +491,13 @@ function getProjectsIssueTypesAndSeverities(json projectList, string[] issueType
     datatables:close(severityDatatable);
 
 }
-function getProjectsIssueTypesAndSeveritiesTESTING2(json projectList, json issueTypeList,  json severityList){
-    sql:ClientConnector dbConnector = create sql:ClientConnector(propertiesMap);
+function getProjectNamesIssueTypesAndSeveritiesTESTING2(json projectList, json issueTypeList,  json severityList, sql:ClientConnector dbConnector){
     sql:Parameter[] params = [];
 
+    logger:debug("getting JIRA product names from the database. Accessing query: GET_PRODUCT_DB_QUERY_VERSION2");
     datatable productDatatable = sql:ClientConnector.select(dbConnector, GET_PRODUCT_DB_QUERY_VERSION2, params);
 
+    logger:debug("Iterating through productDatatable records.");
     while (datatables:hasNext(productDatatable)) {
         any productDataStruct = datatables:next(productDatatable);
         var productRowSet, _ = (PQDProduct)productDataStruct;
@@ -511,9 +511,10 @@ function getProjectsIssueTypesAndSeveritiesTESTING2(json projectList, json issue
     }
     datatables:close(productDatatable);
 
+    logger:debug("getting JIRA issue types names from the database. Accessing query: GET_ISSUE_TYPE_DB_QUERY_VERSION2");
     datatable issueTypeDatatable = sql:ClientConnector.select(dbConnector, GET_ISSUE_TYPE_DB_QUERY_VERSION2, params);
-    //int index = 0;
 
+    logger:debug("Iterating through issueTypeDatatable records.");
     while (datatables:hasNext(issueTypeDatatable)) {
         any issueTypeDataStruct = datatables:next(issueTypeDatatable);
         var issueTypeRowSet, _ = (PQDIssueType)issueTypeDataStruct;
@@ -527,9 +528,10 @@ function getProjectsIssueTypesAndSeveritiesTESTING2(json projectList, json issue
     }
     datatables:close(issueTypeDatatable);
 
+    logger:debug("getting JIRA severity names from the database. Accessing query: GET_SEVERITY_DB_QUERY_VERSION2");
     datatable severityDatatable = sql:ClientConnector.select(dbConnector, GET_SEVERITY_DB_QUERY_VERSION2, params);
-    //index = 0;
 
+    logger:debug("Iterating through severityDatatable records.");
     while (datatables:hasNext(severityDatatable)) {
         any severityDataStruct = datatables:next(severityDatatable);
         var severityRowSet, _ = (PQDSeverity)severityDataStruct;
@@ -546,7 +548,7 @@ function getProjectsIssueTypesAndSeveritiesTESTING2(json projectList, json issue
 }
 
 
-function getJiraIssuesSummary(json projectList, string[] issueTypeList, string[] severityList, jira:ClientConnector jiraConnector)(message ){
+function getJiraIssuesSummary(json projectList, string[] issueTypeList, string[] severityList, jira:ClientConnector jiraConnector, sql:ClientConnector dbConnector)(message ){
 
     int remainingCount = 10;
     int startAt = 0;
@@ -603,7 +605,7 @@ function getJiraIssuesSummary(json projectList, string[] issueTypeList, string[]
     return Response;
 }
 
-function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json severityList, jira:ClientConnector jiraConnector)(message ){
+function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json severityList, jira:ClientConnector jiraConnector, sql:ClientConnector dbConnector)(message ){
 
     int remainingCount = 10;
     int startAt = 0;
@@ -611,19 +613,26 @@ function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json
     int numOfPages = 0;
     json jiraJSONResponse;
     json Result = {"data":[], "error": false};
-    system:println(projectList);
+
+    logger:debug("creating JIRA project ids as a comma seperated string.");
     string projects = getProjectsAsStringTESTING2(projectList);
-    system:println(issueTypeList);
+    logger:info("project ids to be searched: " + projects);
+
+    logger:debug("creating JIRA issue types as a comma seperated string.");
     string issueTypes = getIssueTypeAsStringTESTING2(issueTypeList);
-    system:println("testing");
-    system:println(issueTypes);
-    system:println("getting data");
+    logger:info("issue types to be searched: " + issueTypes);
+
+    logger:debug("fetching data from JIRA.");
     while (remainingCount > 0) {
         json payload = {"jql":" project in ("+projects+") AND status in (Open, 'In Progress')" +
                               "  AND issuetype in ("+issueTypes+")"
                        , "startAt":startAt, "maxResults":1000, "validateQuery":true,
                            "fields": ["project", "components","issuetype","customfield_10075", "versions"]};
 
+        var stringPayload, _ = <json>payload;
+        logger:debug("created jql payload for JIRA: " + stringPayload);
+
+        logger:debug("invoking searchJira action in JIRA client connector with the payload.");
         message jiraResponse = jira:ClientConnector.searchJira(jiraConnector, payload);
 
         boolean[] statusCode = checkStatusCode(http:getStatusCode(jiraResponse));
@@ -633,6 +642,7 @@ function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json
         jiraJSONResponse = messages:getJsonPayload(jiraResponse);
 
         if (statusCodeSuccess) {
+            logger:info("fetched data succesully");
             totalIssues = jsons:getInt(jiraJSONResponse, "$.total");
             startAt = startAt + 1000;
             remainingCount = totalIssues - startAt;
@@ -652,12 +662,12 @@ function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json
         numOfPages = numOfPages + 1;
     }
 
+    logger:info("finished fetching data from JIRA API.");
     boolean error = jsons:getBoolean(Result, "$.error");
-    system:println("got data");
 
     message Response = {};
     if (!error){
-        changeIssueFormatTESTING2(projectList, issueTypeList, severityList, Result, numOfPages);
+        changeIssueFormatTESTING2(projectList, issueTypeList, severityList, Result, numOfPages, dbConnector);
     }
     messages:setStringPayload(Response,"OK");
     //messages:setJsonPayload(Response,Result);
@@ -665,22 +675,21 @@ function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json
 }
 
 
-function changeIssueFormat(json projectList, string[] issueTypeList, string[] severityList, json rawData, int numOfPages){
+function changeIssueFormatTESTING2(json projectList, json issueTypeList, json severityList, json rawData, int numOfPages, sql:ClientConnector dbConnector){
+
     json issues = {"data":[]};
     json data = {"project":{}};
-    json projectIdList = jsons:getJson(projectList, "$.projects[*].id");
 
     int index1 = numOfPages - 1;
-
     json issue = {};
 
+    logger:debug("reformatting the issue json.");
     while (index1 >= 0) {
         int totalNumOfIssues = lengthof rawData.data[index1];
         int index2 = totalNumOfIssues - 1;
         while (index2 >= 0) {
             issue = rawData.data[index1][index2];
             jsons:addToObject(data, "$.project", "id", issue.fields.project.id);
-            jsons:addToObject(data, "$.project", "key", issue.fields.project.key);
 
             string issueType = jsons:getString(issue, "$.fields.issuetype.name");
             string severity;
@@ -695,11 +704,6 @@ function changeIssueFormat(json projectList, string[] issueTypeList, string[] se
             int lengthOfComponents = lengthof component;
             int index3 = lengthOfComponents - 1;
 
-            //if (index3 < 0) {
-            //    json object = {"id":0, "name": "none", "issuetype":issueType, "severity": severity};
-            //    jsons:addToArray(components, "$.components", object);
-            //}
-
             while (index3 >= 0) {
                 json object = {"id": component[index3].id, "name": component[index3].name, "issuetype":issueType, "severity": severity};
                 jsons:addToArray(components, "$.components", object);
@@ -708,7 +712,6 @@ function changeIssueFormat(json projectList, string[] issueTypeList, string[] se
             jsons:addToObject(data, "$.project", "components", components.components);
             jsons:addToObject(data, "$.project", "issuetype", issueType);
             jsons:addToObject(data, "$.project", "severity", severity);
-        //system:println(issue);
 
             json versions = {"versions": []};
             json version = issue.fields.versions;
@@ -734,149 +737,55 @@ function changeIssueFormat(json projectList, string[] issueTypeList, string[] se
 
     }
 
-    countIssues(projectIdList, issueTypeList, severityList, issues);
-
-}
-function changeIssueFormatTESTING2(json projectList, json issueTypeList, json severityList, json rawData, int numOfPages){
-
-    json issues = {"data":[]};
-    json data = {"project":{}};
-    //json projectIdList = jsons:getJson(projectList, "$.projects[*].jiraProjectId");
-
-    int index1 = numOfPages - 1;
-    json issue = {};
-
-    while (index1 >= 0) {
-        int totalNumOfIssues = lengthof rawData.data[index1];
-        int index2 = totalNumOfIssues - 1;
-        while (index2 >= 0) {
-            issue = rawData.data[index1][index2];
-            jsons:addToObject(data, "$.project", "id", issue.fields.project.id);
-
-            string issueType = jsons:getString(issue, "$.fields.issuetype.name");
-            string severity;
-            try {
-                severity = jsons:getString(issue,"$.fields.customfield_10075.value");
-            }catch (errors:Error err) {
-                severity = "Unknown";
-            }
-
-            json components = {"components": []};
-            json component = issue.fields.components;
-            int lengthOfComponents = lengthof component;
-            int index3 = lengthOfComponents - 1;
-
-            //if (index3 < 0) {
-            //    json object = {"id":0, "name": "none", "issuetype":issueType, "severity": severity};
-            //    jsons:addToArray(components, "$.components", object);
-            //}
-
-            while (index3 >= 0) {
-                json object = {"id": component[index3].id, "name": component[index3].name, "issuetype":issueType, "severity": severity};
-                jsons:addToArray(components, "$.components", object);
-                index3 = index3-1;
-            }
-            jsons:addToObject(data, "$.project", "components", components.components);
-            jsons:addToObject(data, "$.project", "issuetype", issueType);
-            jsons:addToObject(data, "$.project", "severity", severity);
-        //system:println(issue);
-
-            json versions = {"versions": []};
-            json version = issue.fields.versions;
-            int lengthOfVersions = lengthof version;
-            int index4 = lengthOfVersions - 1;
-
-            if (index4 < 0) {
-                json object = {"name": "none", "issuetype":issueType, "severity": severity};
-                jsons:addToArray(versions, "$.versions", object);
-            }
-
-            while (index4 >= 0) {
-                json object = {"name": version[index4].name, "issuetype":issueType, "severity": severity};
-                jsons:addToArray(versions, "$.versions", object);
-                index4 = index4-1;
-            }
-
-            jsons:addToObject(data, "$.project", "version", versions.versions);
-            jsons:addToArray(issues, "$.data", data);
-            index2 = index2 - 1;
-        }
-        index1 = index1 -1;
-
-    }
-    //system:println(issues);
-    countIssuesTESTING2(projectList, issueTypeList, severityList, issues);
+    logger:debug("finished reformatting the issue json.");
+    countIssuesTESTING2(projectList, issueTypeList, severityList, issues, dbConnector);
 
 }
 
 
-function getProjectsAsString(json projectList)(string){
-    json projectKeys = jsons:getJson(projectList, "$.projects[*].key");
-    int numOfProjects = lengthof projectKeys;
-    int index = numOfProjects - 1;
-    string projects = "";
-
-    while (index >= 0) {
-        string projectKey = jsons:getString(projectKeys, "$.["+index+"]");
-        projects = projects + "'" + projectKey + "',";
-        index = index - 1;
-    }
-
-    int length = strings:length(projects);
-    string result = strings:subString(projects, 0, length-1);
-    return result;
-}
 function getProjectsAsStringTESTING2(json projectList)(string){
-    system:println(projectList);
     json projectIDs = jsons:getJson(projectList, "$.projects[*].jiraProjectId");
     int numOfProjects = lengthof projectIDs;
-    system:println(numOfProjects);
-    int index = numOfProjects - 1;
-    string projects = "";
 
-    while (index >= 0) {
-        int projectID = jsons:getInt(projectIDs, "$.["+index+"]");
-        projects = projects + "'" + projectID + "',";
-        index = index - 1;
+    if(numOfProjects > 0){
+        int index = numOfProjects - 1;
+        string projects = "";
+
+        while (index >= 0) {
+            int projectID = jsons:getInt(projectIDs, "$.["+index+"]");
+            projects = projects + "'" + projectID + "',";
+            index = index - 1;
+        }
+
+        int length = strings:length(projects);
+        string result = strings:subString(projects, 0, length-1);
+
+        return result;
     }
-
-    int length = strings:length(projects);
-    string result = strings:subString(projects, 0, length-1);
-    return result;
+    return null;
 }
 
-
-function getIssueTypeAsString(string[] issueTypeList)(string){
-    int numOfIssueTypes = lengthof issueTypeList;
-    int index = numOfIssueTypes - 1;
-    string issueTypes = "";
-
-    while (index >= 0) {
-        issueTypes = issueTypes + "'" + issueTypeList[index] + "',";
-        index = index - 1;
-    }
-
-    int length = strings:length(issueTypes);
-    string result = strings:subString(issueTypes, 0, length-1);
-    return result;
-}
 
 function getIssueTypeAsStringTESTING2(json issueTypeList)(string){
     json issuetypes = jsons:getJson(issueTypeList, "$.issuetypes[*].type");
-    system:println(issuetypes);
     int numOfIssueTypes = lengthof issuetypes;
-    int index = numOfIssueTypes - 1;
-    string issueTypes = "";
 
-    while (index >= 0) {
-        string issuetype = jsons:getString(issuetypes, "$.["+index+"]");
-        issueTypes = issueTypes + "'" + issuetype + "',";
-        index = index - 1;
+    if(numOfIssueTypes > 0){
+        int index = numOfIssueTypes - 1;
+        string issueTypes = "";
+
+        while (index >= 0) {
+            string issuetype = jsons:getString(issuetypes, "$.["+index+"]");
+            issueTypes = issueTypes + "'" + issuetype + "',";
+            index = index - 1;
+        }
+
+        int length = strings:length(issueTypes);
+        string result = strings:subString(issueTypes, 0, length-1);
+        return result;
     }
 
-    int length = strings:length(issueTypes);
-    string result = strings:subString(issueTypes, 0, length-1);
-    return result;
+    return null;
 }
 
 
@@ -897,12 +806,12 @@ function countTypeIssues(string date, json projectDetails, string[] issueTypeLis
 
         index = index - 1;
     }
-
 }
+
 function countTypeIssuesTESTING2(string date, json projectDetails, json issueTypeList, json severityList, json issues, string path, sql:ClientConnector sqlCon){
 
-    int lengthOfTypes = lengthof issueTypeList.issuetypes;
-    int index = lengthOfTypes - 1;
+    int numOfIssueTypes = lengthof issueTypeList.issuetypes;
+    int index = numOfIssueTypes - 1;
     while (index >= 0) {
         int issueTypeId = jsons:getInt(issueTypeList.issuetypes, "$.["+index+"].id");
         string issueType = jsons:getString(issueTypeList.issuetypes, "$.["+index+"].type");
@@ -947,10 +856,14 @@ function countSeverityIssues(string date, json projectDetails, string[] severity
     }
 }
 
-function countSeverityIssuesTESTING2(string date, json projectDetails, json severityList, json typeIssues, string path, sql:ClientConnector sqlCon){
 
-    int lengthOfSeverityArray = lengthof severityList.severities;
-    int index = lengthOfSeverityArray - 1;
+
+
+
+function countSeverityIssuesTESTING2(string date, json projectDetails, json severityList, json issueDetails, string path, sql:ClientConnector sqlCon){
+
+    int numOfSeverities = lengthof severityList.severities;
+    int index = numOfSeverities - 1;
 
     while (index >= 0) {
         int severityId = jsons:getInt(severityList.severities, "$.["+index+"].id");
@@ -959,7 +872,7 @@ function countSeverityIssuesTESTING2(string date, json projectDetails, json seve
         string jsonPath = path + "[?(@.severity == '"+severity+"')]";
         projectDetails.jira_severity = severityId;
 
-        json severityIssues = jsons:getJson(typeIssues, jsonPath);
+        json severityIssues = jsons:getJson(issueDetails, jsonPath);
         int numOfIssues = lengthof severityIssues;
 
         if(numOfIssues != 0){
@@ -971,7 +884,7 @@ function countSeverityIssuesTESTING2(string date, json projectDetails, json seve
             int pqd_jira_severity = jsons:getInt(projectDetails, "$.jira_severity");
 
             saveIssuesInDatabaseTESTING2(pqd_area_id, pqd_product_id, pqd_component_jira_id, product_jira_version, pqd_jira_issue_type, pqd_jira_severity, date, numOfIssues, sqlCon);
-            //saveIssuesInDatabase(pqd_product_jira_id, pqd_component_jira_id, product_jira_version, pqd_jira_issue_type, pqd_jira_severity, snapshotId, numOfIssues, sqlCon);
+
         }
         index = index - 1;
     }
@@ -993,23 +906,30 @@ function saveIssuesInDatabaseTESTING2(int pqd_area_id, int pqd_product_id, int p
     string query = "";
     if(pqd_component_jira_id == 0){
         if(product_jira_version == 0){
-            system:println("product");
+            logger:debug("saving issue summary data for product level. Accessing query: INSERT_JIRA_ISSUES_BY_PRODUCT.");
             params = [pqd_area_id_para, pqd_product_jira_id_para, pqd_jira_issue_type_para, pqd_jira_severity_para,
                       pqd_issue_count_para, pqd_updated_para];
             query = INSERT_JIRA_ISSUES_BY_PRODUCT;
         }else{
-            system:println("version");
+            logger:debug("saving issue summary data for product version level. Accessing query: INSERT_JIRA_ISSUES_BY_VERSION.");
             params = [pqd_product_jira_id_para, pqd_product_jira_version_para, pqd_jira_issue_type_para, pqd_jira_severity_para, pqd_issue_count_para, pqd_updated_para];
             query = INSERT_JIRA_ISSUES_BY_VERSION;
         }
     }else{
         if(product_jira_version == 0){
-            system:println("component");
+            logger:debug("saving issue summary data for component level. Accessing query: INSERT_JIRA_ISSUES_BY_COMPONENT.");
             params = [pqd_product_jira_id_para, pqd_component_jira_id_para, pqd_jira_issue_type_para, pqd_jira_severity_para, pqd_issue_count_para, pqd_updated_para];
             query = INSERT_JIRA_ISSUES_BY_COMPONENT;
         }
     }
+
+    logger:debug("pqd_area_id: " + pqd_area_id + ", pqd_product_id: " + pqd_product_id + ", pqd_component_jira_id: " +
+                 pqd_component_jira_id + ", product_jira_version: " + product_jira_version + ", pqd_jira_issue_type: " +
+                 pqd_jira_issue_type + ", pqd_jira_severity: " + pqd_jira_severity + ", numOfIssues: " + numOfIssues +
+                 ", date: " + date);
+
     int numOfUpdatedRows = sql:ClientConnector.update(sqlCon, query, params);
+    logger:debug(numOfUpdatedRows + "number of rows got updated.");
 }
 
 function saveIssuesInDatabase(int pqd_product_jira_id, int pqd_component_jira_id, string product_jira_version, string pqd_jira_issue_type, string pqd_jira_severity, string date, int numOfIssues, sql:ClientConnector sqlCon){
@@ -1066,6 +986,7 @@ function countStatusIssues(json ProjectIssueSummary, json issuesForProduct, stri
 
 
 function checkStatusCode(int statusCode)(boolean[]){
+    logger:info("response status code: "+ statusCode);
     int leadingNum = statusCode / 100;
     boolean[] response;
 
@@ -1198,39 +1119,39 @@ function countIssues(json projectIdList, string[] issueTypeList, string[] severi
     system:println("done counting");
 
 }
-function countIssuesTESTING2(json projectList, json issueTypeList, json severityList, json data){
+function countIssuesTESTING2(json projectList, json issueTypeList, json severityList, json data, sql:ClientConnector dbConnector){
 
     int numOfProjects = lengthof projectList.projects;
     int remainingNumOfProjects = numOfProjects - 1;
-    system:println("remainingNumOfProjects: " + remainingNumOfProjects);
     json issues = {"data":[]};
-
-    sql:ClientConnector sqlCon = create sql:ClientConnector(propertiesMap);
 
     int numOfUpdatedRows;
     sql:Parameter[] params = [];
-
     numOfUpdatedRows = sql:ClientConnector.update(sqlCon, DELETE_JIRA_ISSUES_BY_PRODUCT, params);
+    logger:debug("deleted "+numOfUpdatedRows+" records from pqd_jira_issues_by_product table. Accessing query: DELETE_JIRA_ISSUES_BY_PRODUCT");
+
     numOfUpdatedRows = sql:ClientConnector.update(sqlCon, DELETE_JIRA_ISSUES_BY_COMPONENT, params);
+    logger:debug("deleted "+numOfUpdatedRows+" records from pqd_jira_issues_by_component table. Accessing query: DELETE_JIRA_ISSUES_BY_COMPONENT");
+
     numOfUpdatedRows = sql:ClientConnector.update(sqlCon, DELETE_JIRA_ISSUES_BY_VERSION, params);
-    system:println("cleaned tables");
+    logger:debug("deleted "+numOfUpdatedRows+" records from pqd_jira_issues_by_product_version table. Accessing query: DELETE_JIRA_ISSUES_BY_VERSION");
+
     int year;
     int month;
     int day;
     time:Time currentTime = time:currentTime();
     year, month, day = time:getDate(currentTime);
     string date = year + "-" + month + "-" + day;
-    system:println("Date:" + year + ":" + month + ":" + day);
+    logger:debug("got current date." + year + ":" + month + ":" + day);
 
+    logger:debug("counting issues for product, component and product version level.");
     while (remainingNumOfProjects >= 0) {
         int projectId = jsons:getInt(projectList.projects,"$.["+remainingNumOfProjects+"].jiraProjectId");
         int areaId = jsons:getInt(projectList.projects,"$.["+remainingNumOfProjects+"].area");
         int productId = jsons:getInt(projectList.projects,"$.["+remainingNumOfProjects+"].productID");
 
         json projectDetails = {"pqd_area_id": areaId, "pqd_product_id":productId, "component_jira_id":0, "product_jira_version":0, "jira_issue_type":0, "jira_severity":0};
-        //projectDetails.product_jira_id = projectId;
 
-        system:println(projectId);
         json issuesForProduct = jsons:getJson(data, "$.data[*].project[?(@.id=='"+projectId+"')]");
 
         countTypeIssuesTESTING2(date, projectDetails, issueTypeList, severityList, issuesForProduct, "$", sqlCon);
@@ -1239,7 +1160,6 @@ function countIssuesTESTING2(json projectList, json issueTypeList, json severity
 
         sql:Parameter pqd_product_id_para = {sqlType:"integer", value:productId};
         params = [pqd_product_id_para];
-
         datatable componentsDatatable = sql:ClientConnector.select(sqlCon, GET_PROJECT_COMPONENTS_VERSION2, params);
 
         while (datatables:hasNext(componentsDatatable)) {
@@ -1257,7 +1177,6 @@ function countIssuesTESTING2(json projectList, json issueTypeList, json severity
         datatables:close(componentsDatatable);
 
         params = [pqd_product_id_para];
-
         datatable versionsDatatable = sql:ClientConnector.select(sqlCon, GET_PROJECT_VERSIONS_VERSION2, params);
 
         while (datatables:hasNext(versionsDatatable)) {
@@ -1278,7 +1197,7 @@ function countIssuesTESTING2(json projectList, json issueTypeList, json severity
         remainingNumOfProjects = remainingNumOfProjects -1;
     }
 
-    system:println("done counting");
+    logger:info("finished counting and saving issues for product, component and product version levels.");
 
 }
 
