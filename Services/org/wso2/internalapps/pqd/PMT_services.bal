@@ -3,10 +3,10 @@ package org.wso2.internalapps.pqd;
 import ballerina.lang.messages;
 import ballerina.net.http;
 
-
 @http:configuration {basePath:"/pmt-dashboard-serives", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> pmtserives {
-      @http:GET {}
+
+    @http:GET {}
     @http:Path {value:"/loaddashboard/{startDate}/{endDate}" }
 
     resource loadInitialsCounts (message m, @http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {
@@ -79,7 +79,7 @@ service<http> pmtserives {
     }
 
     @http:GET {}
-        @http:Path {value:"/load-menu-version-badgeCounts/{startDate}/{endDate}" }
+    @http:Path {value:"/load-menu-version-badgeCounts/{startDate}/{endDate}" }
 
     resource getMenuVersionBadgeCounts (message m,@http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {
         json menuVersionBadgeCount = menuVersionBadgesCounts(startDate,endDate);
@@ -213,7 +213,7 @@ service<http> pmtserives {
     @http:GET {}
     @http:Path {value:"/load-lifecycle-states-patch/{patchID}/{eID}" }
 
-    resource  test(message m,@http:PathParam {value:"patchID"} string patchID,@http:PathParam {value:"eID"} string eID){
+    resource  getSpecificPatchDetails(message m,@http:PathParam {value:"patchID"} string patchID,@http:PathParam {value:"eID"} string eID){
         json onePatchLifeCycleStatesResponse = getSpecificPatchLifeCycle(patchID,eID);
 
         message response = {};

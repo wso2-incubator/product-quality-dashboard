@@ -548,62 +548,7 @@ function getProjectNamesIssueTypesAndSeveritiesTESTING2(json projectList, json i
 }
 
 
-function getJiraIssuesSummary(json projectList, string[] issueTypeList, string[] severityList, jira:ClientConnector jiraConnector, sql:ClientConnector dbConnector)(message ){
 
-    int remainingCount = 10;
-    int startAt = 0;
-    int totalIssues;
-    int numOfPages = 0;
-    json jiraJSONResponse;
-    json Result = {"data":[], "error": false};
-    string projects = getProjectsAsString(projectList);
-    string issueTypes = getIssueTypeAsString(issueTypeList);
-
-    system:println("getting data");
-    while (remainingCount > 0) {
-        json payload = {"jql":" project in ("+projects+") AND status in (Open, 'In Progress')" +
-                              "  AND issuetype in ("+issueTypes+")"
-                       , "startAt":startAt, "maxResults":1000, "validateQuery":true,
-                           "fields": ["project", "components","issuetype","customfield_10075", "versions"]};
-
-        message jiraResponse = jira:ClientConnector.searchJira(jiraConnector, payload);
-
-        boolean[] statusCode = checkStatusCode(http:getStatusCode(jiraResponse));
-        boolean statusCodeSuccess = statusCode[0];
-        boolean hasErrorMessage = statusCode[1];
-
-        jiraJSONResponse = messages:getJsonPayload(jiraResponse);
-
-        if (statusCodeSuccess) {
-            totalIssues = jsons:getInt(jiraJSONResponse, "$.total");
-            startAt = startAt + 1000;
-            remainingCount = totalIssues - startAt;
-
-            jsons:addToArray(Result, "$.data", jsons:getJson(jiraJSONResponse, "$.issues"));
-
-        }
-        else{
-            if (hasErrorMessage) {
-                logger:error("errorMessage: "+createErrorMsg(jiraJSONResponse));
-                Result.error = true;
-            }else{
-                logger:error("error");
-                Result.error = true;
-            }
-        }
-        numOfPages = numOfPages + 1;
-    }
-
-    boolean error = jsons:getBoolean(Result, "$.error");
-    system:println("got data");
-
-    message Response = {};
-    if (!error){
-        changeIssueFormat(projectList, issueTypeList, severityList, Result, numOfPages);
-    }
-    messages:setStringPayload(Response,"OK");
-    return Response;
-}
 
 function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json severityList, jira:ClientConnector jiraConnector, sql:ClientConnector dbConnector)(message ){
 
@@ -629,7 +574,8 @@ function getJiraIssuesSummaryTESTING2(json projectList, json issueTypeList, json
                        , "startAt":startAt, "maxResults":1000, "validateQuery":true,
                            "fields": ["project", "components","issuetype","customfield_10075", "versions"]};
 
-        var stringPayload, _ = <json>payload;
+        var stringPayload, _ = (string)payload;
+
         logger:debug("created jql payload for JIRA: " + stringPayload);
 
         logger:debug("invoking searchJira action in JIRA client connector with the payload.");
@@ -746,10 +692,11 @@ function changeIssueFormatTESTING2(json projectList, json issueTypeList, json se
 function getProjectsAsStringTESTING2(json projectList)(string){
     json projectIDs = jsons:getJson(projectList, "$.projects[*].jiraProjectId");
     int numOfProjects = lengthof projectIDs;
+	string projects = "";
 
     if(numOfProjects > 0){
         int index = numOfProjects - 1;
-        string projects = "";
+        
 
         while (index >= 0) {
             int projectID = jsons:getInt(projectIDs, "$.["+index+"]");
@@ -762,17 +709,18 @@ function getProjectsAsStringTESTING2(json projectList)(string){
 
         return result;
     }
-    return null;
+    return projects;
 }
 
 
 function getIssueTypeAsStringTESTING2(json issueTypeList)(string){
     json issuetypes = jsons:getJson(issueTypeList, "$.issuetypes[*].type");
     int numOfIssueTypes = lengthof issuetypes;
-
+	string issueTypes = "";
+	
     if(numOfIssueTypes > 0){
         int index = numOfIssueTypes - 1;
-        string issueTypes = "";
+        
 
         while (index >= 0) {
             string issuetype = jsons:getString(issuetypes, "$.["+index+"]");
@@ -785,7 +733,7 @@ function getIssueTypeAsStringTESTING2(json issueTypeList)(string){
         return result;
     }
 
-    return null;
+    return issueTypes;
 }
 
 
@@ -1119,7 +1067,7 @@ function countIssues(json projectIdList, string[] issueTypeList, string[] severi
     system:println("done counting");
 
 }
-function countIssuesTESTING2(json projectList, json issueTypeList, json severityList, json data, sql:ClientConnector dbConnector){
+function countIssuesTESTING2(json projectList, json issueTypeList, json severityList, json data, sql:ClientConnector sqlCon){
 
     int numOfProjects = lengthof projectList.projects;
     int remainingNumOfProjects = numOfProjects - 1;
