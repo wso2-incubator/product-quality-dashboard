@@ -1,5 +1,6 @@
-var baseUrl='https://10.100.4.8:9092/';
-//digitalops.services.wso2.com
+var baseUrl='https://digitalops.services.wso2.com:9092/';
+//var baseUrl='https://10.100.4.8:9092/';
+
 var currentArea;
 var currentProduct;
 var currentVersion;
