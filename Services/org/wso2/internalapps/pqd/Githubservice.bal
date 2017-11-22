@@ -84,6 +84,7 @@ struct GithubAreaIssue{
     int pqd_issues_count;
 }
 
+json githubConfigData = getConfigData(CONFIG_PATH);
 
 @http:configuration {basePath:"/internal/product-quality/v1.0/github", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> GithubService {
@@ -1464,19 +1465,14 @@ function httpGetForGithub(string path)(message ){
     message request = {};
     message response = {};
 
-    json configData = getConfigData(CONFIG_PATH);
-
     http:ClientConnector githubCon = create http:ClientConnector(domainUrl);
 
-    //messages:setHeader(request, "Authentication:", "token " + jsons:getString(configData, "$.githubAccessToken"));
+    messages:setHeader(request, "Authorization", jsons:getString(githubConfigData, "$.GITHUB.GITHUB_ACCESS_TOKEN"));
     messages:setHeader(request, "Content-Type", "application/json");
 
-    string clientId = jsons:getString(configData, "$.GITHUB.GITHUB_CLIENT_ID");
-    string clientSecret = jsons:getString(configData, "$.GITHUB.GITHUB_CLIENT_SECRET");
+    path = path + "?per_page=100";
 
-    string authenticatedPath = path + "?client_id=" + clientId + "&client_secret=" + clientSecret + "&per_page=100";
-
-    response = http:ClientConnector.get(githubCon, authenticatedPath, request);
+    response = http:ClientConnector.get(githubCon, path, request);
 
     message finalResponse = collectDataFromPagination(response);
 
