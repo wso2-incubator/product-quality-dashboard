@@ -498,6 +498,7 @@ function getSQLconfigData(json configData)(map){
     int dbPort;
     string dbUsername;
     string dbPassword;
+    int maxPoolConnections;
 
     try {
         dbHost = jsons:getString(configData, "$.PQD_JDBC.DB_HOST");
@@ -505,6 +506,7 @@ function getSQLconfigData(json configData)(map){
         dbName = jsons:getString(configData, "$.PQD_JDBC.DB_NAME");
         dbUsername = jsons:getString(configData, "$.PQD_JDBC.DB_USERNAME");
         dbPassword = jsons:getString(configData, "$.PQD_JDBC.DB_PASSWORD");
+        maxPoolConnections = jsons:getInt(configData, "PQD_JDBC.MAXIMUM_POOL_SIZE");
 
     } catch (errors:Error err) {
         logger:error("Properties not defined in config.json: " + err.msg );
@@ -513,12 +515,13 @@ function getSQLconfigData(json configData)(map){
         dbName = jsons:getString(configData, "$.PQD_JDBC.DB_NAME");
         dbUsername = jsons:getString(configData, "$.PQD_JDBC.DB_USERNAME");
         dbPassword = jsons:getString(configData, "$.PQD_JDBC.DB_PASSWORD");
+        maxPoolConnections = jsons:getInt(configData, "PQD_JDBC.MAXIMUM_POOL_SIZE");
 
     }
 
     string jdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
 
-    map propertiesMap = {"jdbcUrl": jdbcUrl,"username": dbUsername, "password": dbPassword};
+    map propertiesMap = {"jdbcUrl": jdbcUrl,"username": dbUsername, "password": dbPassword, "maximumPoolSize":maxPoolConnections};
 
     return propertiesMap;
 
