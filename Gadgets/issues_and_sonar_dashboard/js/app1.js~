@@ -1566,7 +1566,7 @@ function createIssueTrendChart(data){
         },
         tooltip: {
             headerFormat: '<span style="font-size:0.7387508394895903vw">Issues</span><br>',
-            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
+            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> of total<br/>'
         },
         series: [{
             type: 'line',
@@ -1611,7 +1611,7 @@ function createSonarTrendChart(data){
         },
         tooltip: {
             headerFormat: '<span style="font-size:0.7387508394895903vw">Sonar</span><br>',
-            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
+            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> of total<br/>'
         },
         series: [{
             type: 'line',
@@ -1634,7 +1634,6 @@ function setSonarDate(start, end) {
     sonarEndDate = end;
     sonarHistoryTitle =  startDate + " - " + endDate;
 }
-
 
 
 
