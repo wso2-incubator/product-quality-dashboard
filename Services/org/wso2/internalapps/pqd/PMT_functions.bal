@@ -73,47 +73,41 @@ function loadDashboardWithHistory(string start,string end)(json){
         setDatabaseConfiguration();
     }
 
-    //get all products
+    //SQL parameters
     sql:Parameter[] params = [];
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
 
-    sql:Parameter p15 = {sqlType:"varchar", value:""};
-    sql:Parameter p16 = {sqlType:"varchar", value:"Yes"};
-    sql:Parameter p17 = {sqlType:"varchar", value:"No"};
-    params = [p15,p16,p17];
-    datatable dt5 = dbConnection.select(GET_ALL_PRODUCTS, params);
-    var jsonResOfProducts, _ = <json>dt5;
+    //get all products
+    params = [valueOfActiveIsYes,valueOfActiveIsNo];
+    datatable resultsOfAllProducts = dbConnection.select(GET_ALL_PRODUCTS, params);
+    var jsonResOfProducts, _ = <json>resultsOfAllProducts;
 
     //get all versions of each product
     params = [];
-    datatable dt6 = dbConnection.select(GET_ALL_VERSIONS, params);
-    var jsonResOfVersions, _ = <json>dt6;
+    datatable resultsOfAllProductsVersions = dbConnection.select(GET_ALL_VERSIONS, params);
+    var jsonResOfVersions, _ = <json>resultsOfAllProductsVersions;
 
     json drillDownMenu = {"allProducts":jsonResOfProducts,"allVersions":jsonResOfVersions};
 
     //get reactive patch counts
-    sql:Parameter p18 = {sqlType:"varchar", value:"Yes"};
-    sql:Parameter p19 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p20 = {sqlType:"date", value:start};
-    sql:Parameter p21 = {sqlType:"date", value:end};
-    params = [p18,p19,p20,p21];
-    datatable dt7 = dbConnection.select(GET_REACTIVE_PATCH_COUNTS, params);
-    var jsonResOfReactive, _ = <json>dt7;
+    params = [valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
+    datatable resultOfDatabaseReactivePatches = dbConnection.select(GET_REACTIVE_PATCH_COUNTS, params);
+    var jsonResOfReactive, _ = <json>resultOfDatabaseReactivePatches;
     var reactiveCount,castErr = (int)jsonResOfReactive[0].total;
 
     //get proactive patch counts
-    sql:Parameter p22 = {sqlType:"varchar", value:"Yes"};
-    sql:Parameter p23 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p24 = {sqlType:"date", value:start};
-    sql:Parameter p25 = {sqlType:"date", value:end};
-    params = [p22,p23,p24,p25];
-    datatable dt8 = dbConnection.select(GET_PROACTIVE_PATCH_COUNTS, params);
-    var jsonResOfProactive, _ = <json>dt8;
+    params = [valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
+    datatable resultOfDatabaseProactivePatches = dbConnection.select(GET_PROACTIVE_PATCH_COUNTS, params);
+    var jsonResOfProactive, _ = <json>resultOfDatabaseProactivePatches;
     var proactiveCount,_ = (int)jsonResOfProactive[0].total;
 
     //get security internal patches
-    params = [p22,p23,p24,p25];
-    datatable dt9 = dbConnection.select(GET_SECURITY_INTERNAL_PATCHES, params);
-    var jsonResOfSecurityInternal, _ = <json>dt9;
+    params = [valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
+    datatable resultOfDatabaseSecurityInternalPatches = dbConnection.select(GET_SECURITY_INTERNAL_PATCHES, params);
+    var jsonResOfSecurityInternal, _ = <json>resultOfDatabaseSecurityInternalPatches;
 
     string securityInternal_ID;
     string[] idPool = [];
@@ -231,11 +225,11 @@ function loadDashboardWithHistory(string start,string end)(json){
 
     logger:info("PMT DASHBOARD LOADED SUCCESSFULLY");
 
-    datatables:close(dt5);
-    datatables:close(dt6);
-    datatables:close(dt7);
-    datatables:close(dt8);
-    datatables:close(dt9);
+    datatables:close(resultsOfAllProducts);
+    datatables:close(resultsOfAllProductsVersions);
+    datatables:close(resultOfDatabaseReactivePatches);
+    datatables:close(resultOfDatabaseProactivePatches);
+    datatables:close(resultOfDatabaseSecurityInternalPatches);
 
     return loadCounts;
 
@@ -244,17 +238,17 @@ function loadDashboardWithHistory(string start,string end)(json){
 function getYetToStartCount(string start,string end)(int){
 
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"date", value:start};
-    sql:Parameter p2 = {sqlType:"date", value:end};
-    sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p4 = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
 
-    params = [p1,p2,p3,p2,p4,p1,p2];
-    datatable dt = dbConnection.select(GET_YET_TO_START_PATCH_COUNTS, params);
-    var jsonResOfYetToStartCount, _ = <json>dt;
+    params = [startDate,endDate,valueOfActiveIsNo,endDate,valueOfActiveIsYes,startDate,endDate];
+    datatable resultOfYetToStartPatchCount = dbConnection.select(GET_YET_TO_START_PATCH_COUNTS, params);
+    var jsonResOfYetToStartCount, _ = <json>resultOfYetToStartPatchCount;
     var yetToStartCount,_ = (int)jsonResOfYetToStartCount[0].qtotal;
 
-    datatables:close(dt);
+    datatables:close(resultOfYetToStartPatchCount);
 
     return yetToStartCount;
 }
@@ -262,16 +256,16 @@ function getYetToStartCount(string start,string end)(int){
 function completedCount(string start,string end)(int){
     sql:Parameter[] params = [];
 
-    sql:Parameter p4 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p5 = {sqlType:"date", value:start};
-    sql:Parameter p6 = {sqlType:"date", value:end};
-    params = [p4,p5,p6,p5,p6,p5,p6];
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    params = [valueOfActiveIsNo,startDate,endDate,startDate,endDate,startDate,endDate];
 
-    datatable dt1 = dbConnection.select(GET_COMPLETED_PATCH_COUNTS, params);
-    var jsonResOfCompletedCount, _ = <json>dt1;
+    datatable resultOfCompletePatchCount = dbConnection.select(GET_COMPLETED_PATCH_COUNTS, params);
+    var jsonResOfCompletedCount, _ = <json>resultOfCompletePatchCount;
     var completeCount,_ = (int)jsonResOfCompletedCount[0].ctotal;
 
-    datatables:close(dt1);
+    datatables:close(resultOfCompletePatchCount);
 
     return completeCount;
 }
@@ -279,16 +273,16 @@ function completedCount(string start,string end)(int){
 function partiallyCompletedCount(string start,string end)(int){
     sql:Parameter[] params = [];
 
-    sql:Parameter p4 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p5 = {sqlType:"date", value:start};
-    sql:Parameter p6 = {sqlType:"date", value:end};
-    params = [p4,p5,p6,p5,p6,p5,p6];
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    params = [valueOfActiveIsNo,startDate,endDate,startDate,endDate,startDate,endDate];
 
-    datatable dt1 = dbConnection.select(PARTIALLY_COMPLETED_PATCH_COUNTS, params);
-    var jsonResOfPartiallyCompletedCount, _ = <json>dt1;
+    datatable resultOfPartiallyCompletedCount = dbConnection.select(PARTIALLY_COMPLETED_PATCH_COUNTS, params);
+    var jsonResOfPartiallyCompletedCount, _ = <json>resultOfPartiallyCompletedCount;
     var partiallyCompleteCount,_ = (int)jsonResOfPartiallyCompletedCount[0].ctotal;
 
-    datatables:close(dt1);
+    datatables:close(resultOfPartiallyCompletedCount);
 
     return partiallyCompleteCount;
 }
@@ -296,18 +290,18 @@ function partiallyCompletedCount(string start,string end)(int){
 function inProgressCount(string start,string end)(int){
     sql:Parameter[] params = [];
 
-    sql:Parameter p1 = {sqlType:"date", value:start};
-    sql:Parameter p2 = {sqlType:"date", value:end};
-    sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p4 = {sqlType:"integer", value:0};
-    sql:Parameter p5 = {sqlType:"integer", value:1};
-    params = [p1,p2,p3,p4,p3,p5,p2,p2,p2,p2];
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+    params = [startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate];
 
-    datatable dt3 = dbConnection.select(GET_IN_PROGRESS_PATCH_COUNTS, params);
-    var jsonResOfInProgressCount, _ = <json>dt3;
+    datatable resultOfInProgressCount = dbConnection.select(GET_IN_PROGRESS_PATCH_COUNTS, params);
+    var jsonResOfInProgressCount, _ = <json>resultOfInProgressCount;
     var inProgressPatchCount,_ = (int)jsonResOfInProgressCount[0].devtotal;
 
-    datatables:close(dt3);
+    datatables:close(resultOfInProgressCount);
 
     return inProgressPatchCount;
 }
@@ -315,18 +309,18 @@ function inProgressCount(string start,string end)(int){
 function overETACount(string start,string end)(int){
     sql:Parameter[] params = [];
 
-    sql:Parameter p1 = {sqlType:"date", value:start};
-    sql:Parameter p2 = {sqlType:"date", value:end};
-    sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p4 = {sqlType:"integer", value:0};
-    sql:Parameter p5 = {sqlType:"integer", value:1};
-    params = [p1,p2,p3,p4,p3,p5,p2,p2,p2,p2,p2];
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+    params = [startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate,endDate];
 
-    datatable dt3 = dbConnection.select(GET_OVER_ETA_PATCH_COUNTS, params);
-    var jsonResOfOverETACount, _ = <json>dt3;
+    datatable resultOfOverETACount = dbConnection.select(GET_OVER_ETA_PATCH_COUNTS, params);
+    var jsonResOfOverETACount, _ = <json>resultOfOverETACount;
     var etaCount,_ = (int)jsonResOfOverETACount[0].etatotal;
 
-    datatables:close(dt3);
+    datatables:close(resultOfOverETACount);
 
     return etaCount;
 }
@@ -336,13 +330,13 @@ function queuedDetails(string start,string end)(json){
         setDatabaseConfiguration();
     }
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"date", value:start};
-    sql:Parameter p2 = {sqlType:"date", value:end};
-    sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p4 = {sqlType:"varchar", value:"Yes"};
-    params = [p1,p2,p3,p2,p4,p1,p2];
-    datatable dt = dbConnection.select(GET_YET_TO_START_PATCH_DETAILS, params);
-    var jsonResOfQueueDetails, _ = <json>dt;
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+    params = [startDate,endDate,valueOfActiveIsNo,endDate,valueOfActiveIsYes,startDate,endDate];
+    datatable resultOfYetToStartPatchDetails = dbConnection.select(GET_YET_TO_START_PATCH_DETAILS, params);
+    var jsonResOfQueueDetails, _ = <json>resultOfYetToStartPatchDetails;
 
     logger:info("YET TO START DETAILS SENT");
 
@@ -354,15 +348,15 @@ function devDetails(string start,string end)(json){
         setDatabaseConfiguration();
     }
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"date", value:start};
-    sql:Parameter p2 = {sqlType:"date", value:end};
-    sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p4 = {sqlType:"integer", value:0};
-    sql:Parameter p5 = {sqlType:"integer", value:1};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
 
-    params = [p1,p2,p3,p4,p3,p5,p2,p2,p2,p2];
-    datatable dt = dbConnection.select(GET_IN_PROGRESS_PATCH_DETAILS, params);
-    var jsonResOfDevDetails, _ = <json>dt;
+    params = [startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate];
+    datatable resultOfInProgressPatchDetails = dbConnection.select(GET_IN_PROGRESS_PATCH_DETAILS, params);
+    var jsonResOfDevDetails, _ = <json>resultOfInProgressPatchDetails;
 
     logger:info("IN PROGRESS DETAILS SENT");
 
@@ -374,13 +368,13 @@ function completeDetails(string start,string end)(json){
         setDatabaseConfiguration();
     }
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"varchar", value:"1"};
-    sql:Parameter p2 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p3 = {sqlType:"date", value:start};
-    sql:Parameter p4 = {sqlType:"date", value:end};
-    params = [p1,p2,p3,p4,p3,p4,p3,p4];
-    datatable dt = dbConnection.select(GET_COMPLETED_PATCH_DETAILS, params);
-    var jsonResOfCompleteDetails, _ = <json>dt;
+    sql:Parameter valueOfStatusIsOne = {sqlType:"varchar", value:"1"};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    params = [valueOfStatusIsOne,valueOfActiveIsNo,startDate,endDate,startDate,endDate,startDate,endDate];
+    datatable resultOfAllCompletePatchDetails = dbConnection.select(GET_COMPLETED_PATCH_DETAILS, params);
+    var jsonResOfCompleteDetails, _ = <json>resultOfAllCompletePatchDetails;
 
     logger:info("COMPLETED DETAILS SENT");
 
@@ -391,43 +385,33 @@ function menuBadgesCounts(string start,string end)(json){
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
+
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"date", value:start};
-    sql:Parameter p2 = {sqlType:"date", value:end};
-    sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p4 = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
 
-    params = [p1,p2,p3,p2,p4,p1,p2];
-    datatable dt = dbConnection.select(PRODUCT_WISE_YET_TO_START_COUNT, params);
+    params = [startDate,endDate,valueOfActiveIsNo,endDate,valueOfActiveIsYes,startDate,endDate];
+    datatable resultOfProductWiseTetToStartCount = dbConnection.select(PRODUCT_WISE_YET_TO_START_COUNT, params);
+    var jsonResOfQueuedCount, _ = <json>resultOfProductWiseTetToStartCount;
 
-    var jsonResOfQueuedCount, _ = <json>dt;
+    params = [startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate,endDate];
+    datatable resultOfProductWiseOverETACount = dbConnection.select(PRODUCT_WISE_OVER_ETA_COUNT, params);
+    var jsonResOfETACounts, _ = <json>resultOfProductWiseOverETACount;
 
-    sql:Parameter p01 = {sqlType:"date", value:start};
-    sql:Parameter p02 = {sqlType:"date", value:end};
-    sql:Parameter p03 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p04 = {sqlType:"integer", value:0};
-    sql:Parameter p05 = {sqlType:"integer", value:1};
-
-    params = [p01,p02,p03,p04,p03,p05,p02,p02,p02,p02,p02];
-    datatable dt2 = dbConnection.select(PRODUCT_WISE_OVER_ETA_COUNT, params);
-    var jsonResOfETACounts, _ = <json>dt2;
-
-    sql:Parameter pp1 = {sqlType:"date", value:start};
-    sql:Parameter pp2 = {sqlType:"date", value:end};
-    sql:Parameter pp3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter pp4 = {sqlType:"integer", value:0};
-    sql:Parameter pp5 = {sqlType:"integer", value:1};
-
-    params = [pp1,pp2,pp3,pp4,pp3,pp5,pp2,pp2,pp2,pp2];
-    datatable dt3 = dbConnection.select(PRODUCT_WISE_IN_PROGRESS_COUNT, params);
-    var jsonResOfDEVCounts, _ = <json>dt3;
+    params = [startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate];
+    datatable resultOfProductWiseInProgressCount = dbConnection.select(PRODUCT_WISE_IN_PROGRESS_COUNT, params);
+    var jsonResOfDEVCounts, _ = <json>resultOfProductWiseInProgressCount;
 
     json menuBadgeCount = {"jsonResOfQueuedCount":jsonResOfQueuedCount,"jsonResOfETACounts":jsonResOfETACounts,"jsonResOfDEVCounts":jsonResOfDEVCounts};
 
     logger:info("MAIN MENU BADGE COUNTS SENT");
-    datatables:close(dt);
-    datatables:close(dt2);
-    datatables:close(dt3);
+    datatables:close(resultOfProductWiseTetToStartCount);
+    datatables:close(resultOfProductWiseOverETACount);
+    datatables:close(resultOfProductWiseInProgressCount);
 
     return menuBadgeCount;
 }
@@ -437,42 +421,32 @@ function menuVersionBadgesCounts(string start,string end)(json){
         setDatabaseConfiguration();
     }
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"date", value:start};
-    sql:Parameter p2 = {sqlType:"date", value:end};
-    sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p4 = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
 
-    params = [p1,p2,p3,p2,p4,p1,p2];
-    datatable dt = dbConnection.select(VERSION_WISE_YET_TO_START_COUNT, params);
 
-    var jsonResOfQueuedCount, _ = <json>dt;
+    params = [startDate,endDate,valueOfActiveIsNo,endDate,valueOfActiveIsYes,startDate,endDate];
+    datatable resultOfVersionWiseYetToStartPatchCount = dbConnection.select(VERSION_WISE_YET_TO_START_COUNT, params);
+    var jsonResOfQueuedCount, _ = <json>resultOfVersionWiseYetToStartPatchCount;
 
-    sql:Parameter p01 = {sqlType:"date", value:start};
-    sql:Parameter p02 = {sqlType:"date", value:end};
-    sql:Parameter p03 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p04 = {sqlType:"integer", value:0};
-    sql:Parameter p05 = {sqlType:"integer", value:1};
+    params = [startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate,endDate];
+    datatable resultOfVersionWiseOverETACount = dbConnection.select(VERSION_WISE_OVER_ETA_COUNT, params);
+    var jsonResOfETACounts, _ = <json>resultOfVersionWiseOverETACount;
 
-    params = [p01,p02,p03,p04,p03,p05,p02,p02,p02,p02,p02];
-    datatable dt2 = dbConnection.select(VERSION_WISE_OVER_ETA_COUNT, params);
-    var jsonResOfETACounts, _ = <json>dt2;
-
-    sql:Parameter pp1 = {sqlType:"date", value:start};
-    sql:Parameter pp2 = {sqlType:"date", value:end};
-    sql:Parameter pp3 = {sqlType:"varchar", value:"No"};
-    sql:Parameter pp4 = {sqlType:"integer", value:0};
-    sql:Parameter pp5 = {sqlType:"integer", value:1};
-
-    params = [pp1,pp2,pp3,pp4,pp3,pp5,pp2,pp2,pp2,pp2];
-    datatable dt3 = dbConnection.select(VERSION_WISE_IN_PROGRESS_COUNT, params);
-    var jsonResOfDEVCounts, _ = <json>dt3;
+    params = [startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate];
+    datatable resultOfVersionWiseInProgressCount = dbConnection.select(VERSION_WISE_IN_PROGRESS_COUNT, params);
+    var jsonResOfDEVCounts, _ = <json>resultOfVersionWiseInProgressCount;
 
     json menuBadgeCount = {"jsonResOfQueuedCount":jsonResOfQueuedCount,"jsonResOfETACounts":jsonResOfETACounts,"jsonResOfDEVCounts":jsonResOfDEVCounts};
 
     logger:info("MAIN MENU VERSION BADGE COUNTS SENT");
-    datatables:close(dt);
-    datatables:close(dt2);
-    datatables:close(dt3);
+    datatables:close(resultOfVersionWiseYetToStartPatchCount);
+    datatables:close(resultOfVersionWiseOverETACount);
+    datatables:close(resultOfVersionWiseInProgressCount);
 
     return menuBadgeCount;
 }
@@ -484,12 +458,14 @@ function reportedPatchGraph(string duration,string start,string end)(json){
 
     logger:info("REPORTED PATCHES FOR "+duration+" REQUESTED");
 
-    sql:Parameter p1 = {sqlType:"varchar", value:"Yes"};
-    sql:Parameter p2 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p3 = {sqlType:"varchar", value:start};
-    sql:Parameter p4 = {sqlType:"varchar", value:end};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
 
-    params = [p1,p2,p3,p4];
+    params = [valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
     boolean isEmpty = false;
     int jsonResOfReportedPatchesLength=0;
     int loop = 0;
@@ -498,19 +474,19 @@ function reportedPatchGraph(string duration,string start,string end)(json){
     json weekFirstDate ={};
 
     if(duration == "month"){
-        datatable dt = dbConnection.select(REPORTED_PATCH_MONTH_BASIS, params);
-        jsonResOfReportedPatches, _ = <json>dt;
+        datatable resultOfReportedPatchesMonthly = dbConnection.select(REPORTED_PATCH_MONTH_BASIS, params);
+        jsonResOfReportedPatches, _ = <json>resultOfReportedPatchesMonthly;
 
         jsonResOfReportedPatchesLength = lengthof jsonResOfReportedPatches;
 
         while(loop<jsonResOfReportedPatchesLength){
-            sql:Parameter p5 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].TYPE};
-            sql:Parameter p6 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].MONTH};
-            sql:Parameter p7 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].QUARTER};
-            sql:Parameter p8 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].YEAR};
-            params = [p5,p6,p7,p8,p1,p2,p3,p4];
-            datatable dt2 = dbConnection.select(REPORTED_PATCH_PRODUCT_WISE_MONTH_BASIS, params);
-            reportedPatchDrillDown[loop],_ = <json>dt2;
+            sql:Parameter currentMonth = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].TYPE};
+            sql:Parameter month = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].MONTH};
+            sql:Parameter quarter = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].QUARTER};
+            sql:Parameter year = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].YEAR};
+            params = [currentMonth,month,quarter,year,valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
+            datatable resultOfReportedPatchProductWiseMonth = dbConnection.select(REPORTED_PATCH_PRODUCT_WISE_MONTH_BASIS, params);
+            reportedPatchDrillDown[loop],_ = <json>resultOfReportedPatchProductWiseMonth;
             loop=loop+1;
         }
 
@@ -522,11 +498,11 @@ function reportedPatchGraph(string duration,string start,string end)(json){
         jsonResOfReportedPatchesLength = lengthof jsonResOfReportedPatches;
 
         while(loop<jsonResOfReportedPatchesLength){
-            sql:Parameter p5 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].TYPE};
-            sql:Parameter p6 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].MONTH};
-            sql:Parameter p7 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].QUARTER};
-            sql:Parameter p8 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].YEAR};
-            params = [p5,p6,p7,p8,p1,p2,p3,p4];
+            sql:Parameter currentDay = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].TYPE};
+            sql:Parameter month = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].MONTH};
+            sql:Parameter quarter = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].QUARTER};
+            sql:Parameter year = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].YEAR};
+            params = [currentDay,month,quarter,year,valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
             datatable dt2 = dbConnection.select(REPORTED_PATCH_PRODUCT_WISE_DAY_BASIS, params);
             reportedPatchDrillDown[loop],_ = <json>dt2;
             loop=loop+1;
@@ -543,7 +519,7 @@ function reportedPatchGraph(string duration,string start,string end)(json){
         while(loop<jsonResOfReportedPatchesLength){
             sql:Parameter p5 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].TYPE};
             sql:Parameter p8 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].YEAR};
-            params = [p5,p8,p1,p2,p3,p4];
+            params = [p5,p8,valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
             datatable dt2 = dbConnection.select(REPORTED_PATCH_PRODUCT_WISE_WEEK_BASIS, params);
             reportedPatchDrillDown[loop],_ = <json>dt2;
             loop=loop+1;
@@ -561,7 +537,7 @@ function reportedPatchGraph(string duration,string start,string end)(json){
         while(loop<jsonResOfReportedPatchesLength){
             sql:Parameter p5 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].TYPE};
             sql:Parameter p8 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].YEAR};
-            params = [p5,p8,p1,p2,p3,p4];
+            params = [p5,p8,valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
             datatable dt2 = dbConnection.select(REPORTED_PATCH_PRODUCT_WISE_QUARTER_BASIS, params);
             reportedPatchDrillDown[loop],_ = <json>dt2;
             loop=loop+1;
@@ -577,7 +553,7 @@ function reportedPatchGraph(string duration,string start,string end)(json){
         while(loop<jsonResOfReportedPatchesLength){
             sql:Parameter p5 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].TYPE};
             sql:Parameter p8 = {sqlType:"varchar", value:jsonResOfReportedPatches[loop].YEAR};
-            params = [p5,p8,p1,p2,p3,p4];
+            params = [p5,p8,valueOfActiveIsYes,valueOfActiveIsNo,startDate,endDate];
             datatable dt2 = dbConnection.select(REPORTED_PATCH_PRODUCT_WISE_YEAR_BASIS, params);
             reportedPatchDrillDown[loop],_ = <json>dt2;
             loop=loop+1;
@@ -696,49 +672,37 @@ function totalProductSummaryCounts(string product,string start,string end)(json)
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
+
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"varchar", value:"Yes"};
-    sql:Parameter p2 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p3 = {sqlType:"varchar", value:product};
-    sql:Parameter p4 = {sqlType:"varchar", value:"Bug"};
-    sql:Parameter p5 = {sqlType:"date", value:start};
-    sql:Parameter p6 = {sqlType:"date", value:end};
-    params = [p1,p2,p3,p4,p5,p6];
-    datatable dt = dbConnection.select(SPECIFIC_PRODUCT_BUG_COUNT, params);
-    var jsonResOfBugCount, _ = <json>dt;
 
-    sql:Parameter p00 = {sqlType:"varchar", value:product};
-    sql:Parameter p01 = {sqlType:"date", value:start};
-    sql:Parameter p02 = {sqlType:"date", value:end};
-    sql:Parameter p03 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p04 = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+    sql:Parameter product = {sqlType:"varchar", value:product};
+    sql:Parameter valueBug = {sqlType:"varchar", value:"Bug"};
 
-    params = [p00,p01,p02,p03,p02,p00,p04,p01,p02];
-    datatable dt1 = dbConnection.select(SPECIFIC_PRODUCT_YET_TO_START_COUNT, params);
-    var jsonResOfQueuedCounts, _ = <json>dt1;
+    params = [valueOfActiveIsYes,valueOfActiveIsNo,product,valueBug,startDate,endDate];
+    datatable resultOfProductBugCount = dbConnection.select(SPECIFIC_PRODUCT_BUG_COUNT, params);
+    var jsonResOfBugCount, _ = <json>resultOfProductBugCount;
 
-    sql:Parameter p17 = {sqlType:"varchar", value:"1"};
-    sql:Parameter p18 = {sqlType:"varchar", value:product};
-    sql:Parameter p19 = {sqlType:"date", value:start};
-    sql:Parameter p11 = {sqlType:"date", value:end};
-    params = [p17,p18,p19,p11,p19,p11,p19,p11];
-    datatable dt2 = dbConnection.select(SPECIFIC_PRODUCT_COMPLETED_COUNT, params);
-    var jsonResOfCompleteCounts, _ = <json>dt2;
+    params = [product,startDate,endDate,valueOfActiveIsNo,endDate,product,valueOfActiveIsYes,startDate,endDate];
+    datatable resultOfProductYetToStartCount = dbConnection.select(SPECIFIC_PRODUCT_YET_TO_START_COUNT, params);
+    var jsonResOfQueuedCounts, _ = <json>resultOfProductYetToStartCount;
 
+    params = [valueOfStatusIsOne,product,startDate,endDate,startDate,endDate,startDate,endDate];
+    datatable resultOfProductCompleteCount = dbConnection.select(SPECIFIC_PRODUCT_COMPLETED_COUNT, params);
+    var jsonResOfCompleteCounts, _ = <json>resultOfProductCompleteCount;
 
-    sql:Parameter p31 = {sqlType:"date", value:start};
-    sql:Parameter p32 = {sqlType:"date", value:end};
-    sql:Parameter p33 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p34 = {sqlType:"integer", value:0};
-    sql:Parameter p35 = {sqlType:"integer", value:1};
+    params = [product,startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate];
+    datatable resultOfProductInProgressCount = dbConnection.select(SPECIFIC_PRODUCT_IN_PROGRESS_COUNT, params);
+    var jsonResOfDevCounts, _ = <json>resultOfProductInProgressCount;
 
-    params = [p00,p31,p32,p33,p34,p33,p35,p32,p32,p32,p32];
-    datatable dt3 = dbConnection.select(SPECIFIC_PRODUCT_IN_PROGRESS_COUNT, params);
-    var jsonResOfDevCounts, _ = <json>dt3;
-
-    params = [p17,p18,p19,p11,p19,p11,p19,p11];
-    datatable dt4 = dbConnection.select(SPECIFIC_PRODUCT_PARTIALLY_COMPLETED_COUNT, params);
-    var jsonResOfPartiallyCompleteCounts, _ = <json>dt4;
+    params = [valueOfStatusIsOne,product,startDate,endDate,startDate,endDate,startDate,endDate];
+    datatable resultOfProductPartiallyCompleteCount = dbConnection.select(SPECIFIC_PRODUCT_PARTIALLY_COMPLETED_COUNT, params);
+    var jsonResOfPartiallyCompleteCounts, _ = <json>resultOfProductPartiallyCompleteCount;
 
     json totalProductSummaryCount = {"jsonResOfQueuedCounts":jsonResOfQueuedCounts,"jsonResOfDevCounts":jsonResOfDevCounts,"jsonResOfCompleteCounts":jsonResOfCompleteCounts,"jsonResOfBugCount":jsonResOfBugCount,"jsonResOfPartiallyCompleteCount":jsonResOfPartiallyCompleteCounts};
 
@@ -753,12 +717,12 @@ function productTotalReleaseTrend(string product,string duration,string start,st
     }
 
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"varchar", value:product};
-    sql:Parameter p2 = {sqlType:"varchar", value:"1"};
-    sql:Parameter p3 = {sqlType:"varchar", value:start};
-    sql:Parameter p4 = {sqlType:"varchar", value:end};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+    sql:Parameter product = {sqlType:"varchar", value:product};
 
-    params = [p1,p2,p3,p4,p3,p4,p3,p4];
+    params = [product,valueOfStatusIsOne,startDate,endDate,startDate,endDate,startDate,endDate];
     boolean isEmpty = false;
     int jsonResOfReleaseTrendLength=0;
     int loop = 0;
@@ -768,17 +732,17 @@ function productTotalReleaseTrend(string product,string duration,string start,st
     json weekFirstDate = {};
 
     if(duration == "week"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_WEEK, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfTotalReleaseTrendWeekly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_WEEK, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfTotalReleaseTrendWeekly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
         weekFirstDate = getReleaseFirstDateFromWeekNumber(start,end);
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_WEEK, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfCompleteReleaseTrendWeekly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_WEEK, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfCompleteReleaseTrendWeekly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_WEEK, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfPartiallyCompleteReleaseTrendWeekly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_WEEK, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfPartiallyCompleteReleaseTrendWeekly;
 
     }else if(duration == "month"){
         datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_MONTH, params);
@@ -961,7 +925,7 @@ function loadProductVersionCounts(string product,string version,string start,str
     sql:Parameter p34 = {sqlType:"integer", value:0};
     sql:Parameter p35 = {sqlType:"integer", value:1};
 
-    params = [p00,p0,p31,p32,p33,p34,p33,p35,p32,p32,p32,p32];
+    params = [p00,p0,p31,p32,p33,p34,p33,p35,p32,p32];
     datatable dt3 = dbConnection.select(SPECIFIC_PRODUCT_VERSION_IN_PROGRESS_COUNT, params);
     var jsonResOfDevCounts, _ = <json>dt3;
 
@@ -1288,7 +1252,7 @@ function queuedAgeGraphGenerator(string firstMonthDate,string lastMonthDate)(jso
         sql:Parameter p4 = {sqlType:"varchar", value:"Yes"};
         sql:Parameter p5 = {sqlType:"varchar", value:"0"};
         sql:Parameter p6 = {sqlType:"varchar", value:"1"};
-        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p2];
+        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2];
 
         datatable dt = dbConnection.select(GET_ALL_PATCHES_FOR_QUEUED_AGE_GRAPH_GIVEN_TIME_GAP, params);
         var fetchMonthData,_ = <json>dt;
@@ -1366,7 +1330,7 @@ function ageDrillDownGraph(string group,string month)(json){
         sql:Parameter p6 = {sqlType:"varchar", value:"1"};
         sql:Parameter p7 = {sqlType:"varchar", value:groupLimits[currentGroupIndex][0]};
         sql:Parameter p8 = {sqlType:"varchar", value:groupLimits[currentGroupIndex][1]};
-        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p2,p2,p7,p2,p8];
+        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p7,p2,p8];
 
         datatable dt = dbConnection.select(ALL_PRODUCTS_OF_NOT_MORE_THAN_90_DAYS_QUEUED, params);
         fetchData,_ = <json>dt;
@@ -1383,7 +1347,7 @@ function ageDrillDownGraph(string group,string month)(json){
         sql:Parameter p5 = {sqlType:"varchar", value:"0"};
         sql:Parameter p6 = {sqlType:"varchar", value:"1"};
         sql:Parameter p8 = {sqlType:"varchar", value:"90"};
-        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p2,p2,p8];
+        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p8];
 
         datatable dt = dbConnection.select(ALL_PRODUCTS_OF_MORE_THAN_90_DAYS_QUEUED, params);
         fetchData,_ = <json>dt;
@@ -1473,6 +1437,7 @@ function lifeCycleStackGraph(string start,string end)(json){
     json products = [];
     json dayCountAndNumbersOfPatches = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
     json movementAverages = [[0,0],[0,0]];
+    json statesIds = [[],[],[],[],[],[],[],[],[]];
 
     sql:Parameter[] params = [];
     sql:Parameter p1 = {sqlType:"varchar", value:start};
@@ -1481,7 +1446,7 @@ function lifeCycleStackGraph(string start,string end)(json){
     sql:Parameter p4 = {sqlType:"varchar", value:"Yes"};
     sql:Parameter p5 = {sqlType:"varchar", value:"0"};
     sql:Parameter p6 = {sqlType:"varchar", value:"1"};
-    params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p2,p1,p2,p1,p2,p1,p2];
+    params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p1,p2,p1,p2,p1,p2];
 
     datatable dt = dbConnection.select(GET_ALL_PATCH_DATA_IN_GIVEN_DATE_RANGE, params);
     var fetchAllPatchData,_ = <json>dt;
@@ -1581,51 +1546,107 @@ function lifeCycleStackGraph(string start,string end)(json){
                     preQADateTime = time:parse(temp[0]+"T00:00:00.000-0000","yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                 }
 
-                if(regressionDateTime != null && regressionDateTime.time<=durationLastDate.time  && patchState == "Regression"){
+                if((regressionDateTime != null && regressionDateTime.time<=durationLastDate.time  && patchState == "Regression") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Regression")){
                     var sCount,_ = (int)countsInStates[8];
                     countsInStates[8] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[8][loop];
                     finalStatesCounts[8][loop]= count + 1;
-                }else if(brokenDateTime != null && brokenDateTime.time<=durationLastDate.time  && patchState == "Broken"){
+                    int currentStatesIdsIndex = lengthof statesIds[8];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[8][currentStatesIdsIndex] = temp;
+
+                }else if(brokenDateTime != null && brokenDateTime.time<=durationLastDate.time  && patchState == "Broken" ||  (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Broken")){
                     var sCount,_ = (int)countsInStates[7];
                     countsInStates[7] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[7][loop];
                     finalStatesCounts[7][loop] = count + 1;
-                }else if((releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Released") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "Released")) {
+                    int currentStatesIdsIndex = lengthof statesIds[7];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[7][currentStatesIdsIndex] = temp;
+
+                }else if((releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Released") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "Released") || (rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "Released")) {
                     var sCount,_ = (int)countsInStates[6];
                     countsInStates[6] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[6][loop];
                     finalStatesCounts[6][loop] = count + 1;
-                }else if((rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotAutomated") || (rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated")) {
+                    int currentStatesIdsIndex = lengthof statesIds[6];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[6][currentStatesIdsIndex] = temp;
+
+                }else if((rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && (patchState == "ReleasedNotAutomated" || patchState == "Released")) || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotAutomated") || (rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated")) {
                     var sCount,_ = (int)countsInStates[5];
                     countsInStates[5] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[5][loop];
                     finalStatesCounts[5][loop] = count + 1;
-                }else if((rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotInPublicSVN") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN")) {
+                    int currentStatesIdsIndex = lengthof statesIds[5];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[5][currentStatesIdsIndex] = temp;
+
+                }else if((rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && (patchState == "ReleasedNotInPublicSVN" || patchState == "Released" || patchState == "ReleasedNotAutomated")) || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotInPublicSVN") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN")) {
                     var sCount,_ = (int)countsInStates[4];
                     countsInStates[4] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[4][loop];
                     finalStatesCounts[4][loop] = count + 1;
-                }else if(QADateTime != null && QADateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
+                    int currentStatesIdsIndex = lengthof statesIds[4];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[4][currentStatesIdsIndex] = temp;
+
+                }else if(QADateTime != null && QADateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "N/A")) {
+                    //system:println(fetchAllPatchData[loop2].ID);
                     var sCount,_ = (int)countsInStates[3];
                     countsInStates[3] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[3][loop];
                     finalStatesCounts[3][loop] = count + 1;
-                }else if(devDateTime != null && devDateTime.time<=durationLastDate.time  && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
+                    int currentStatesIdsIndex = lengthof statesIds[3];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[3][currentStatesIdsIndex] = temp;
+
+                }else if(devDateTime != null && devDateTime.time<=durationLastDate.time  && (patchState != "OnHold" && patchState != "Broken"  && patchState != "N/A")) {
+                    //system:println(fetchAllPatchData[loop2].ID);
                     var sCount,_ = (int)countsInStates[2];
                     countsInStates[2] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[2][loop];
                     finalStatesCounts[2][loop] = count + 1;
-                }else if(preQADateTime != null && preQADateTime.time<=durationLastDate.time  && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
-                    var sCount,_ = (int)countsInStates[2];
+                    int currentStatesIdsIndex = lengthof statesIds[2];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[2][currentStatesIdsIndex] = temp;
+
+                }else if(preQADateTime != null && preQADateTime.time<=durationLastDate.time  && (patchState != "OnHold" && patchState != "Broken"  && patchState != "N/A")) {
+                    //system:println(fetchAllPatchData[loop2].ID);
+                    var sCount,_ = (int)countsInStates[1];
                     countsInStates[1] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[1][loop];
                     finalStatesCounts[1][loop] = count + 1;
-                }else if((patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")){
+                    int currentStatesIdsIndex = lengthof statesIds[1];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[1][currentStatesIdsIndex] = temp;
+
+                }else if((patchState != "OnHold" && patchState != "Broken"  && patchState != "N/A")){
                     var sCount,_ = (int)countsInStates[0];
                     countsInStates[0] = sCount + 1;
                     var count,_ = (int)finalStatesCounts[0][loop];
                     finalStatesCounts[0][loop] = count + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[0];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop2].ID;
+                    temp[1] = fetchAllPatchData[loop2].eID;
+                    statesIds[0][currentStatesIdsIndex] = temp;
                 }
 
             }
@@ -1783,7 +1804,7 @@ function lifeCycleStackGraph(string start,string end)(json){
     }
 
 
-    json stackArray = {"category":statesOfDuration,"products":products,"counts":finalStatesCounts,"stateCounts":countsInStates,"patchDetails":fetchAllPatchData,"averageSummary":dayCountAndNumbersOfPatches,"mainSumamry":movementAverages };
+    json stackArray = {"category":statesOfDuration,"products":products,"counts":finalStatesCounts,"stateCounts":countsInStates,"patchDetails":fetchAllPatchData,"averageSummary":dayCountAndNumbersOfPatches,"mainSumamry":movementAverages ,"statesIds":statesIds};
 
     logger:info("LIFE-CYCLE DATA SENT");
 
@@ -1800,6 +1821,7 @@ function stateTransitionGraphOfLifeCycle(string product,string start,string end)
     json movementAverages = [[0,0],[0,0]];
     json products = [];
     json fetchAllPatchData = [];
+    json statesIds = [[],[],[],[],[],[],[],[],[]];
 
 
     sql:Parameter[] params = [];
@@ -1812,7 +1834,7 @@ function stateTransitionGraphOfLifeCycle(string product,string start,string end)
     sql:Parameter p7 = {sqlType:"varchar", value:product};
 
     if(product == "all"){
-        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p2,p1,p2,p1,p2,p1,p2];
+        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p1,p2,p1,p2,p1,p2];
 
         datatable dt = dbConnection.select(FETCH_ALL_PATCH_DATA_FOR_DROP_DOWN_SELECTION, params);
         fetchAllPatchData,_ = <json>dt;
@@ -1901,41 +1923,86 @@ function stateTransitionGraphOfLifeCycle(string product,string start,string end)
                         preQADateTime = time:parse(temp[0]+"T00:00:00.000-0000","yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                     }
 
-                    if(regressionDateTime != null && regressionDateTime.time<=durationLastDate.time   && patchState == "Regression"){
+                    if((regressionDateTime != null && regressionDateTime.time<=durationLastDate.time  && patchState == "Regression") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Regression")){
                         var sCount,_ = (int)countsInStates[8];
                         countsInStates[8] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[8];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[8][currentStatesIdsIndex] = temp;
 
-                    }else if(brokenDateTime != null && brokenDateTime.time<=durationLastDate.time   && patchState == "Broken"){
+                    }else if(brokenDateTime != null && brokenDateTime.time<=durationLastDate.time  && patchState == "Broken" ||  (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Broken")){
                         var sCount,_ = (int)countsInStates[7];
                         countsInStates[7] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[7];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[7][currentStatesIdsIndex] = temp;
 
                     }else if((releasedDateTime != null && releasedDateTime.time<=durationLastDate.time  && patchState == "Released") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "Released")) {
                         var sCount,_ = (int)countsInStates[6];
                         countsInStates[6] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[6];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[6][currentStatesIdsIndex] = temp;
 
-                    }else if((rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotAutomated") || (rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated")) {
+                    }else if((rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && (patchState == "ReleasedNotAutomated" || patchState == "Released")) || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotAutomated") || (rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated")) {
                         var sCount,_ = (int)countsInStates[5];
                         countsInStates[5] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[5];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[5][currentStatesIdsIndex] = temp;
 
-                    }else if((rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotInPublicSVN") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN")) {
+                    }else if((rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && (patchState == "ReleasedNotInPublicSVN" || patchState == "Released" || patchState == "ReleasedNotAutomated")) || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotInPublicSVN") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN")) {
                         var sCount,_ = (int)countsInStates[4];
                         countsInStates[4] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[4];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[4][currentStatesIdsIndex] = temp;
 
-                    }else if(QADateTime != null && QADateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
+                    }else if(QADateTime != null && QADateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "N/A")) {
                         var sCount,_ = (int)countsInStates[3];
                         countsInStates[3] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[3];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[3][currentStatesIdsIndex] = temp;
 
-                    }else if(devDateTime != null && devDateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
+                    }else if(devDateTime != null && devDateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "N/A")) {
                         var sCount,_ = (int)countsInStates[2];
                         countsInStates[2] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[2];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[2][currentStatesIdsIndex] = temp;
 
-                    }else if(preQADateTime != null && preQADateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
-                        var sCount,_ = (int)countsInStates[2];
+                    }else if(preQADateTime != null && preQADateTime.time<=durationLastDate.time && (patchState != "OnHold" && patchState != "Broken" && patchState != "N/A")) {
+                        var sCount,_ = (int)countsInStates[1];
                         countsInStates[1] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[1];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[1][currentStatesIdsIndex] = temp;
 
-                    }else if((patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")){
+                    }else if((patchState != "OnHold" && patchState != "Broken" &&  patchState != "N/A")){
                         var sCount,_ = (int)countsInStates[0];
                         countsInStates[0] = sCount + 1;
+                        int currentStatesIdsIndex = lengthof statesIds[0];
+                        json temp = [];
+                        temp[0] = fetchAllPatchData[loop2].ID;
+                        temp[1] = fetchAllPatchData[loop2].eID;
+                        statesIds[0][currentStatesIdsIndex] = temp;
 
                     }
 
@@ -2089,7 +2156,7 @@ function stateTransitionGraphOfLifeCycle(string product,string start,string end)
 
 
     }else{
-        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p2,p2,p1,p2,p1,p2,p1,p2,p7];
+        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2,p1,p2,p1,p2,p1,p2,p7];
 
         datatable dt = dbConnection.select(FETCH_REQUIRED_PRODUCT_PATCH_DATA_FOR_DROP_DOWN_SELECTION, params);
         fetchAllPatchData,_ = <json>dt;
@@ -2160,41 +2227,86 @@ function stateTransitionGraphOfLifeCycle(string product,string start,string end)
                     preQADateTime = time:parse(temp[0]+"T00:00:00.000-0000","yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                 }
 
-                if(regressionDateTime != null && regressionDateTime.time<=durationLastDate.time   && patchState == "Regression"){
+                if((regressionDateTime != null && regressionDateTime.time<=durationLastDate.time  && patchState == "Regression") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Regression")){
                     var sCount,_ = (int)countsInStates[8];
                     countsInStates[8] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[8];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[8][currentStatesIdsIndex] = temp;
 
-                }else if(brokenDateTime != null && brokenDateTime.time<=durationLastDate.time   && patchState == "Broken"){
+                }else if(brokenDateTime != null && brokenDateTime.time<=durationLastDate.time  && patchState == "Broken" ||  (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState == "Broken")){
                     var sCount,_ = (int)countsInStates[7];
                     countsInStates[7] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[7];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[7][currentStatesIdsIndex] = temp;
 
                 }else if((releasedDateTime != null && releasedDateTime.time<=durationLastDate.time  && patchState == "Released") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "Released")) {
                     var sCount,_ = (int)countsInStates[6];
                     countsInStates[6] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[6];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[6][currentStatesIdsIndex] = temp;
 
-                }else if((rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotAutomated") || (rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated")) {
+                }else if((rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && (patchState == "ReleasedNotAutomated" || patchState == "Released")) || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotAutomated") || (rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotAutomated")) {
                     var sCount,_ = (int)countsInStates[5];
                     countsInStates[5] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[5];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[5][currentStatesIdsIndex] = temp;
 
-                }else if((rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN") || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotInPublicSVN") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN")) {
+                }else if((rnipsDateTime != null && rnipsDateTime.time<=durationLastDate.time  && (patchState == "ReleasedNotInPublicSVN" || patchState == "Released" || patchState == "ReleasedNotAutomated")) || (releasedDateTime != null && releasedDateTime.time<=durationLastDate.time && patchState== "ReleasedNotInPublicSVN") || (rnaDateTime != null && rnaDateTime.time<=durationLastDate.time  && patchState == "ReleasedNotInPublicSVN")) {
                     var sCount,_ = (int)countsInStates[4];
                     countsInStates[4] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[4];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[4][currentStatesIdsIndex] = temp;
 
-                }else if(QADateTime != null && QADateTime.time<=durationLastDate.time   && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
+                }else if(QADateTime != null && QADateTime.time<=durationLastDate.time   && (patchState != "OnHold" && patchState != "Broken"  && patchState != "N/A")) {
                     var sCount,_ = (int)countsInStates[3];
                     countsInStates[3] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[3];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[3][currentStatesIdsIndex] = temp;
 
-                }else if(devDateTime != null && devDateTime.time<=durationLastDate.time   && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
+                }else if(devDateTime != null && devDateTime.time<=durationLastDate.time   && (patchState != "OnHold" && patchState != "Broken" && patchState != "N/A")) {
                     var sCount,_ = (int)countsInStates[2];
                     countsInStates[2] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[2];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[2][currentStatesIdsIndex] = temp;
 
-                }else if(preQADateTime != null && preQADateTime.time<=durationLastDate.time  && (patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")) {
-                    var sCount,_ = (int)countsInStates[2];
+                }else if(preQADateTime != null && preQADateTime.time<=durationLastDate.time  && (patchState != "OnHold" && patchState != "Broken"  && patchState != "N/A")) {
+                    var sCount,_ = (int)countsInStates[1];
                     countsInStates[1] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[1];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[1][currentStatesIdsIndex] = temp;
 
-                }else if((patchState != "OnHold" && patchState != "Broken" && patchState != "Regression" && patchState != "N/A")){
+                }else if((patchState != "OnHold" && patchState != "Broken" && patchState != "N/A")){
                     var sCount,_ = (int)countsInStates[0];
                     countsInStates[0] = sCount + 1;
+                    int currentStatesIdsIndex = lengthof statesIds[0];
+                    json temp = [];
+                    temp[0] = fetchAllPatchData[loop].ID;
+                    temp[1] = fetchAllPatchData[loop].eID;
+                    statesIds[0][currentStatesIdsIndex] = temp;
 
                 }
 
@@ -2345,7 +2457,7 @@ function stateTransitionGraphOfLifeCycle(string product,string start,string end)
         }
     }
 
-    json response = {"stateCounts":countsInStates,"averageDates":dayCountAndNumbersOfPatches,"patchDetails":fetchAllPatchData,"mainSumamry":movementAverages};
+    json response = {"stateCounts":countsInStates,"averageDates":dayCountAndNumbersOfPatches,"patchDetails":fetchAllPatchData,"mainSumamry":movementAverages,"statesIds":statesIds};
 
     logger:info("SELECTED FIELD LIFE-CYCLE DATA SENT");
 
