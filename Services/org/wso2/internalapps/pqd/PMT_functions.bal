@@ -668,7 +668,7 @@ function reportedPatchGraph(string duration,string start,string end)(json){
     return reportedPatches;
 }
 
-function totalProductSummaryCounts(string product,string start,string end)(json){
+function totalProductSummaryCounts(string inputProduct,string start,string end)(json){
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
@@ -681,7 +681,7 @@ function totalProductSummaryCounts(string product,string start,string end)(json)
     sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
     sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
     sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
-    sql:Parameter product = {sqlType:"varchar", value:product};
+    sql:Parameter product = {sqlType:"varchar", value:inputProduct};
     sql:Parameter valueBug = {sqlType:"varchar", value:"Bug"};
 
     params = [valueOfActiveIsYes,valueOfActiveIsNo,product,valueBug,startDate,endDate];
@@ -706,12 +706,12 @@ function totalProductSummaryCounts(string product,string start,string end)(json)
 
     json totalProductSummaryCount = {"jsonResOfQueuedCounts":jsonResOfQueuedCounts,"jsonResOfDevCounts":jsonResOfDevCounts,"jsonResOfCompleteCounts":jsonResOfCompleteCounts,"jsonResOfBugCount":jsonResOfBugCount,"jsonResOfPartiallyCompleteCount":jsonResOfPartiallyCompleteCounts};
 
-    logger:info("RETURNED "+product+" TOTAL SUMMARY COUNTS");
+    logger:info("RETURNED "+inputProduct+" TOTAL SUMMARY COUNTS");
 
     return totalProductSummaryCount;
 }
 
-function productTotalReleaseTrend(string product,string duration,string start,string end)(json){
+function productTotalReleaseTrend(string inputProduct,string duration,string start,string end)(json){
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
@@ -720,7 +720,7 @@ function productTotalReleaseTrend(string product,string duration,string start,st
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
     sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
-    sql:Parameter product = {sqlType:"varchar", value:product};
+    sql:Parameter product = {sqlType:"varchar", value:inputProduct};
 
     params = [product,valueOfStatusIsOne,startDate,endDate,startDate,endDate,startDate,endDate];
     boolean isEmpty = false;
@@ -745,43 +745,43 @@ function productTotalReleaseTrend(string product,string duration,string start,st
         jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfPartiallyCompleteReleaseTrendWeekly;
 
     }else if(duration == "month"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_MONTH, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfTotalReleaseTrendMonthly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_MONTH, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfTotalReleaseTrendMonthly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_MONTH, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfCompleteReleaseTrendMonthly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_MONTH, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfCompleteReleaseTrendMonthly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_MONTH, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfPartiallyCompleteReleaseTrendMonthly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_MONTH, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfPartiallyCompleteReleaseTrendMonthly;
 
 
     }else if(duration == "quarter"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_QUARTER, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfTotalReleaseTrendQuarterly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_QUARTER, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfTotalReleaseTrendQuarterly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_QUARTER, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfCompleteReleaseTrendQuarterly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_QUARTER, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfCompleteReleaseTrendQuarterly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_QUARTER, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfPartiallyCompleteReleaseTrendQuarterly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_QUARTER, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfPartiallyCompleteReleaseTrendQuarterly;
 
 
     }else if(duration == "year"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_YEAR, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfTotalReleaseTrendYearly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_YEAR, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfTotalReleaseTrendYearly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_YEAR, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfCompleteReleaseTrendYearly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_YEAR, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfCompleteReleaseTrendYearly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_YEAR, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfPartiallyCompleteReleaseTrendYearly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_YEAR, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfPartiallyCompleteReleaseTrendYearly;
 
     }
 
@@ -880,78 +880,66 @@ function productTotalReleaseTrend(string product,string duration,string start,st
 
     json reportedPatches = {"isEmpty":isEmpty,"totalReleaseTrend":mainArray};
 
-    logger:info(product+" TOTAL RELEASE "+duration+" TREND DATA SENT");
+    logger:info(inputProduct+" TOTAL RELEASE "+duration+" TREND DATA SENT");
 
     return reportedPatches;
 }
 
-function loadProductVersionCounts(string product,string version,string start,string end)(json){
+function loadProductVersionCounts(string inputProduct,string inVersion,string start,string end)(json){
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
     sql:Parameter[] params = [];
-    sql:Parameter p0 ={sqlType:"varchar", value:version};
-    sql:Parameter p1 = {sqlType:"varchar", value:"Yes"};
-    sql:Parameter p2 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p3 = {sqlType:"varchar", value:product};
-    sql:Parameter p4 = {sqlType:"varchar", value:"Bug"};
-    sql:Parameter p5 = {sqlType:"date", value:start};
-    sql:Parameter p6 = {sqlType:"date", value:end};
-    params = [p1,p2,p3,p0,p4,p5,p6];
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+    sql:Parameter product = {sqlType:"varchar", value:inputProduct};
+    sql:Parameter valueBug = {sqlType:"varchar", value:"Bug"};
+    sql:Parameter inputVersion ={sqlType:"varchar", value:inVersion};
+
+    params = [valueOfActiveIsYes,valueOfActiveIsNo,product,inputVersion,valueBug,startDate,endDate];
     datatable dt = dbConnection.select(SPECIFIC_PRODUCT_VERSION_BUG_COUNT, params);
     var jsonResOfBugCount, _ = <json>dt;
 
-    sql:Parameter p00 = {sqlType:"varchar", value:product};
-    sql:Parameter p01 = {sqlType:"date", value:start};
-    sql:Parameter p02 = {sqlType:"date", value:end};
-    sql:Parameter p03 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p04 = {sqlType:"varchar", value:"Yes"};
+    params = [product,inputVersion,startDate,endDate,valueOfActiveIsNo,endDate,product,inputVersion,valueOfActiveIsYes,startDate,endDate];
+    datatable resultOfVersionBugCount = dbConnection.select(SPECIFIC_PRODUCT_VERSION_YET_TO_START_COUNT, params);
+    var jsonResOfQueuedCounts, _ = <json>resultOfVersionBugCount;
 
-    params = [p00,p0,p01,p02,p03,p02,p00,p0,p04,p01,p02];
-    datatable dt1 = dbConnection.select(SPECIFIC_PRODUCT_VERSION_YET_TO_START_COUNT, params);
-    var jsonResOfQueuedCounts, _ = <json>dt1;
+    params = [valueOfStatusIsOne,product,inputVersion,startDate,endDate,startDate,endDate,startDate,endDate];
+    datatable resultOfVersionYetToStartCount = dbConnection.select(SPECIFIC_PRODUCT_VERSION_COMPLETED_COUNT, params);
+    var jsonResOfCompleteCounts, _ = <json>resultOfVersionYetToStartCount;
 
-    sql:Parameter p17 = {sqlType:"varchar", value:"1"};
-    sql:Parameter p18 = {sqlType:"varchar", value:product};
-    sql:Parameter p19 = {sqlType:"date", value:start};
-    sql:Parameter p11 = {sqlType:"date", value:end};
-    params = [p17,p18,p0,p19,p11,p19,p11,p19,p11];
-    datatable dt2 = dbConnection.select(SPECIFIC_PRODUCT_VERSION_COMPLETED_COUNT, params);
-    var jsonResOfCompleteCounts, _ = <json>dt2;
-
-    sql:Parameter p31 = {sqlType:"date", value:start};
-    sql:Parameter p32 = {sqlType:"date", value:end};
-    sql:Parameter p33 = {sqlType:"varchar", value:"No"};
-    sql:Parameter p34 = {sqlType:"integer", value:0};
-    sql:Parameter p35 = {sqlType:"integer", value:1};
-
-    params = [p00,p0,p31,p32,p33,p34,p33,p35,p32,p32];
+    params = [product,inputVersion,startDate,endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate];
     datatable dt3 = dbConnection.select(SPECIFIC_PRODUCT_VERSION_IN_PROGRESS_COUNT, params);
     var jsonResOfDevCounts, _ = <json>dt3;
 
-    params = [p17,p18,p0,p19,p11,p19,p11,p19,p11];
+    params = [valueOfStatusIsOne,product,inputVersion,startDate,endDate,startDate,endDate,startDate,endDate];
     datatable dt4 = dbConnection.select(SPECIFIC_PRODUCT_VERSION_PARTIALLY_COMPLETED_COUNT, params);
     var jsonResOfPartiallyCompleteCounts, _ = <json>dt4;
 
     json versionProductSummaryCount = {"jsonResOfQueuedCounts":jsonResOfQueuedCounts,"jsonResOfDevCounts":jsonResOfDevCounts,"jsonResOfCompleteCounts":jsonResOfCompleteCounts,"jsonResOfBugCount":jsonResOfBugCount,"jsonResOfPartiallyCompleteCount":jsonResOfPartiallyCompleteCounts};
 
-    logger:info("RETURNED "+product+"-"+version+" TOTAL SUMMARY COUNTS");
+    logger:info("RETURNED "+inputProduct+"-"+inVersion+" TOTAL SUMMARY COUNTS");
 
     return versionProductSummaryCount;
 }
 
-function productVersionReleaseTrend(string product,string version,string duration,string start,string end)(json){
+function productVersionReleaseTrend(string inputProduct,string inVersion,string duration,string start,string end)(json){
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
-    sql:Parameter[] params = [];
-    sql:Parameter p0 = {sqlType:"varchar", value:product};
-    sql:Parameter p1 = {sqlType:"varchar", value:version};
-    sql:Parameter p2 = {sqlType:"varchar", value:"1"};
-    sql:Parameter p3 = {sqlType:"varchar", value:start};
-    sql:Parameter p4 = {sqlType:"varchar", value:end};
 
-    params = [p0,p1,p2,p3,p4,p3,p4,p3,p4];
+    sql:Parameter[] params = [];
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+    sql:Parameter product = {sqlType:"varchar", value:inputProduct};
+    sql:Parameter version = {sqlType:"varchar", value:inVersion};
+
+    params = [product,version,valueOfStatusIsOne,startDate,endDate,startDate,endDate,startDate,endDate];
     boolean isEmpty = false;
     int jsonResOfReleaseTrendLength=0;
     int loop = 0;
@@ -961,56 +949,56 @@ function productVersionReleaseTrend(string product,string version,string duratio
     json weekFirstDate ={};
 
     if(duration == "week"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_WEEK, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfAllReleaseTrendWeekly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_WEEK, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfAllReleaseTrendWeekly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
         weekFirstDate = getReleaseFirstDateFromWeekNumber(start,end);
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_WEEK, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfAllCompleteReleaseTrendWeekly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_WEEK, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfAllCompleteReleaseTrendWeekly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_WEEK, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfAllPartiallyCompleteReleaseTrendWeekly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_WEEK, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfAllPartiallyCompleteReleaseTrendWeekly;
 
 
     }else if(duration == "month"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_MONTH, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfAllReleaseTrendMonthly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_MONTH, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfAllReleaseTrendMonthly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_MONTH, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfAllCompleteReleaseTrendMonthly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_MONTH, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfAllCompleteReleaseTrendMonthly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_MONTH, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfAllPartiallyCompleteReleaseTrendMonthly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_MONTH, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfAllPartiallyCompleteReleaseTrendMonthly;
 
 
     }else if(duration == "quarter"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_QUARTER, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfAllReleaseTrendQuarterly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_QUARTER, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfAllReleaseTrendQuarterly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_QUARTER, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfAllCompleteReleaseTrendQuarterly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_QUARTER, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfAllCompleteReleaseTrendQuarterly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_QUARTER, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfAllPartiallyCompleteReleaseTrendQuarterly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_QUARTER, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfAllPartiallyCompleteReleaseTrendQuarterly;
 
 
     }else if(duration == "year"){
-        datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_YEAR, params);
-        jsonResOfReleaseTrend, _ = <json>dt;
+        datatable resultOfAllReleaseTrendYearly = dbConnection.select(ALL_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_YEAR, params);
+        jsonResOfReleaseTrend, _ = <json>resultOfAllReleaseTrendYearly;
 
         jsonResOfReleaseTrendLength = lengthof jsonResOfReleaseTrend;
 
-        datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_YEAR, params);
-        jsonResOfCompleteReleaseTrend, _ = <json>dt1;
+        datatable resultOfAllCompleteReleaseTrendYearly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_YEAR, params);
+        jsonResOfCompleteReleaseTrend, _ = <json>resultOfAllCompleteReleaseTrendYearly;
 
-        datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_YEAR, params);
-        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>dt2;
+        datatable resultOfAllPartiallyCompleteReleaseTrendYearly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_TOTAL_PRODUCT_VERSION_YEAR, params);
+        jsonResOfPartiallyCompleteReleaseTrend, _ = <json>resultOfAllPartiallyCompleteReleaseTrendYearly;
 
     }
 
@@ -1075,7 +1063,7 @@ function productVersionReleaseTrend(string product,string version,string duratio
         loop = loop + 1;
     }
 
-
+    //create response JSON to send data
     loop = 0;
     while(loop<jsonResOfReleaseTrendLength){
         json dump={name:"x",y:2016,sub:"array"};
@@ -1109,12 +1097,12 @@ function productVersionReleaseTrend(string product,string version,string duratio
 
     json reportedPatches = {"isEmpty":isEmpty,"versionReleaseTrend":mainArray};
 
-    logger:info(product+"-"+version+" RELEASE TREND DATA SENT");
+    logger:info(inputProduct+"-"+inVersion+" RELEASE TREND DATA SENT");
 
     return reportedPatches;
 }
 
-function allProductVersionReleaseTrend(string product,string version,string duration,string start,string end)(json){
+function allProductVersionReleaseTrend(string inProduct,string version,string duration,string start,string end)(json){
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
@@ -1131,53 +1119,53 @@ function allProductVersionReleaseTrend(string product,string version,string dura
     json weekFirstDate ={};
 
     while(loop < versionLength){
-        sql:Parameter p0 = {sqlType:"varchar", value:product};
-        sql:Parameter p1 = {sqlType:"varchar", value:versionArray[loop]};
-        sql:Parameter p2 = {sqlType:"varchar", value:"1"};
-        sql:Parameter p3 = {sqlType:"varchar", value:start};
-        sql:Parameter p4 = {sqlType:"varchar", value:end};
+        sql:Parameter product = {sqlType:"varchar", value:inProduct};
+        sql:Parameter currentVersion = {sqlType:"varchar", value:versionArray[loop]};
+        sql:Parameter startDate = {sqlType:"date", value:start};
+        sql:Parameter endDate = {sqlType:"date", value:end};
+        sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
 
-        params = [p0,p1,p2,p3,p4,p3,p4,p3,p4];
+        params = [product,currentVersion,valueOfStatusIsOne,startDate,endDate,startDate,endDate,startDate,endDate];
 
         if(duration =="week"){
-            datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_WEEK, params);
-            jsonResOfReleaseTrend[loop], _ = <json>dt;
+            datatable resultOfAllVersionReleaseTrendWeekly = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_WEEK, params);
+            jsonResOfReleaseTrend[loop], _ = <json>resultOfAllVersionReleaseTrendWeekly;
 
-            datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_WEEK, params);
-            jsonResOfCompleteReleaseTrend[loop], _ = <json>dt1;
+            datatable resultOfAllVersionCompleteReleaseTrendWeekly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_WEEK, params);
+            jsonResOfCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionCompleteReleaseTrendWeekly;
 
-            datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_WEEK, params);
-            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>dt2;
+            datatable resultOfAllVersionPartiallyCompleteReleaseTrendWeekly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_WEEK, params);
+            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionPartiallyCompleteReleaseTrendWeekly;
 
         }else if(duration =="month"){
-            datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_MONTH, params);
-            jsonResOfReleaseTrend[loop], _ = <json>dt;
+            datatable resultOfAllVersionReleaseTrendMonthly = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_MONTH, params);
+            jsonResOfReleaseTrend[loop], _ = <json>resultOfAllVersionReleaseTrendMonthly;
 
-            datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_MONTH, params);
-            jsonResOfCompleteReleaseTrend[loop], _ = <json>dt1;
+            datatable resultOfAllVersionCompleteReleaseTrendMonthly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_MONTH, params);
+            jsonResOfCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionCompleteReleaseTrendMonthly;
 
-            datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_MONTH, params);
-            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>dt2;
+            datatable resultOfAllVersionPartiallyCompleteReleaseTrendMonthly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_MONTH, params);
+            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionPartiallyCompleteReleaseTrendMonthly;
 
         }else if(duration =="quarter"){
-            datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_QUARTER, params);
-            jsonResOfReleaseTrend[loop], _ = <json>dt;
+            datatable resultOfAllVersionReleaseTrendQuarterly = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_QUARTER, params);
+            jsonResOfReleaseTrend[loop], _ = <json>resultOfAllVersionReleaseTrendQuarterly;
 
-            datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_QUARTER, params);
-            jsonResOfCompleteReleaseTrend[loop], _ = <json>dt1;
+            datatable resultOfAllVersionCompleteReleaseTrendQuarterly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_QUARTER, params);
+            jsonResOfCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionCompleteReleaseTrendQuarterly;
 
-            datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_QUARTER, params);
-            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>dt2;
+            datatable resultOfAllVersionPartiallyCompleteReleaseTrendQuarterly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_QUARTER, params);
+            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionPartiallyCompleteReleaseTrendQuarterly;
 
         }else if(duration =="year"){
-            datatable dt = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_YEAR, params);
-            jsonResOfReleaseTrend[loop], _ = <json>dt;
+            datatable resultOfAllVersionReleaseTrendYearly = dbConnection.select(ALL_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_YEAR, params);
+            jsonResOfReleaseTrend[loop], _ = <json>resultOfAllVersionReleaseTrendYearly;
 
-            datatable dt1 = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_YEAR, params);
-            jsonResOfCompleteReleaseTrend[loop], _ = <json>dt1;
+            datatable resultOfAllVersionCompleteReleaseTrendYearly = dbConnection.select(COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_YEAR, params);
+            jsonResOfCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionCompleteReleaseTrendYearly;
 
-            datatable dt2 = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_YEAR, params);
-            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>dt2;
+            datatable resultOfAllVersionPartiallyCompleteReleaseTrendYearly = dbConnection.select(PARTIALLY_COMPLETE_RELEASE_TREND_OF_ALL_PRODUCT_VERSION_YEAR, params);
+            jsonResOfPartiallyCompleteReleaseTrend[loop], _ = <json>resultOfAllVersionPartiallyCompleteReleaseTrendYearly;
         }
 
         loop = loop +1;
@@ -1190,39 +1178,40 @@ function allProductVersionReleaseTrend(string product,string version,string dura
 
     json reportedPatches = {"isEmpty":isEmpty,"versionReleaseTrend":jsonResOfReleaseTrend,"versionCompletedReleaseTrend":jsonResOfCompleteReleaseTrend,"versionPartiallyCompletedReleasedTrend":jsonResOfPartiallyCompleteReleaseTrend};
 
-    logger:info(product+" ALL VERSION RELEASE TREND DATA SENT");
+    logger:info(inProduct+" ALL VERSION RELEASE TREND DATA SENT");
 
     return reportedPatches;
 }
 
-function allCategoryReleaseTrendGraph(string product,string duration,string start,string end)(json){
+function allCategoryReleaseTrendGraph(string inProduct,string duration,string start,string end)(json){
     if(dbConnection == null){
         setDatabaseConfiguration();
     }
 
     sql:Parameter[] params = [];
-    sql:Parameter p1 = {sqlType:"varchar", value:product};
-    sql:Parameter p2 = {sqlType:"varchar", value:"1"};
-    sql:Parameter p3 = {sqlType:"date", value:start};
-    sql:Parameter p4 = {sqlType:"date", value:end};
-    params = [p1,p2,p3,p4,p3,p4,p3,p4];
+    sql:Parameter product = {sqlType:"varchar", value:inProduct};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+    sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+
+    params = [product,valueOfStatusIsOne,startDate,endDate,startDate,endDate,startDate,endDate];
     json jsonResOfcategory = {};
 
     if(duration =="week"){
-        datatable dt = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_WEEK, params);
-        jsonResOfcategory, _ = <json>dt;
+        datatable resultOfCategoryDatesInAllVersionsWeekly = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_WEEK, params);
+        jsonResOfcategory, _ = <json>resultOfCategoryDatesInAllVersionsWeekly;
 
     }else if(duration =="month"){
-        datatable dt = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_MONTH, params);
-        jsonResOfcategory, _ = <json>dt;
+        datatable resultOfCategoryDatesInAllVersionsMonthly = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_MONTH, params);
+        jsonResOfcategory, _ = <json>resultOfCategoryDatesInAllVersionsMonthly;
 
     }else if(duration =="quarter"){
-        datatable dt = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_QUARTER, params);
-        jsonResOfcategory, _ = <json>dt;
+        datatable resultOfCategoryDatesInAllVersionsQuarterly = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_QUARTER, params);
+        jsonResOfcategory, _ = <json>resultOfCategoryDatesInAllVersionsQuarterly;
 
     }else if(duration =="year"){
-        datatable dt = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_YEAR, params);
-        jsonResOfcategory, _ = <json>dt;
+        datatable resultOfCategoryDatesInAllVersionsYearly = dbConnection.select(RELEASE_TREND_OF_ALL_PRODUCT_CATEGORY_YEAR, params);
+        jsonResOfcategory, _ = <json>resultOfCategoryDatesInAllVersionsYearly;
     }
 
     logger:info("ALL VERSION CATEGORIES SENT");
@@ -1246,20 +1235,24 @@ function queuedAgeGraphGenerator(string firstMonthDate,string lastMonthDate)(jso
 
     while(loop<monthLimitLength){
         sql:Parameter[] params = [];
-        sql:Parameter p1 = {sqlType:"varchar", value:"2014-01-01"};
-        sql:Parameter p2 = {sqlType:"varchar", value:lastDateOfMonthArray[loop]};
-        sql:Parameter p3 = {sqlType:"varchar", value:"No"};
-        sql:Parameter p4 = {sqlType:"varchar", value:"Yes"};
-        sql:Parameter p5 = {sqlType:"varchar", value:"0"};
-        sql:Parameter p6 = {sqlType:"varchar", value:"1"};
-        params = [p1,p2,p3,p2,p4,p1,p2,p1,p2,p3,p5,p3,p6,p2,p2];
 
-        datatable dt = dbConnection.select(GET_ALL_PATCHES_FOR_QUEUED_AGE_GRAPH_GIVEN_TIME_GAP, params);
-        var fetchMonthData,_ = <json>dt;
+
+        sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+        sql:Parameter valueOfActiveIsYes = {sqlType:"varchar", value:"Yes"};
+        sql:Parameter valueOfStatusIsZero = {sqlType:"integer", value:0};
+        sql:Parameter valueOfStatusIsOne = {sqlType:"integer", value:1};
+        sql:Parameter startingDate = {sqlType:"varchar", value:"2014-01-01"};
+        sql:Parameter lastMonthEndDate = {sqlType:"varchar", value:lastDateOfMonthArray[loop]};
+
+        params = [startingDate,lastMonthEndDate,valueOfActiveIsNo,lastMonthEndDate,valueOfActiveIsYes,startingDate,lastMonthEndDate,startingDate,lastMonthEndDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,lastMonthEndDate,lastMonthEndDate];
+
+        datatable resultOfAllPatchesAtThePatchQueue = dbConnection.select(GET_ALL_PATCHES_FOR_QUEUED_AGE_GRAPH_GIVEN_TIME_GAP, params);
+        var fetchMonthData,_ = <json>resultOfAllPatchesAtThePatchQueue;
 
         int fetchLength = lengthof fetchMonthData;
         int loop2 = 0;
 
+        //Check each patch and put each patch into appropriate date count bucket
         while(loop2<fetchLength){
             var reportD,_ = (string)fetchMonthData[loop2].REPORT_DATE;
             time:Time reportDate = time:parse(reportD+"T00:00:00.000-0000","yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -1319,7 +1312,7 @@ function ageDrillDownGraph(string group,string month)(json){
         currentGroupIndex = 4;
     }
 
-
+    //get product and version drill down to day count buckets
     if(group != "90"){
         sql:Parameter[] params = [];
         sql:Parameter p1 = {sqlType:"varchar", value:"2014-01-01"};
@@ -2606,3 +2599,4 @@ function getReleaseFirstDateFromWeekNumber(string start,string end)(json){
 
     return weekFirstDate;
 }
+
