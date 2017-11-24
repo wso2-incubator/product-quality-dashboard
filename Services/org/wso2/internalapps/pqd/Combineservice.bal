@@ -521,7 +521,7 @@ function getSQLconfigData(json configData)(map){
 
     string jdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
 
-    map propertiesMap = {"jdbcUrl": jdbcUrl,"username": dbUsername, "password": dbPassword, "maximumPoolSize":maxPoolConnections};
+    map propertiesMap = {"jdbcUrl": jdbcUrl,"username": dbUsername, "password": dbPassword};
 
     return propertiesMap;
 
