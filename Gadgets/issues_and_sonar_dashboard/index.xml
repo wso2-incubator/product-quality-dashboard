@@ -12,7 +12,7 @@
 <html>
 <head>
     <title>
-        Issues and Sonar Dashboard Gadget
+        Issues and Sonar Dashboard
     </title>
 
     <meta charset="utf-8">
@@ -23,75 +23,7 @@
     <link href="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/css/daterangepicker.css" rel="stylesheet"/>
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href='css/font-awesome/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
-
-    <style type="text/css">
-        body {
-            overflow:hidden;
-            font-size:0.8vw !important;
-            font-family:"Helvetica Neue",Helvetica,Arial,sans-serif !important;
-        }
-
-        .sidebarInside{
-            max-height:500px !important;
-            overflow:hidden;
-            overflow-y:auto;
-            font-size:0.8vw !important;
-        }
-
-        .left {
-            height:100vh;
-            max-height: 100vh;
-            overflow-y : scroll;
-        }
-        .right-scrolling-body {
-            margin-top:0px;
-            margin-bottom:10px;
-            height: 830px;
-            overflow-y: scroll;
-            position: relative;
-            font-size:0.8vw !important;
-        }
-
-        .mam-light-issues{
-            color:#fff!important;
-            background-color:#FF9933!important;
-        }
-
-        .mam-light-sonar{
-            color:#fff!important;
-            background-color:#206898!important
-        }
-
-        .mam-container{
-            padding:0.01em 16px
-        }
-
-        .mam-card{
-            box-shadow:0 2px 5px 0 rgba(0,0,0,0.2),0 2px 10px 0 rgba(0,0,0,0.19);
-            background-color:#FFFFFF
-        }
-        .btn-product{
-            color:#000000;
-        }
-        .btn-product-active{
-            background:#a1bdcc;
-            font-weight:bold;
-        }
-        .btn-product-inactive{
-            background:#d9edf7;
-        }
-        .fixedIssesDiv{
-           background-color:#FFF7F2;
-        }
-        .fixedSonarDiv{
-            background-color:#F2F7FF;
-        }
-    </style>
-    <style type="text/css">
-        .demo i {
-            position: relative; bottom: 10px; right: 24px; top: auto; cursor: pointer;
-        }
-    </style>
+    <link href="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/css/custom.css" rel="stylesheet"/>
 </head>
 
 <body>
@@ -376,15 +308,12 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -406,186 +335,8 @@
 <script src="code/modules/drilldown.js"></script>
 
 <!--Custom JS-->
-<script src="js/dashboard.js"></script>
-<script type="text/javascript" src="js/data.js"></script>
-<script type="text/javascript" src="js/app1.js"></script>
-<script type="text/javascript" src="js/mapping.js"></script>
-<script>
-
-
-$(window).on('load', function() {
-    initPage();
-
-    var fixedIssesDivTop = $('.fixedIssesDiv').offset().top;
-    console.log($(window).width());
-    $('.right-scrolling-body').scroll(function() {
-        var currentScroll = $('.right-scrolling-body').scrollTop();
-        var scrollTop = $('.right-scrolling-body').offset().top;
-        if (currentScroll >= fixedIssesDivTop && currentScroll<=1390) {
-            $('.fixedIssesDiv').css({
-                position: 'fixed',
-                top: scrollTop,
-               'box-shadow': '0 2px 5px rgba(0,0,0,0.2),0 2px 5px rgba(0,0,0,0.19)',
-               'width':'76.35997313633311vw'
-
-            });
-        } else {
-            $('.fixedIssesDiv').css({
-                position: 'static',
-                'box-shadow': '0px 0px 0px',
-                width:'auto'
-            });
-        }
-    });window
-
-    var fixedSonarDivTop = $('.fixedSonarDiv').offset().top;
-
-    $('.right-scrolling-body').scroll(function() {
-        var currentScroll = $('.right-scrolling-body').scrollTop();
-        var scrollTop = $('.right-scrolling-body').offset().top;
-        if (currentScroll >= fixedSonarDivTop ) {
-            $('.fixedSonarDiv').css({
-                position: 'fixed',
-                top: scrollTop,
-                'box-shadow': '0 2px 5px rgba(0,0,0,0.2),0 2px 5px rgba(0,0,0,0.19)',
-                width:'76.35997313633311vw'
-
-            });
-        } else {
-            $('.fixedSonarDiv').css({
-                position: 'static',
-                'box-shadow': '0px 0px 0px',
-                width:'auto'
-            });
-        }
-    });window
-
-});
-
-    $(".right-scrolling-body").scroll(function() {
-      $(".daterangepicker").hide();
-      $('#issue-calender').blur();
-    });
-
-    $(window).resize(function() {
-      $(".daterangepicker").hide();
-      $('#issue-calender').blur();
-    });
-
-    $(".right-scrolling-body").scroll(function() {
-      $(".daterangepicker").hide();
-      $('#sonar-calender').blur();
-    });
-
-    $(window).resize(function() {
-      $(".daterangepicker").hide();
-      $('#sonar-calender').blur();
-    });
-
-</script>
-
-
-
-
-<script type="text/javascript">
-
-    var start = moment().subtract(29, 'days');
-    var end = moment();
-    var startDate = start.format('YYYY-MM-DD');
-    var endDate = end.format('YYYY-MM-DD');
-
-    $(function() {
-
-        function cb(start, end) {
-            $('#sonar-calender span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-        }
-
-        $('#sonar-calender').daterangepicker({
-            startDate: start,
-            endDate: end,
-            ranges: {
-                <!--'Today': [moment(), moment()],-->
-                <!--'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],-->
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            }
-        }, cb);
-
-        cb(start, end);
-
-        function cd(start, end) {
-            $('#issue-calender span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-        }
-
-        $('#issue-calender').daterangepicker({
-            startDate: start,
-            endDate: end,
-            ranges: {
-                <!--'Today': [moment(), moment()],-->
-                <!--'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],-->
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            }
-        }, cd);
-
-        cd(start, end);
-
-    });
-
-    $('#dailyBtn').click(function(){
-        getIssueTrendLineHistory("day");
-    });
-    $('#monthlyBtn').click(function(){
-        getIssueTrendLineHistory("Month");
-    });
-    $('#quarterlyBtn').click(function(){
-        getIssueTrendLineHistory("Quarter");
-    });
-    $('#yearlyBtn').click(function(){
-        getIssueTrendLineHistory("Year");
-    });
-
-
-    $('#dailyBtnSonar').click(function(){
-        getSonarTrendLineHistory("day");
-    });
-    $('#monthlyBtnSonar').click(function(){
-        getSonarTrendLineHistory("Month");
-    });
-    $('#quarterlyBtnSonar').click(function(){
-        getSonarTrendLineHistory("Quarter");
-    });
-    $('#yearlyBtnSonar').click(function(){
-        getSonarTrendLineHistory("Year");
-    });
-
-    $('#resetView').click(function(){
-        allAreaClick();
-    });
-
-
-    $('#issue-calender').on('apply.daterangepicker', function(ev, picker) {
-
-        startDate = picker.startDate.format('YYYY-MM-DD');
-        endDate = picker.endDate.format('YYYY-MM-DD');
-        setIssueDate(startDate, endDate);
-        <!--setIssueCalender();-->
-        getIssueTrendLineHistory("day");
-    });
-    $('#sonar-calender').on('apply.daterangepicker', function(ev, picker) {
-
-        startDate = picker.startDate.format('YYYY-MM-DD');
-        endDate = picker.endDate.format('YYYY-MM-DD');
-        setSonarDate(startDate, endDate);
-        <!--setSonarCalender();-->
-        getSonarTrendLineHistory("day");
-    });
-</script>
-
+<script type="text/javascript" src="js/app.js"></script>
+<script type="text/javascript" src="js/custom.js"></script>
 </body>
 </html>
 

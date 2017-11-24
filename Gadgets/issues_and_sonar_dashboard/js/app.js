@@ -1,16 +1,10 @@
 var baseUrl='https://digitalops.services.wso2.com:9092/';
-//var baseUrl='https://10.100.4.8:9092/';
 
-var currentArea;
-var currentProduct;
 var currentVersion;
-var currentComponent;
 var currentIssueIssueType;
 var currentIssueSeverity;
-var issueBoth;
 var currentSonarIssueType;
 var currentSonarSeverity;
-var sonarBoth;
 
 var issueStartDate;
 var issueEndDate;
@@ -58,32 +52,22 @@ var currentSonarIssueType;
 var currentSonarSeverity;
 
 var currentCategory;
-
 var sameAreaIsSelected;
-
-var issueIssueTypePieChartTitle;
-var issueSeverityPieChartTitle;
-var sonarIssueTypePieChartTitle;
-var sonarSeverityPieChartTitle;
 
 
 function initPage() {
     
     var sidePaneDetails;
-    var content;
     $.ajax({
         type: "GET",
         url: baseUrl+'internal/product-quality/v1.0/issues/all',
-        // url: baseUrl+'internal/product-quality/v1.0/issues/all',
         async: false,
         success: function(data){
-            
             sidePaneDetails = data.data.items;
-            content = data.data;
             currentData = data.data;
         }
     });
-    
+
     issueIssueTypeIsSelected = false;
     issueSeverityIsSelected = false;
     sonarIssueTypeIsSelected = false;
@@ -100,14 +84,16 @@ function initPage() {
     sameAreaIsSelected = 0;
 
     loadSidePane(sidePaneDetails);
-    
+
     loadTypeAndSeverityDropdowns();
-    initChart(content);
-    
-    initSonarChart(content);
+
+    initChart();
+
+    initSonarChart();
 
 
 }
+
 function loadTypeAndSeverityDropdowns() {
     var issueIssueTypes;
     var issueSeverities;
@@ -115,7 +101,6 @@ function loadTypeAndSeverityDropdowns() {
     var sonarSeverities;
     $.ajax({
         type: "GET",
-        // url: baseURL+'internal/product-quality/v1.0/jira/getIssueTypesAndSeverities',
         url: baseUrl+'internal/product-quality/v1.0/getIssueTypesAndSeverities',
         async: false,
         success: function(data){
@@ -125,7 +110,7 @@ function loadTypeAndSeverityDropdowns() {
             
             sonarIssueTypes = data.data.sonarIssuetypes;
             sonarSeverities = data.data.sonarSeverities;
-            
+
         }
     });
     loadTypeAndSeverityDropdownsForIssues(issueIssueTypes, issueSeverities);
@@ -150,21 +135,21 @@ function loadTypeAndSeverityDropdownsForSonar(issueTypes, severities) {
     selectIssueType.addEventListener('change',function(){
         var e = document.getElementById("sonar-issuetype-choice");
         var selectedSonarType = e.options[e.selectedIndex].value;
-        var selectedSonarTypeName = e.options[e.selectedIndex].text;
 
-        // document.getElementById("sonarSeverityChartHeader").innerHTML = "Issue Type Breakdown for "+ selectedSonarTypeName;
+        currentSonarIssueType = parseInt(selectedSonarType);
 
-        
+        if(currentSonarIssueType !== 0){
+            sonarIssueTypeIsSelected = true;
 
-        if(parseInt(selectedSonarType) !== 0){
-            
             for (var i = 0; i < sonarIssuetypeChart.series[0].data.length; i++) {
                 sonarIssuetypeChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
             sonarIssuetypeChart.get(parseInt(selectedSonarType)).update({ color: '#118983' }, true, false);
             sonarIssuetypeChart.get(parseInt(selectedSonarType)).select();
+        }else{
+            sonarIssueTypeIsSelected = false;
         }
-        selectSonarIssueTypePieChart(parseInt(selectedSonarType));
+        selectSonarIssueTypePieChart();
     });
 
 
@@ -183,22 +168,20 @@ function loadTypeAndSeverityDropdownsForSonar(issueTypes, severities) {
     selectSeverity.addEventListener('change',function(){
         var e = document.getElementById("sonar-severity-choice");
         var selectedSonarSeverity = e.options[e.selectedIndex].value;
-        var selectedSonarSeverityName = e.options[e.selectedIndex].text;
 
-        // document.getElementById("sonarIssueTypeChartHeader").innerHTML = "Issue Type Breakdown for "+ selectedSonarSeverityName;
-
-        
-
-        if(parseInt(selectedSonarSeverity) !== 0){
-            
+        currentSonarSeverity = parseInt(selectedSonarSeverity);
+        if(currentSonarSeverity !== 0){
+            sonarSeverityIsSelected = true;
             for (var i = 0; i < sonarSeverityChart.series[0].data.length; i++) {
                 
                 sonarSeverityChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
             sonarSeverityChart.get(parseInt(selectedSonarSeverity)).update({ color: '#118983' }, true, false);
             sonarSeverityChart.get(parseInt(selectedSonarSeverity)).select();
+        }else{
+            sonarSeverityIsSelected = false;
         }
-        selectSonarSeverityPieChart(parseInt(selectedSonarSeverity));
+        selectSonarSeverityPieChart();
     });
 }
 
@@ -219,21 +202,21 @@ function loadTypeAndSeverityDropdownsForIssues(issueTypes, severities) {
     selectIssueType.addEventListener('change',function(){
         var e = document.getElementById("issuetype-choice");
         var selectedType = e.options[e.selectedIndex].value;
-        var selectedTypeName = e.options[e.selectedIndex].text;
 
-        // document.getElementById("issueSeverityChartHeader").innerHTML = "Issue Type Breakdown for "+ selectedTypeName;
+        currentIssueIssueType = parseInt(selectedType);
 
-        
+        if(currentIssueIssueType !== 0){
+            issueIssueTypeIsSelected = true;
 
-        if(parseInt(selectedType) !== 0){
-            
             for (var i = 0; i < issueIssuetypeChart.series[0].data.length; i++) {
                 issueIssuetypeChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
             issueIssuetypeChart.get(parseInt(selectedType)).update({ color: '#118983' }, true, false);
             issueIssuetypeChart.get(parseInt(selectedType)).select();
+        }else{
+            issueIssueTypeIsSelected = false;
         }
-        selectIssueIssueTypePieChart(parseInt(selectedType));
+        selectIssueIssueTypePieChart();
     });
 
 
@@ -252,36 +235,26 @@ function loadTypeAndSeverityDropdownsForIssues(issueTypes, severities) {
     selectSeverity.addEventListener('change',function(){
         var e = document.getElementById("severity-choice");
         var selectedSeverity = e.options[e.selectedIndex].value;
-        var selectedSeverityName = e.options[e.selectedIndex].text;
 
-        // document.getElementById("issueIssueTypeChartHeader").innerHTML = "Severity Breakdown for "+ selectedSeverityName;
+        currentIssueSeverity = parseInt(selectedSeverity);
 
-        
-
-        if(parseInt(selectedSeverity) !== 0){
-            
+        if(currentIssueSeverity !== 0){
+            issueSeverityIsSelected = true;
             for (var i = 0; i < issueSeverityChart.series[0].data.length; i++) {
                 issueSeverityChart.series[0].data[i].update({ color: '#a2a3a3' }, true, false);
             }
             issueSeverityChart.get(parseInt(selectedSeverity)).update({ color: '#118983' }, true, false);
             issueSeverityChart.get(parseInt(selectedSeverity)).select();
+        }else{
+            issueSeverityIsSelected = false;
         }
-        selectIssueSeverityPieChart(parseInt(selectedSeverity));
+        selectIssueSeverityPieChart();
     });
-
-
 }
 
 
-function selectIssueIssueTypePieChart(issueTypeId) {
-    currentIssueIssueType = issueTypeId;
-    if (issueTypeId !== 0){
-        issueIssueTypeIsSelected = true;
-    }else{
-        issueIssueTypeIsSelected = false;
-    }
-
-    var url = baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+issueTypeId+'/severity/'+currentIssueSeverity;
+function selectIssueIssueTypePieChart() {
+    var url = baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+currentIssueSeverity;
 
     if (issueSeverityIsSelected === true){
         
@@ -293,7 +266,6 @@ function selectIssueIssueTypePieChart(issueTypeId) {
         
     }
 
-    var content;
     $.ajax({
         type: "GET",
         url: url,
@@ -303,24 +275,17 @@ function selectIssueIssueTypePieChart(issueTypeId) {
         },
         async: false,
         success: function(data){
-            
-            content = data.data;
-            currentData = content;
+            currentData = data.data;
+
         }
     });
 
-    initChart(content);
+    initChart();
 }
 
-function selectIssueSeverityPieChart(severityId) {
-    currentIssueSeverity = severityId;
-    if (severityId !== 0){
-        issueSeverityIsSelected = true;
-    }else{
-        issueSeverityIsSelected = false;
-    }
-    var url = baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+severityId;
+function selectIssueSeverityPieChart() {
 
+    var url = baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+currentIssueSeverity;
 
     if (issueIssueTypeIsSelected === true){
         
@@ -330,7 +295,6 @@ function selectIssueSeverityPieChart(severityId) {
         refreshBtn.style.display = 'initial';
     }
 
-    var content;
     $.ajax({
         type: "GET",
         url: url,
@@ -340,26 +304,15 @@ function selectIssueSeverityPieChart(severityId) {
         },
         async: false,
         success: function(data){
-            
-            content = data.data;
-            currentData = content;
+            currentData = data.data;
         }
     });
-    initChart(content);
+    initChart();
 }
 
-function selectSonarIssueTypePieChart(issueTypeId) {
+function selectSonarIssueTypePieChart() {
 
-    
-    currentSonarIssueType = issueTypeId;
-    if(issueTypeId !== 0){
-        
-        sonarIssueTypeIsSelected = true;
-    }else{
-        
-        sonarIssueTypeIsSelected = false;
-    }
-    var url = baseUrl+'internal/product-quality/v1.0/sonar/issues/issuetype/'+issueTypeId+'/severity/'+currentSonarSeverity;
+    var url = baseUrl+'internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+currentSonarSeverity;
 
     if (sonarSeverityIsSelected === true){
         
@@ -369,7 +322,7 @@ function selectSonarIssueTypePieChart(issueTypeId) {
         refreshBtn.style.display = 'initial';
     }
 
-    var content;
+
     $.ajax({
         type: "GET",
         url: url,
@@ -379,24 +332,15 @@ function selectSonarIssueTypePieChart(issueTypeId) {
         },
         async: false,
         success: function(data){
-            
-            content = data.data;
-            currentData = content;
+            currentData = data.data;
         }
     });
-    initSonarChart(content);
+    initSonarChart();
 }
 
-function selectSonarSeverityPieChart(severityId) {
-    currentSonarSeverity = severityId;
-    if(severityId !== 0){
-        
-        sonarSeverityIsSelected = true;
-    }else{
-        
-        sonarSeverityIsSelected = false;
-    }
-    var url = baseUrl+'internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+severityId;
+function selectSonarSeverityPieChart() {
+
+    var url = baseUrl+'internal/product-quality/v1.0/sonar/issues/issuetype/'+currentSonarIssueType+'/severity/'+currentSonarSeverity;
 
     if (sonarIssueTypeIsSelected === true){
         
@@ -405,7 +349,7 @@ function selectSonarSeverityPieChart(severityId) {
         var refreshBtn = document.getElementById("resetSonarChartsId");
         refreshBtn.style.display = 'initial';
     }
-    var content;
+
     $.ajax({
         type: "GET",
         url: url,
@@ -415,12 +359,10 @@ function selectSonarSeverityPieChart(severityId) {
         },
         async: false,
         success: function(data){
-            
-            content = data.data;
-            currentData = content;
+            currentData = data.data;
         }
     });
-    initSonarChart(content);
+    initSonarChart();
 }
 
 function resetSonarCharts() {
@@ -448,13 +390,11 @@ function resetSonarCharts() {
             categoryId: currentCategoryId
         },
         success: function(data){
-            
-            content = data.data;
-            currentData = content;
+            currentData = data.data;
         }
     });
 
-    initSonarChart(content);
+    initSonarChart();
     
 }
 
@@ -473,7 +413,6 @@ function resetIssueCharts() {
     var refreshBtn = document.getElementById("resetIssueChartsId");
     refreshBtn.style.display = 'none';
 
-    
     $.ajax({
         type: "GET",
         url: baseUrl+'internal/product-quality/v1.0/github/issues/issuetype/'+currentIssueIssueType+'/severity/'+currentIssueSeverity,
@@ -483,25 +422,20 @@ function resetIssueCharts() {
             categoryId: currentCategoryId
         },
         success: function(data){
-            
-            content = data.data;
-            currentData = content;
+            currentData = data.data;
         }
     });
 
-
-
-    initChart(content);
+    initChart();
     
 }
 
 function loadSidePane(sidePaneDetails) {
     
     var totalProducts = sidePaneDetails.length;
-    
 
     for (var x = 0; x < totalProducts; x++) {
-        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:0px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='a"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
+        document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:0px; margin-bottom:-4px; font-size: 100%;'><button onclick='clickArea("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='a"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
             + sidePaneDetails[x].name        +
             "<span id='sonarCount"+(parseInt(x)+1)+"' class='badge' style='width:2.7vw; font-size: 0.75vw; background-color:#206898;padding:3px 6px;'></span>" +
             "<span id='issueCount"+(parseInt(x)+1)+"' class='badge' style='width:2.2vw; font-size: 0.75vw; background-color:#FF9933; padding:3px 6px;'></span></button>" +
@@ -519,45 +453,17 @@ function loadSidePane(sidePaneDetails) {
     }
 }
 
-function loadSidePaneAtReset(sidePaneDetails) {
 
-    var totalProducts = sidePaneDetails.length;
-
-    document.getElementById('area').innerHTML = "";
-
-
-    for (var x = 0; x < totalProducts; x++) {
-            document.getElementById('area').innerHTML += "<div class='panel' style='margin-top:0px; margin-bottom:-4px; font-size: 100%;'><button onclick='leftMenuAreaClick("+sidePaneDetails[x].id+")' data-parent='#area' href='#collapseArea"+(sidePaneDetails[x].id)+"' data-toggle='collapse' id='a"+(sidePaneDetails[x].id)+"' class='list-group-item'>"
-                + sidePaneDetails[x].name        +
-                "<span id='sonarCount"+(parseInt(x)+1)+"' class='badge' style='width:2.7vw; font-size: 0.75vw; background-color:#206898;padding:3px 6px;'></span>" +
-                "<span id='issueCount"+(parseInt(x)+1)+"' class='badge' style='width:2.2vw; font-size: 0.75vw; background-color:#FF9933; padding:3px 6px;'></span></button>" +
-                "<div id='collapseArea"+(sidePaneDetails[x].id)+"'  style='transition: all .8s ease;' class='panel-collapse collapse' role='tabpanel' aria-labelledby='headingOne'>" +
-                "<div class='sidebarInside'>" +
-                "<ul id='product"+(sidePaneDetails[x].id)+"' >"+
-                ""+
-                "</ul>"+
-                "</div>" +
-                "</div>" +
-                "</div>"
-
-            document.getElementById('issueCount'+(parseInt(x)+1)).innerHTML = sidePaneDetails[x].issues;
-            document.getElementById('sonarCount'+(parseInt(x)+1)).innerHTML = sidePaneDetails[x].sonar;
-     }
-}
-
-function allAreaClick() {
+function resetDashboardView() {
     
     var sidePaneDetails;
-    var content;
     $.ajax({
         type: "GET",
         url: baseUrl+'internal/product-quality/v1.0/issues/all',
-        // url: baseUrl+'internal/product-quality/v1.0/issues/all',
         async: false,
         success: function(data){
             
             sidePaneDetails = data.data.items;
-            content = data.data;
             currentData = data.data;
         }
     });
@@ -596,13 +502,14 @@ function allAreaClick() {
     sameAreaIsSelected = 0;
 
     document.getElementById('componentChoice').innerHTML = "&nbsp;";
-    loadSidePaneAtReset(sidePaneDetails);
-    initChart(content);
-    
-    initSonarChart(content);
+    document.getElementById('area').innerHTML = "";
+
+    loadSidePane(sidePaneDetails);
+    initChart();
+    initSonarChart();
 }
 
-function leftMenuAreaClick(areaId){
+function clickArea(areaId){
     if(currentAreaId === areaId){
         sameAreaIsSelected = sameAreaIsSelected + 1;
 
@@ -651,8 +558,6 @@ function leftMenuAreaClick(areaId){
     refreshBtn.style.display = 'none';
 
     var sidePaneDetails;
-    var content;
-    
 
     if(sameAreaIsSelected === 2){
         currentCategoryId = 0;
@@ -663,9 +568,7 @@ function leftMenuAreaClick(areaId){
             url: baseUrl+'internal/product-quality/v1.0/issues/all/',
             async: false,
             success: function(data){
-                
-                content = data.data;
-                currentData = content;
+                currentData = data.data;
             }
         });
         
@@ -677,8 +580,7 @@ function leftMenuAreaClick(areaId){
             success: function(data){
                 
                 sidePaneDetails = data.data.items;
-                content = data.data;
-                currentData = content;
+                currentData = data.data;
             }
         });
         
@@ -690,7 +592,7 @@ function leftMenuAreaClick(areaId){
             sonarCount = sidePaneDetails[y].sonar;
 
             document.getElementById('product'+(areaId)).innerHTML +=
-                "<button class='btn-product list-group-item list-group-item-info' onclick='leftMenuProductClick("+(sidePaneDetails[y].id)+")' style='width:100%;text-align: left;' id='" + sidePaneDetails[y].id + "'>"+
+                "<button class='btn-product list-group-item list-group-item-info' onclick='clickProduct("+(sidePaneDetails[y].id)+")' style='width:100%;text-align: left;' id='" + sidePaneDetails[y].id + "'>"+
                 sidePaneDetails[y].name +
                 "<span id='sonarProductCount"+areaId+(parseInt(y))+"' class='badge' style='min-width:2.7vw; font-size: 0.75vw; background-color:#206898;padding:3px 6px;'></span>" +
                 "<span id='issueProductCount"+areaId+(parseInt (y))+"' class='badge' style='min-width:2.2vw; font-size: 0.75vw; background-color:#FF9933; padding:3px 6px;'></span></button>";
@@ -700,11 +602,11 @@ function leftMenuAreaClick(areaId){
 
         }
     }
-    initChart(content);
-    initSonarChart(content);
+    initChart();
+    initSonarChart();
 }
 
-function leftMenuProductClick(productId) {
+function clickProduct(productId) {
     
 
     $('.btn-product').removeClass('btn-product-active').addClass('btn-product-inactive');
@@ -744,7 +646,6 @@ function leftMenuProductClick(productId) {
     refreshBtn.style.display = 'none';
 
     var sidePaneDetails;
-    var content;
     $.ajax({
         type: "GET",
         url: baseUrl+'internal/product-quality/v1.0/issues/product/'+productId ,
@@ -752,51 +653,19 @@ function leftMenuProductClick(productId) {
         success: function(data){
             
             sidePaneDetails = data.data.items;
-            content = data.data;
             currentData = data.data;
         }
     });
 
     loadComponentDropdown(sidePaneDetails);
 
-    initChart(content);
+    initChart();
     
-    initSonarChart(content);
-}
-
-function leftMenuVersionClick(version) {
-    currentProductId = productId;
-    currentVersion = version;
-    currentComponentId = 0;
-
-    currentIssueIssueType = 0;
-    currentIssueSeverity = 0;
-    currentSonarIssueType = 0;
-    currentSonarSeverity = 0;
-
-    var sidePaneDetails;
-    var content;
-    $.ajax({
-        type: "GET",
-        url: baseUrl+'internal/product-quality/v1.0/jira/issues/summary/' + productId + '/version/' + version,
-        async: false,
-        success: function(data){
-            
-            sidePaneDetails = data.data.items;
-            content = data.data;
-            currentData = data.data;
-        }
-    });
-
-    currentCategory = "version";
-    initChart("version", content);
-    
-    loadComponentDropdown(sidePaneDetails);
+    initSonarChart();
 }
 
 
 function loadComponentDropdown(sidePaneDetails) {
-    
 
     document.getElementById('componentChoice').innerHTML = "";
     var item = document.getElementById('componentChoice');
@@ -851,13 +720,12 @@ function loadComponentDropdown(sidePaneDetails) {
         if(parseInt(strUser) > 0){
             loadComponentDetails(parseInt(strUser));
         }else{
-            leftMenuProductClick(currentProductId);
+            clickProduct(currentProductId);
         }
     });
 
 
 }
-
 
 function loadComponentDetails(componentId) {
     
@@ -892,35 +760,29 @@ function loadComponentDetails(componentId) {
     var refreshBtn = document.getElementById("resetSonarChartsId");
     refreshBtn.style.display = 'none';
 
-    var content;
+
     $.ajax({
         type: "GET",
         url: baseUrl+'internal/product-quality/v1.0/issues/component/' + componentId,
         async: false,
         success: function(data){
-            
-            content = data.data;
             currentData = data.data;
         }
     });
 
-    initChart(content);
-    initSonarChart(content);
+    initChart();
+    initSonarChart();
 }
 
 
-function initChart(content) {
-    
-    //set the data for main chart
-    if (currentCategory !== "component"){
-        
-        productData = content.items;
+function initChart() {
+    productData = currentData.items;
+    mainSeriesData = [];
+    totalMainIssues = 0;
 
-        mainSeriesData = [];
-        totalMainIssues = 0;
+    if (currentCategory !== "component"){
 
         if(productData.length !== 0){
-
             for(var i = 0; i < productData.length; i++){
                 name = productData[i].name;
                 id = productData[i].id;
@@ -932,22 +794,16 @@ function initChart(content) {
 
         }
         currentIssueMainChartTitle = "Total : " + totalMainIssues;
-
         currentIssueMainChartData = [{
             name: "Product",
             colorByPoint: true, data: mainSeriesData
         }]
         createMainChart();
     }
-    if (currentCategory === "component"){
-        
-        productData = content.items;
 
-        mainSeriesData = [];
-        totalMainIssues = 0;
+    if (currentCategory === "component"){
 
         if(productData.length !== 0){
-
             for(var i = 0; i < productData.length; i++){
                 name = productData[i].name;
                 id = productData[i].id;
@@ -963,7 +819,6 @@ function initChart(content) {
 
         }
         currentIssueMainChartTitle = "Total : " + totalMainIssues;
-
         currentIssueMainChartData = [{
             name: "Component",
             colorByPoint: true, data: mainSeriesData
@@ -971,10 +826,9 @@ function initChart(content) {
         createMainChart();
     }
 
-    //set the data for the issuetype chart
     if(issueIssueTypeIsSelected === false){
         
-        issuetypeData = content.issueIssuetype;
+        issuetypeData = currentData.issueIssuetype;
 
         issuetypeSeriesData = [];
         totalIssuetypeIssues = 0;
@@ -1001,9 +855,7 @@ function initChart(content) {
 
 
     if(issueSeverityIsSelected === false){
-        
-        //set the data for the severity chart
-        severityData = content.issueSeverity;
+        severityData = currentData.issueSeverity;
 
         severitySeriesData = [];
         totalSeverityIssues = 0;
@@ -1028,9 +880,6 @@ function initChart(content) {
         createSeverityChart();
     }
 
-    // createIssueCharts(category);
-
-    
     var dateFrom = moment().subtract(29, 'days');
     var dateTo= moment();
     issueStartDate = dateFrom.format('YYYY-MM-DD');
@@ -1039,17 +888,12 @@ function initChart(content) {
     
 }
 
-function initSonarChart(content) {
-    
+function initSonarChart() {
+    productData = currentData.items;
+    mainSeriesData = [];
+    totalMainIssues = 0;
 
-    //set the data for main chart
     if (currentCategory !== "component"){
-        
-        productData = content.items;
-
-        mainSeriesData = [];
-        totalMainIssues = 0;
-
         if(productData.length !== 0){
 
             for(var i = 0; i < productData.length; i++){
@@ -1064,7 +908,6 @@ function initSonarChart(content) {
 
 
         currentSonarMainChartTitle = "Total : " + totalMainIssues;
-
         currentSonarMainChartData = [{
             name: "Product",
             colorByPoint: true, data: mainSeriesData
@@ -1075,12 +918,6 @@ function initSonarChart(content) {
     }
 
     if (currentCategory === "component"){
-        
-        productData = content.items;
-
-        mainSeriesData = [];
-        totalMainIssues = 0;
-
         if(productData.length !== 0){
 
             for(var i = 0; i < productData.length; i++){
@@ -1098,7 +935,6 @@ function initSonarChart(content) {
 
         }
         currentSonarMainChartTitle = "Total : " + totalMainIssues;
-
         currentSonarMainChartData = [{
             name: "Component",
             colorByPoint: true, data: mainSeriesData
@@ -1110,9 +946,7 @@ function initSonarChart(content) {
     //set the data for the issuetype chart
     if(sonarIssueTypeIsSelected === false){
 
-        
-        issuetypeData = content.sonarIssuetype;
-
+        issuetypeData = currentData.sonarIssuetype;
         issuetypeSeriesData = [];
         totalIssuetypeIssues = 0;
 
@@ -1143,8 +977,7 @@ function initSonarChart(content) {
 
 
     if(sonarSeverityIsSelected === false){
-        //set the data for the severity chart
-        severityData = content.sonarSeverity;
+        severityData = currentData.sonarSeverity;
 
         severitySeriesData = [];
         totalSeverityIssues = 0;
@@ -1180,9 +1013,7 @@ function initSonarChart(content) {
 
 
 function createMainChart(){
-    //Create the chart
-    
-    this.issueMainChart = Highcharts.chart('main-chart-container', {
+    issueMainChart = Highcharts.chart('main-chart-container', {
         chart: {
             type: 'column'
         },
@@ -1231,9 +1062,7 @@ function createMainChart(){
 }
 
 function createSonarMainChart(){
-    //Create the chart
-    
-    this.sonarMainChart = Highcharts.chart('main-chart-container-sonar', {
+    sonarMainChart = Highcharts.chart('main-chart-container-sonar', {
         chart: {
             type: 'column'
         },
@@ -1281,8 +1110,6 @@ function createSonarMainChart(){
 }
 
 function createIssueTypeChart(){
-    
-    // Create the chart
     this.issueIssuetypeChart = Highcharts.chart('issuetype-chart-container', {
         chart: {
             type: 'pie'
@@ -1294,11 +1121,6 @@ function createIssueTypeChart(){
             text: currentIssueIssueTypeChartTitle
         },
         legend: {
-            // layout: 'vertical',
-            // align: 'right',
-            // verticalAlign: 'top',
-            // y: 50,
-            // width: 100
             itemWidth: 150
         },
         plotOptions: {
@@ -1313,7 +1135,6 @@ function createIssueTypeChart(){
                 showInLegend: true,
             }
         },
-        // colors: ['#fff698', '#c8f0a8', '#50a35a', '#006d7c', '#66a6ae', '#d6a36e', '#b4e6ff', '#033656', '#deaa96'],
         tooltip: {
             headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
@@ -1326,9 +1147,8 @@ function createIssueTypeChart(){
 
     });
 }
+
 function createSonarIssueTypeChart(){
-    
-    // Create the chart
     this.sonarIssuetypeChart = Highcharts.chart('issuetype-chart-container-sonar', {
         chart: {
             type: 'pie'
@@ -1340,12 +1160,7 @@ function createSonarIssueTypeChart(){
             text: currentSonarIssueTypeChartTitle
         },
         legend: {
-            // layout: 'vertical',
-            // align: 'right',
-            // verticalAlign: 'top',
-            // y: 50,
-            // width: 100
-            itemWidth: 150
+           itemWidth: 150
         },
         plotOptions: {
             pie: {
@@ -1359,7 +1174,6 @@ function createSonarIssueTypeChart(){
                 showInLegend: true,
             }
         },
-        // colors: ['#fff698', '#c8f0a8', '#50a35a', '#006d7c', '#66a6ae', '#d6a36e', '#b4e6ff', '#033656', '#deaa96'],
         tooltip: {
             headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
@@ -1375,9 +1189,7 @@ function createSonarIssueTypeChart(){
 
 
 function createSeverityChart(){
-    // Create the chart
-    
-    this.issueSeverityChart = Highcharts.chart('severity-chart-container', {
+     this.issueSeverityChart = Highcharts.chart('severity-chart-container', {
         chart: {
             type: 'pie'
         },
@@ -1385,13 +1197,7 @@ function createSeverityChart(){
             enabled: false
         },
         legend: {
-            // layout: 'vertical',
-            // align: 'right',
-            // verticalAlign: 'top',
-            // y: 50,
             itemWidth: 150
-            // floating: false,
-            // backgroundColor: '#FCFFC5'
         },
         title: {
             text: currentIssueSeverityChartTitle
@@ -1408,7 +1214,6 @@ function createSeverityChart(){
                 showInLegend: true
             }
         },
-        // colors: ['#ffdba2', '#ffafa2', '#dd5f5f', '#bf0a0a', '#781f1f', '#8d3f3f', '#450000'],
         tooltip: {
             headerFormat: '<span style="font-size:0.7387508394895903vw">{series.name}</span><br>',
             pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
@@ -1423,8 +1228,6 @@ function createSeverityChart(){
 }
 
 function createSonarSeverityChart(){
-    // Create the chart
-    
     this.sonarSeverityChart = Highcharts.chart('severity-chart-container-sonar', {
         chart: {
             type: 'pie'
@@ -1464,9 +1267,6 @@ function createSonarSeverityChart(){
     });
 }
 
-
-
-
 function getIssueTrendLineHistory(period) {
     
     var history;
@@ -1489,7 +1289,6 @@ function getIssueTrendLineHistory(period) {
     historySeriesData = [];
 
     for(var i = 0; i < history.length; i++){
-        // time = history[i].date.split("+");
         name = history[i].date;
         y = history[i].count;
         historySeriesData.push({name: name, y: y});
@@ -1522,7 +1321,6 @@ function getSonarTrendLineHistory(period) {
     for(var i = 0; i < history.length; i++){
         time = history[i].date.split("+");
         name = time[0];
-        // name = history[i].date;
         y = history[i].count;
         historySeriesData.push({name: name, y: y});
     }
@@ -1570,13 +1368,13 @@ function createIssueTrendChart(data){
         },
         series: [{
             type: 'line',
-            // name: 'USD to EUR',
             data: data
         }]
 
     });
 
 }
+
 function createSonarTrendChart(data){
     
     Highcharts.chart('trend-chart-container-sonar', {
@@ -1615,7 +1413,6 @@ function createSonarTrendChart(data){
         },
         series: [{
             type: 'line',
-            // name: 'USD to EUR',
             data: data
         }]
 
@@ -1634,7 +1431,6 @@ function setSonarDate(start, end) {
     sonarEndDate = end;
     sonarHistoryTitle =  startDate + " - " + endDate;
 }
-
 
 
 
