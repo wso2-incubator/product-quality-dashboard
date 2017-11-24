@@ -641,7 +641,9 @@ function changeIssueFormatTESTING2(json projectList, json issueTypeList, json se
             string severity;
             try {
                 severity = jsons:getString(issue,"$.fields.customfield_10075.value");
+
             }catch (errors:Error err) {
+
                 severity = "Unknown";
             }
 
@@ -3165,5 +3167,3 @@ function getProductLevelIssueSummaryForIssueTypeAndSeverity(int productId, int i
     messages:setJsonPayload(response, data);
     return response;
 }
-
-
