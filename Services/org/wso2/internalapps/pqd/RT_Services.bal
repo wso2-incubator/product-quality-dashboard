@@ -16,6 +16,9 @@ service<http> releaseTrainService {
     @http:Path{value:"/"}
     resource resource1 (message m) {
 
+
+
+
         message send={};
 
         logger:info("test");
@@ -32,6 +35,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/project"}
     resource resource2 (message m) {
         updateProject();
+        logger:info("/project Rest call triggered");
         http:setStatusCode(m, 202);
         messages:setStringPayload(m, "Request Accepted");
         reply m;
@@ -41,6 +45,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/user"}
     resource resource3 (message m) {
         updateUser();
+        logger:info("/user Rest call triggered");
         http:setStatusCode(m,202);
         messages:setStringPayload(m,"Request Accepted");
         reply m;
@@ -51,6 +56,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/version"}
     resource resource4 (message m) {
         updateVersion();
+        logger:info("/version Rest call triggered");
         http:setStatusCode(m,202);
         messages:setStringPayload(m,"Request Accepted");
         reply m;
@@ -61,6 +67,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/issue"}
     resource resource5 (message m) {
         updateIssue();
+        logger:info("/issue Rest call triggered");
         http:setStatusCode(m,202);
         messages:setStringPayload(m,"Request Accepted");
         reply m;
@@ -72,8 +79,9 @@ service<http> releaseTrainService {
     @http:Path{value:"/getAllReleases"}
     resource resource6 (message m) {
         message send={};
-        json dataSet1 = getAllReleases();
-        messages:setJsonPayload(send,dataSet1);
+        json sendData = getAllReleases();
+        logger:info("/getAllReleases Rest call triggered");
+        messages:setJsonPayload(send, sendData);
         messages:setHeader(send,"Access-Control-Allow-Origin","*");
         reply send;
 
@@ -81,12 +89,13 @@ service<http> releaseTrainService {
 
 
     @http:GET {}
-    @http:Path{value:"/getProductWiseReleases/{product}"}
-    resource resource7 (message m,@http:PathParam {value:"product"} string product) {
+    @http:Path{value:"/getProductWiseReleases/{productArea}"}
+    resource resource7 (message m,@http:PathParam {value:"productArea"} string productArea) {
 
         message send={};
-        json dataSet1 = getReleasesByProduct(product);
-        messages:setJsonPayload(send,dataSet1);
+        json sendData = getReleasesByProductArea(productArea);
+        logger:info("/getProductWiseReleases/{productArea} Rest call triggered");
+        messages:setJsonPayload(send, sendData);
         messages:setHeader(send,"Access-Control-Allow-Origin","*");
         reply send;
 
@@ -94,12 +103,13 @@ service<http> releaseTrainService {
 
 
     @http:GET {}
-    @http:Path{value:"/manager/{product}/{startDate}/{endDate}"}
-    resource resource8 (message m, @http:PathParam {value:"product"} string product,
+    @http:Path{value:"/manager/{productArea}/{startDate}/{endDate}"}
+    resource resource8 (message m, @http:PathParam {value:"productArea"} string productArea,
                         @http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {
 
         message send={};
-        json manager = getManagers(product,startDate,endDate);
+        json manager = getManagers(productArea,startDate,endDate);
+        logger:info("/manager/{productArea}/{startDate}/{endDate} Rest call triggered");
         messages:setJsonPayload(send,manager);
         messages:setHeader(send,"Access-Control-Allow-Origin","*");
         reply send;
@@ -113,6 +123,7 @@ service<http> releaseTrainService {
 
         message send={};
         json trackerSubjects = getTrackerSubjects(trackerId,versionId);
+        logger:info("/tracker/{trackerId}/{versionId} Rest call triggered");
         messages:setJsonPayload(send,trackerSubjects);
         messages:setHeader(send,"Access-Control-Allow-Origin","*");
         reply send;
@@ -125,9 +136,9 @@ service<http> releaseTrainService {
 
         message response={};
 
-        json jsonRes = getFixedGitIssues(repoName, versionName);
-
-        messages:setJsonPayload(response,jsonRes);
+        json fixedIssues = getFixedGitIssues(repoName, versionName);
+        logger:info("/getFixedGitIssues/{repoName} Rest call triggered");
+        messages:setJsonPayload(response, fixedIssues);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");
         reply response;
     }
@@ -138,9 +149,9 @@ service<http> releaseTrainService {
 
         message response={};
 
-        json jsonRes = getReportedGitIssues(repoName, versionName);
-
-        messages:setJsonPayload(response,jsonRes);
+        json reportedIssues = getReportedGitIssues(repoName, versionName);
+        logger:info("/getReportedGitIssues/{repoName} Rest call triggered");
+        messages:setJsonPayload(response, reportedIssues);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");
         reply response;
     }
@@ -151,13 +162,33 @@ service<http> releaseTrainService {
 
         message response={};
 
-        json jsonRes = getRepoAndVersion(projectId, versionId);
-
-        messages:setJsonPayload(response,jsonRes);
+        json sendData = getRepoAndVersion(projectId, versionId);
+        logger:info("/getRepoAndVersion/{projectId}/{versionId} Rest call triggered");
+        messages:setJsonPayload(response, sendData);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");
         reply response;
     }
 
+    @http:GET {}
+    @http:Path{value:"/updateGitHubReleases"}
+    resource resource13 (message m) {
+        updateGitHubReleases();
+        logger:info("/updateGitHubReleases Rest call triggered");
+        http:setStatusCode(m,202);
+        messages:setStringPayload(m,"Request Accepted");
+        reply m;
+    }
 
+    @http:GET {}
+    @http:Path{value:"/getRepoAndGitVersionByGitId/{gitVersionId}"}
+    resource resource14 (message m, @http:PathParam {value:"gitVersionId"} int gitVersionId) {
+        message response={};
+        json sendData = getRepoAndGitVersionByGitId(gitVersionId);
+        logger:info("/getRepoAndGitVersionByGitId/{gitVersionId} Rest call triggered");
+        messages:setJsonPayload(response, sendData);
+        messages:setHeader(response,"Access-Control-Allow-Origin","*");
+        reply response;
+
+    }
 
 }
