@@ -35,7 +35,8 @@ struct SonarIssues{
     string project_key;
     int BLOCKER_BUG; int CRITICAL_BUG; int MAJOR_BUG; int MINOR_BUG; int INFO_BUG;
     int BLOCKER_CODE_SMELL; int CRITICAL_CODE_SMELL; int MAJOR_CODE_SMELL; int MINOR_CODE_SMELL; int INFO_CODE_SMELL;
-    int BLOCKER_VULNERABILITY; int CRITICAL_VULNERABILITY; int MAJOR_VULNERABILITY; int MINOR_VULNERABILITY; int INFO_VULNERABILITY;
+    int BLOCKER_VULNERABILITY; int CRITICAL_VULNERABILITY; int MAJOR_VULNERABILITY; int MINOR_VULNERABILITY;
+    int INFO_VULNERABILITY;
     int total;
 }
 
@@ -50,30 +51,37 @@ struct DailySonarIssues {
     string date;
     float BLOCKER_BUG; float CRITICAL_BUG; float MAJOR_BUG; float MINOR_BUG; float INFO_BUG;
     float BLOCKER_CODE_SMELL; float CRITICAL_CODE_SMELL; float MAJOR_CODE_SMELL; float MINOR_CODE_SMELL; float INFO_CODE_SMELL;
-    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY; float INFO_VULNERABILITY;
+    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY;
+    float INFO_VULNERABILITY;
     float total;
 }
+
 struct MonthlySonarIssues {
     int year;
     int month;
     float BLOCKER_BUG; float CRITICAL_BUG; float MAJOR_BUG; float MINOR_BUG; float INFO_BUG;
     float BLOCKER_CODE_SMELL; float CRITICAL_CODE_SMELL; float MAJOR_CODE_SMELL; float MINOR_CODE_SMELL; float INFO_CODE_SMELL;
-    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY; float INFO_VULNERABILITY;
+    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY;
+    float INFO_VULNERABILITY;
     float total;
 }
+
 struct QuarterlySonarIssues{
     int year;
     int quarter;
     float BLOCKER_BUG; float CRITICAL_BUG; float MAJOR_BUG; float MINOR_BUG; float INFO_BUG;
     float BLOCKER_CODE_SMELL; float CRITICAL_CODE_SMELL; float MAJOR_CODE_SMELL; float MINOR_CODE_SMELL; float INFO_CODE_SMELL;
-    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY; float INFO_VULNERABILITY;
+    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY;
+    float INFO_VULNERABILITY;
     float total;
 }
+
 struct YearlySonarIssues{
     int year;
     float BLOCKER_BUG; float CRITICAL_BUG; float MAJOR_BUG; float MINOR_BUG; float INFO_BUG;
     float BLOCKER_CODE_SMELL; float CRITICAL_CODE_SMELL; float MAJOR_CODE_SMELL; float MINOR_CODE_SMELL; float INFO_CODE_SMELL;
-    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY; float INFO_VULNERABILITY;
+    float BLOCKER_VULNERABILITY; float CRITICAL_VULNERABILITY; float MAJOR_VULNERABILITY; float MINOR_VULNERABILITY;
+    float INFO_VULNERABILITY;
     float total;
 }
 
@@ -84,7 +92,9 @@ map propertiesMap = getSQLconfigData(configData);
 string basicurl = jsons:getString(configData, "$.SONAR.SONAR_URL");
 string version =  API_VERSION;
 
-@http:configuration {basePath:"/internal/product-quality/v1.0/sonar", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
+@http:configuration {basePath:"/internal/product-quality/v1.0/sonar", httpsPort: 9092,
+                     keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks",
+                     keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> SonarService {
 
     @http:GET {}
@@ -131,11 +141,10 @@ service<http> SonarService {
 
         sonarResponse = http:ClientConnector.get(sonarcon, Path, requestH);
         json sonarJsonResponse = messages:getJsonPayload(sonarResponse);
-        logger:info(sonarJsonResponse);
         json projects=jsons:getJson(sonarJsonResponse,"$.[?(@.k)].k");
-        saveIssues(projects);
+        storeIssuesToDatabase(projects);
 
-        messages:setJsonPayload(response, projects);
+        messages:setStringPayload(response, "Data fetching from Sonar has begun...");
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         reply response;
     }
@@ -144,20 +153,6 @@ service<http> SonarService {
     @http:Path {value:"/get-all-area-issues"}
     resource SonarAllAreaIssues (message m) {
         json data = getAllAreaSonarIssues();
-        message response = {};
-        messages:setJsonPayload(response,data);
-        messages:setHeader(response, "Access-Control-Allow-Origin", "*");
-        reply response;
-
-    }
-
-    @http:GET {}
-    @http:Path {value:"/get-issues/{category}/{selected}/{issueType}/{severity}"}
-    resource SonarGetIssues (message m, @http:PathParam {value:"category"} string category,
-                             @http:PathParam {value:"selected"} int selected,
-                             @http:PathParam {value:"sonarIssuetype"} int issueType,
-                             @http:PathParam {value:"sonarSeverity"} int severity) {
-        json data = getSelectionResult(category,selected,issueType,severity);
         message response = {};
         messages:setJsonPayload(response,data);
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
@@ -180,22 +175,6 @@ service<http> SonarService {
     }
 
     @http:GET {}
-    @http:Path {value:"get-history/{start}/{end}/{period}/{category}/{selected}/{issueType}/{severity}"}
-    resource SonarGetHistory(message m, @http:PathParam {value:"start"} string start,
-                             @http:PathParam {value:"end"} string end,
-                             @http:PathParam {value:"period"} string period,
-                             @http:PathParam {value:"category"} string category,
-                             @http:PathParam {value:"selected"} int selected,
-                             @http:PathParam {value:"sonarIssuetype"} int issueType,
-                             @http:PathParam {value:"sonarSeverity"} int severity){
-        json data = getSelectionHistory(start,end,period,category,selected,issueType,severity);
-        message response = {};
-        messages:setJsonPayload(response,data);
-        messages:setHeader(response, "Access-Control-Allow-Origin", "*");
-        reply response;
-    }
-
-    @http:GET {}
     @http:Path {value:"issues/history/{category}/{categoryId}"}
     resource SonarGetHistory2(message m, @http:QueryParam {value:"dateFrom"} string start,
                               @http:QueryParam {value:"dateTo"} string end,
@@ -213,14 +192,14 @@ service<http> SonarService {
 
 }
 
-function saveIssues (json projects)  {
-    int ls=lengthof projects;
-    logger:info(ls);
-    ls -> w1;
+function storeIssuesToDatabase (json projects) {
+    int lengthOfProjectList=lengthof projects;
+    logger:info("There are "+lengthOfProjectList+" sonar projects for today.");
+    lengthOfProjectList -> issuesRecordingWorker;
 
-    worker w1 {
-        int loopsize;
-        loopsize<-default;
+    worker issuesRecordingWorker{
+        int loopSize;
+        loopSize <- default;
 
         sql:ClientConnector dbConnector = create sql:ClientConnector(propertiesMap);
         sql:Parameter[] params = [];
@@ -230,105 +209,116 @@ function saveIssues (json projects)  {
 
         sql:Parameter todayDate = {sqlType:"varchar", value:customStartTimeString};
         params = [todayDate];
-        int ret = sql:ClientConnector.update(dbConnector, INSERT_SNAPSHOT_DETAILS , params);
-
-        params = [];
-        datatable dt = sql:ClientConnector.select(dbConnector,  GET_SNAPSHOT_ID, params);
-
-        Snapshots ss;
-        int snapshot_id;
-        errors:TypeCastError err;
-        while (datatables:hasNext(dt)) {
-            any row = datatables:next(dt);
-            ss, err = (Snapshots)row;
-
-            snapshot_id = ss.snapshot_id;
-
+        int ret=0;
+        try{
+            ret = sql:ClientConnector.update(dbConnector, INSERT_SNAPSHOT_DETAILS , params);
+        }catch(errors:Error err){
+            logger:error(err.msg);
         }
-        datatables:close(dt);
-        //transaction {
 
-            sql:Parameter snapshotid = {sqlType:"integer", value:snapshot_id};
+        if(ret !=0){
+            params = [];
+            datatable dt = sql:ClientConnector.select(dbConnector,  GET_SNAPSHOT_ID, params);
+
+            Snapshots latestSnaphot;
+            int snapshotId;
+            errors:TypeCastError err;
+            while (datatables:hasNext(dt)) {
+                any row = datatables:next(dt);
+                latestSnaphot, err = (Snapshots)row;
+
+                snapshotId = latestSnaphot.snapshot_id;
+
+            }
+            datatables:close(dt);
+            //transaction {
+
+            sql:Parameter snapshotIdParam = {sqlType:"integer", value:snapshotId};
             int i = 0;
-            while (i < loopsize) {
+            while (i < loopSize) {
 
-                var project_key, er = (string)projects[i];
-                logger:info(i + "|" + project_key);
-                json sumaryofProjectJson = componentSonarIssueCount(project_key);
+                var projectKey, er = (string)projects[i];
+                logger:info(i + "|" + projectKey);
+                json sumaryofProjectJson = getSonarIssueCountForProject(projectKey);
                 logger:info(sumaryofProjectJson);
 
-                sql:Parameter projectkey = {sqlType:"varchar", value:project_key};
+                sql:Parameter projectKeyParam = {sqlType:"varchar", value:projectKey};
 
-                int bb = jsons:getInt(sumaryofProjectJson, "$.bb");
-                sql:Parameter bb1 = {sqlType:"integer", value:bb};
+                int blockeBugs = jsons:getInt(sumaryofProjectJson, "$.bb");
+                sql:Parameter blokerBugsParam = {sqlType:"integer", value:blockeBugs};
 
-                int cb = jsons:getInt(sumaryofProjectJson, "$.cb");
-                sql:Parameter cb1 = {sqlType:"integer", value:cb};
+                int criticalBugs = jsons:getInt(sumaryofProjectJson, "$.cb");
+                sql:Parameter criticalBugsParam = {sqlType:"integer", value:criticalBugs};
 
-                int mab = jsons:getInt(sumaryofProjectJson, "$.mab");
-                sql:Parameter mab1 = {sqlType:"integer", value:mab};
+                int majorBugs = jsons:getInt(sumaryofProjectJson, "$.mab");
+                sql:Parameter majorBugsParam = {sqlType:"integer", value:majorBugs};
 
-                int mib = jsons:getInt(sumaryofProjectJson, "$.mib");
-                sql:Parameter mib1 = {sqlType:"integer", value:mib};
+                int minorBugs = jsons:getInt(sumaryofProjectJson, "$.mib");
+                sql:Parameter minorBugsParam = {sqlType:"integer", value:minorBugs};
 
-                int ib = jsons:getInt(sumaryofProjectJson, "$.ib");
-                sql:Parameter ib1 = {sqlType:"integer", value:ib};
+                int infoBugs = jsons:getInt(sumaryofProjectJson, "$.ib");
+                sql:Parameter infoBugsParam = {sqlType:"integer", value:infoBugs};
 
-                int bc = jsons:getInt(sumaryofProjectJson, "$.bc");
-                sql:Parameter bc1 = {sqlType:"integer", value:bc};
+                int blockerCodeSmells = jsons:getInt(sumaryofProjectJson, "$.bc");
+                sql:Parameter blockerCodeSmellsParam = {sqlType:"integer", value:blockerCodeSmells};
 
-                int cc = jsons:getInt(sumaryofProjectJson, "$.cc");
-                sql:Parameter cc1 = {sqlType:"integer", value:cc};
+                int criticalCodeSmells = jsons:getInt(sumaryofProjectJson, "$.cc");
+                sql:Parameter criticalCodeSmellsParam = {sqlType:"integer", value:criticalCodeSmells};
 
-                int mac = jsons:getInt(sumaryofProjectJson, "$.mac");
-                sql:Parameter mac1 = {sqlType:"integer", value:mac};
+                int majorCodeSmells = jsons:getInt(sumaryofProjectJson, "$.mac");
+                sql:Parameter majorCodeSmellsParam = {sqlType:"integer", value:majorCodeSmells};
 
-                int mic = jsons:getInt(sumaryofProjectJson, "$.mic");
-                sql:Parameter mic1 = {sqlType:"integer", value:mic};
+                int minorCodeSmells = jsons:getInt(sumaryofProjectJson, "$.mic");
+                sql:Parameter minorCodeSmellsParam = {sqlType:"integer", value:minorCodeSmells};
 
-                int ic = jsons:getInt(sumaryofProjectJson, "$.ic");
-                sql:Parameter ic1 = {sqlType:"integer", value:ic};
+                int infoCodeSmells = jsons:getInt(sumaryofProjectJson, "$.ic");
+                sql:Parameter infoCodeSmellsParam = {sqlType:"integer", value:infoCodeSmells};
 
-                int bv = jsons:getInt(sumaryofProjectJson, "$.bv");
-                sql:Parameter bv1 = {sqlType:"integer", value:bv};
+                int blockerVulnerabilities = jsons:getInt(sumaryofProjectJson, "$.bv");
+                sql:Parameter blockerVulnerabilitiesparam = {sqlType:"integer", value:blockerVulnerabilities};
 
-                int cv = jsons:getInt(sumaryofProjectJson, "$.cv");
-                sql:Parameter cv1 = {sqlType:"integer", value:cv};
+                int criticalVulnerabilities = jsons:getInt(sumaryofProjectJson, "$.cv");
+                sql:Parameter criticalVulnerabilitiesParam = {sqlType:"integer", value:criticalVulnerabilities};
 
-                int mav = jsons:getInt(sumaryofProjectJson, "$.mav");
-                sql:Parameter mav1 = {sqlType:"integer", value:mav};
+                int majorVulnerabilities = jsons:getInt(sumaryofProjectJson, "$.mav");
+                sql:Parameter majorVulnerabilitiesParam = {sqlType:"integer", value:majorVulnerabilities};
 
-                int miv = jsons:getInt(sumaryofProjectJson, "$.miv");
-                sql:Parameter miv1 = {sqlType:"integer", value:miv};
+                int minorVulnerabilities = jsons:getInt(sumaryofProjectJson, "$.miv");
+                sql:Parameter minorVulnerabilitiesParam = {sqlType:"integer", value:minorVulnerabilities};
 
-                int iv = jsons:getInt(sumaryofProjectJson, "$.iv");
-                sql:Parameter iv1 = {sqlType:"integer", value:iv};
+                int infoVulnerabilities = jsons:getInt(sumaryofProjectJson, "$.iv");
+                sql:Parameter infoVulnerabilitiesParam = {sqlType:"integer", value:infoVulnerabilities};
 
-                int total = jsons:getInt(sumaryofProjectJson, "$.Total");
-                sql:Parameter total1 = {sqlType:"integer", value:total};
+                int totalIssues = jsons:getInt(sumaryofProjectJson, "$.Total");
+                sql:Parameter totalIssuesParam = {sqlType:"integer", value:totalIssues};
 
-                params = [snapshotid, todayDate,projectkey, bb1, cb1, mab1, mib1, ib1, bc1, cc1, mac1, mic1, ic1, bv1, cv1, mav1, miv1, iv1,total1];
+                params = [snapshotIdParam, todayDate, projectKeyParam, blokerBugsParam, criticalBugsParam, majorBugsParam,
+                          minorBugsParam, infoBugsParam, blockerCodeSmellsParam, criticalCodeSmellsParam, majorCodeSmellsParam,
+                          minorCodeSmellsParam, infoCodeSmellsParam, blockerVulnerabilitiesparam, criticalVulnerabilitiesParam,
+                          majorVulnerabilitiesParam, minorVulnerabilitiesParam, infoVulnerabilitiesParam, totalIssuesParam];
+
                 int ret1 = sql:ClientConnector.update(dbConnector, INSERT_SONAR_ISSUES, params);
                 i = i + 1;
             }
-        //}
-        string customEndTimeString = time:format(time:currentTime(), "yyyy-MM-dd");
-        logger:info("End time: " + customEndTimeString);
+            //}
+            string customEndTimeString = time:format(time:currentTime(), "yyyy-MM-dd");
+            logger:info("End time: " + customEndTimeString);
+        }
         dbConnector.close();
     }
 }
 
-function componentSonarIssueCount (string project_key) (json) {
+function getSonarIssueCountForProject (string project_key) (json) {
     http:ClientConnector sonarcon = create http:ClientConnector(basicurl);
 
     message request = {};
     message requestH = {};
     message sonarResponse = {};
     json sonarJSONResponse = {};
-    int p=1;
-    int ps = 500;
+    int pageNumber = 1;
+    int pageSize = 500;
 
-    string Path = "/api/issues/search?resolved=no&ps=500&projectKeys=" + project_key+"&p="+p;
+    string Path = "/api/issues/search?resolved=no&ps=500&projectKeys=" + project_key+"&p="+ pageNumber;
     requestH = authHeader(request);
     logger:info(basicurl+Path);
     sonarResponse = http:ClientConnector.get(sonarcon, Path, requestH);
@@ -383,11 +373,11 @@ function componentSonarIssueCount (string project_key) (json) {
     int totalInfoVulnerabilities=jsons:getInt(infoVulnerabilities,"$.length()");
 
 
-    while (total>ps){
-        p=p+1;
-        total=total-500;
-        logger:info(total+"|"+p);
-        Path = "/api/issues/search?resolved=no&ps=500&projectKeys=" + project_key+"&p="+p;
+    while (total> pageSize) {
+        pageNumber = pageNumber + 1;
+        total=total-pageSize;
+        logger:info(total+"|"+ pageNumber);
+        Path = "/api/issues/search?resolved=no&ps=500&projectKeys=" + project_key+"&p="+ pageNumber;
         logger:info(basicurl+Path);
         sonarResponse = http:ClientConnector.get(sonarcon, Path, requestH);
 
@@ -500,176 +490,189 @@ function getSelectionHistory(string start, string end, string period, string cat
     if(period=="day"){
         if(category=="all"){
             if(issueType!=0 && severity==0){
-                ret= getDailyHistoryAllAreaForType(start, end, issueType);
+                ret= getDailyHistoryForAllAreaForType(start, end, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getDailyHistoryAllAreaForSeverity(start,end,severity);
+                ret= getDailyHistoryForAllAreaForSeverity(start, end, severity);
             }else if(issueType==0 && severity==0){
-                ret= getDailyHistoryAllArea(start,end);
+                ret= getDailyHistoryForAllArea(start, end);
             }else{
-                ret= getDailyHistoryAllAreaForTypeAndSeverity(start, end, issueType, severity);
+                ret= getDailyHistoryForAllAreaForTypeAndSeverity(start, end, issueType, severity);
             }
         }else if(category=="area"){
             if(issueType!=0 && severity==0){
-                ret= getDailyHistorySelectedAreaForType(start, end,selected, issueType);
+                ret= getDailyHistoryForSelectedAreaForType(start, end, selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getDailyHistorySelectedAreaForSeverity(start,end,selected,severity);
+                ret= getDailyHistoryForSelectedAreaForSeverity(start, end, selected, severity);
             }else if(issueType==0 && severity==0){
-                ret= getDailyHistorySelectedArea(start,end,selected);
+                ret= getDailyHistoryForSelectedArea(start, end, selected);
             }else{
-                ret= getDailyHistorySelectedAreaForTypeAndSeverity(start, end, selected ,issueType, severity);
+                ret= getDailyHistoryForSelectedAreaForTypeAndSeverity(start, end, selected, issueType, severity);
             }
         }else if(category=="product"){
             if(issueType!=0 && severity==0){
-                ret= getDailyHistorySelectedProductForType(start, end,selected, issueType);
+                ret= getDailyHistoryForSelectedProductForType(start, end, selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getDailyHistorySelectedProductForSeverity(start,end,selected,severity);
+                ret= getDailyHistoryForSelectedProductForSeverity(start, end, selected, severity);
             }else if(issueType==0 && severity==0){
-                ret= getDailyHistorySelectedProduct(start,end,selected);
+                ret= getDailyHistoryForSelectedProduct(start, end, selected);
             }else{
-                ret= getDailyHistorySelectedProductForTypeAndSeverity(start, end, selected ,issueType, severity);
+                ret= getDailyHistoryForSelectedProductForTypeAndSeverity(start, end, selected, issueType, severity);
             }
         }else if(category=="component"){
             if(issueType!=0 && severity==0){
-                ret= getDailyHistorySelectedComponentForType(start, end,selected, issueType);
+                ret= getDailyHistoryForSelectedComponentForType(start, end,selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getDailyHistorySelectedComponentForSeverity(start,end,selected,severity);
+                ret= getDailyHistoryForSelectedComponentForSeverity(start,end,selected,severity);
             }else if(issueType==0 && severity==0){
-                ret= getDailyHistorySelectedComponent(start,end,selected);
+                ret= getDailyHistoryForSelectedComponent(start,end,selected);
             }else{
-                ret= getDailyHistorySelectedComponentForTypeAndSeverity(start, end,  selected ,issueType, severity);
+                ret= getDailyHistoryForSelectedComponentForTypeAndSeverity(start, end,  selected ,issueType, severity);
             }
         }
     }else if(period=="Month"){
         if(category=="all"){
             if(issueType!=0 && severity==0){
-                ret= getMonthlyHistoryAllAreaForType(start, end, issueType);
+                ret= getMonthlyHistoryForAllAreaForType(start, end, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getMonthlyHistoryAllAreaForSeverity(start,end,severity);
+                ret= getMonthlyHistoryForAllAreaForSeverity(start, end, severity);
             }else if(issueType==0 && severity==0){
-                ret= getMonthlyHistoryAllArea(start,end);
+                ret= getMonthlyHistoryForAllArea(start, end);
             }else{
-                ret= getMonthlyHistoryAllAreaForTypeAndSeverity(start, end, issueType, severity);
+                ret= getMonthlyHistoryForAllAreaForTypeAndSeverity(start, end, issueType, severity);
             }
         }else if(category=="area"){
             if(issueType!=0 && severity==0){
-                ret= getMonthlyHistorySelectedAreaForType(start, end,selected, issueType);
+                ret= getMonthlyHistoryForSelectedAreaForType(start, end, selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getMonthlyHistorySelectedAreaForSeverity(start,end,selected,severity);
+                ret= getMonthlyHistoryForSelectedAreaForSeverity(start, end, selected, severity);
             }else if(issueType==0 && severity==0){
-                ret= getMonthlyHistorySelectedArea(start,end,selected);
+                ret= getMonthlyHistoryForSelectedArea(start, end, selected);
             }else{
-                ret= getMonthlyHistorySelectedAreaForTypeAndSeverity(start, end,selected ,issueType, severity);
+                ret= getMonthlyHistoryForSelectedAreaForTypeAndSeverity(start, end, selected, issueType, severity);
             }
         }else if(category=="product"){
             if(issueType!=0 && severity==0){
-                ret= getMonthlyHistorySelectedProductForType(start, end,selected, issueType);
+                ret= getMonthlyHistoryForSelectedProductForType(start, end, selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getMonthlyHistorySelectedProductForSeverity(start,end,selected,severity);
+                ret= getMonthlyHistoryForSelectedProductForSeverity(start, end, selected, severity);
             }else if(issueType==0 && severity==0){
-                ret= getMonthlyHistorySelectedProduct(start,end,selected);
+                ret= getMonthlyHistoryForSelectedProduct(start, end, selected);
             }else{
-                ret= getMonthlyHistorySelectedProductForTypeAndSeverity(start, end,selected ,issueType, severity);
+                ret= getMonthlyHistoryForSelectedProductForTypeAndSeverity(start, end, selected, issueType, severity);
             }
         }else if(category=="component"){
             if(issueType!=0 && severity==0){
-                ret= getMonthlyHistorySelectedComponentForType(start, end,selected, issueType);
+                ret= getMonthlyHistoryForSelectedComponentForType(start, end,selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getMonthlyHistorySelectedComponentForSeverity(start,end,selected,severity);
+                ret= getMonthlyHistoryForSelectedComponentForSeverity(start,end,selected,severity);
             }else if(issueType==0 && severity==0){
-                ret= getMonthlyHistorySelectedComponent(start,end,selected);
+                ret= getMonthlyHistoryForSelectedComponent(start,end,selected);
             }else{
-                ret= getMonthlyHistorySelectedComponentForTypeAndSeverity(start, end,selected ,issueType, severity);
+                ret= getMonthlyHistoryForSelectedComponentForTypeAndSeverity(start, end,selected ,issueType, severity);
             }
         }
     }else if(period=="Quarter"){
         if(category=="all"){
             if(issueType!=0 && severity==0){
-                ret= getQuarterlyHistoryAllAreaForType(start, end, issueType);
+                ret= getQuarterlyHistoryForAllAreaForType(start, end, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getQuarterlyHistoryAllAreaForSeverity(start,end,severity);
+                ret= getQuarterlyHistoryForAllAreaForSeverity(start, end, severity);
             }else if(issueType==0 && severity==0){
-                ret= getQuarterlyHistoryAllArea(start,end);
+                ret= getQuarterlyHistoryForAllArea(start, end);
             }else{
-                ret= getQuarterlyHistoryAllAreaForTypeAndSeverity(start, end, issueType, severity);
+                ret= getQuarterlyHistoryForAllAreaForTypeAndSeverity(start, end, issueType, severity);
             }
         }else if(category=="area"){
             if(issueType!=0 && severity==0){
-                ret= getQuarterlyHistorySelectedAreaForType(start, end,selected, issueType);
+                ret= getQuarterlyHistoryForSelectedAreaForType(start, end, selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getQuarterlyHistorySelectedAreaForSeverity(start,end,selected,severity);
+                ret= getQuarterlyHistoryForSelectedAreaForSeverity(start, end, selected, severity);
             }else if(issueType==0 && severity==0){
-                ret= getQuarterlyHistorySelectedArea(start,end,selected);
+                ret= getQuarterlyHistoryForSelectedArea(start, end, selected);
             }else{
-                ret= getQuarterlyHistorySelectedAreaForTypeAndSeverity(start, end,selected ,issueType, severity);
+                ret= getQuarterlyHistoryForSelectedAreaForTypeAndSeverity(start, end, selected, issueType, severity);
             }
         }else if(category=="product"){
             if(issueType!=0 && severity==0){
-                ret= getQuarterlyHistorySelectedProductForType(start, end,selected, issueType);
+                ret= getQuarterlyHistoryForSelectedProductForType(start, end, selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getQuarterlyHistorySelectedProductForSeverity(start,end,selected,severity);
+                ret= getQuarterlyHistoryForSelectedProductForSeverity(start, end, selected, severity);
             }else if(issueType==0 && severity==0){
-                ret= getQuarterlyHistorySelectedProduct(start,end,selected);
+                ret= getQuarterlyHistoryForSelectedProduct(start, end, selected);
             }else{
-                ret= getQuarterlyHistorySelectedProductForTypeAndSeverity(start, end,selected ,issueType, severity);
+                ret= getQuarterlyHistoryForSelectedProductForTypeAndSeverity(start, end,selected ,issueType, severity);
             }
         }else if(category=="component"){
             if(issueType!=0 && severity==0){
-                ret= getQuarterlyHistorySelectedComponentForType(start, end,selected, issueType);
+                ret= getQuarterlyHistoryForSelectedComponentForType(start, end,selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getQuarterlyHistorySelectedComponentForSeverity(start,end,selected,severity);
+                ret= getQuarterlyHistoryForSelectedComponentForSeverity(start,end,selected,severity);
             }else if(issueType==0 && severity==0){
-                ret= getQuarterlyHistorySelectedComponent(start,end,selected);
+                ret= getQuarterlyHistoryForSelectedComponent(start,end,selected);
             }else{
-                ret= getQuarterlyHistorySelectedComponentForTypeAndSeverity(start, end,selected ,issueType, severity);
+                ret= getQuarterlyHistoryForSelectedComponentForTypeAndSeverity(start, end,selected ,issueType, severity);
             }
         }
 
     }else if(period=="Year"){
         if(category=="all"){
             if(issueType!=0 && severity==0){
-                ret= getYearlyHistoryAllAreaForType(start, end, issueType);
+                ret= getYearlyHistoryForAllAreaForType(start, end, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getYearlyHistoryAllAreaForSeverity(start,end,severity);
+                ret= getYearlyHistoryForAllAreaForSeverity(start, end, severity);
             }else if(issueType==0 && severity==0){
-                ret= getYearlyHistoryAllArea(start,end);
+                ret= getYearlyHistoryForAllArea(start, end);
             }else{
-                ret= getYearlyHistoryAllAreaForTypeAndSeverity(start, end, issueType, severity);
+                ret= getYearlyHistoryForAllAreaForTypeAndSeverity(start, end, issueType, severity);
             }
         }else if(category=="area"){
             if(issueType!=0 && severity==0){
-                ret= getYearlyHistorySelectedAreaForType(start, end,selected ,issueType);
+                ret= getYearlyHistoryForSelectedAreaForType(start, end, selected, issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getYearlyHistorySelectedAreaForSeverity(start,end,selected,severity);
+                ret= getYearlyHistoryForSelectedAreaForSeverity(start, end, selected, severity);
             }else if(issueType==0 && severity==0){
-                ret= getYearlyHistorySelectedArea(start,end,selected);
+                ret= getYearlyHistoryForSelectedArea(start, end, selected);
             }else{
-                ret= getYearlyHistorySelectedAreaForTypeAndSeverity(start, end,selected,issueType, severity);
+                ret= getYearlyHistoryForSelectedAreaForTypeAndSeverity(start, end, selected, issueType, severity);
             }
         }else if(category=="product"){
             if(issueType!=0 && severity==0){
-                ret= getYearlyHistorySelectedProductForType(start, end,selected ,issueType);
+                ret= getYearlyHistoryForSelectedProductForType(start, end,selected ,issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getYearlyHistorySelectedProductForSeverity(start,end,selected,severity);
+                ret= getYearlyHistoryForSelectedProductForSeverity(start,end,selected,severity);
             }else if(issueType==0 && severity==0){
-                ret= getYearlyHistorySelectedProduct(start,end,selected);
+                ret= getYearlyHistoryForSelectedProduct(start,end,selected);
             }else{
-                ret= getYearlyHistorySelectedProductForTypeAndSeverity(start, end,selected,issueType, severity);
+                ret= getYearlyHistoryForSelectedProductForTypeAndSeverity(start, end,selected,issueType, severity);
             }
         }else if(category=="component"){
             if(issueType!=0 && severity==0){
-                ret= getYearlyHistorySelectedComponentForType(start, end,selected ,issueType);
+                ret= getYearlyHistoryForSelectedComponentForType(start, end,selected ,issueType);
             }else if(severity!=0 && issueType==0){
-                ret= getYearlyHistorySelectedComponentForSeverity(start,end,selected,severity);
+                ret= getYearlyHistoryForSelectedComponentForSeverity(start,end,selected,severity);
             }else if(issueType==0 && severity==0){
-                ret= getYearlyHistorySelectedComponent(start,end,selected);
+                ret= getYearlyHistoryForSelectedComponent(start,end,selected);
             }else{
-                ret= getYearlyHistorySelectedComponentForTypeAndSeverity(start, end,selected,issueType, severity);
+                ret= getYearlyHistoryForSelectedComponentForTypeAndSeverity(start, end,selected,issueType, severity);
             }
         }
     }
 
     return ret;
 }
+
+function authHeader (message req) (message) {
+    string sonarAccessToken=jsons:getString(configData,"$.SONAR.SONAR_ACCESS_TOKEN");
+    string token=sonarAccessToken+":";
+    string encodedToken = utils:base64encode(token);
+    string passingToken = "Basic "+encodedToken;
+    messages:setHeader(req, "Authorization", passingToken);
+    messages:setHeader(req, "Content-Type", "application/json");
+    return req;
+
+}
+
+
 
 function getAllAreaSonarIssues () (json) {
     json data = {"error":false};
@@ -680,14 +683,14 @@ function getAllAreaSonarIssues () (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id = latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -788,14 +791,14 @@ function getAllAreaSonarIssuesForTypeAndSeverity (int issueType, int severity) (
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -867,7 +870,6 @@ function getAllAreaSonarIssuesForTypeAndSeverity (int issueType, int severity) (
                     tot = iv;
                 }else{
                     jsons:set(data,"$.error",true);
-                    return data;
                 }
 
                 sonars=sonars+tot;
@@ -897,14 +899,14 @@ function getAllAreaSonarIssuesForSeverity (int severity) (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -974,7 +976,6 @@ function getAllAreaSonarIssuesForSeverity (int severity) (json) {
                     VULNERABILITIES= VULNERABILITIES + iv;
                 }else{
                     jsons:set(data,"$.error",true);
-                    return data;
                 }
 
                 sonars=sonars+tot;
@@ -1010,14 +1011,14 @@ function getAllAreaSonarIssuesForType (int issueType) (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1085,7 +1086,6 @@ function getAllAreaSonarIssuesForType (int issueType) (json) {
                     INFO = INFO + iv;
                 }else{
                     jsons:set(data,"$.error",true);
-                    return data;
                 }
                 sonars=sonars+tot;
             }
@@ -1124,14 +1124,14 @@ function getSelectedAreaSonarIssues (int selected) (json) {
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1231,14 +1231,14 @@ function getSelectedAreaSonarIssuesForTypeAndSeverity (int selected, int issueTy
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1310,7 +1310,6 @@ function getSelectedAreaSonarIssuesForTypeAndSeverity (int selected, int issueTy
                     tot = iv;
                 }else{
                     jsons:set(data,"$.error",true);
-                    return data;
                 }
 
                 sonars=sonars+tot;
@@ -1339,14 +1338,14 @@ function getSelectedAreaSonarIssuesForSeverity(int selected,int severity)(json){
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1418,7 +1417,6 @@ function getSelectedAreaSonarIssuesForSeverity(int selected,int severity)(json){
                     VULNERABILITIES= VULNERABILITIES + iv;
                 }else{
                     jsons:set(data,"$.error",true);
-                    return data;
                 }
 
                 sonars=sonars+tot;
@@ -1453,14 +1451,14 @@ function getSelectedAreaSonarIssuesForType(int selected, int issueType)(json){
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1530,7 +1528,6 @@ function getSelectedAreaSonarIssuesForType(int selected, int issueType)(json){
                     INFO = INFO + iv;
                 }else{
                     jsons:set(data,"$.error",true);
-                    return data;
                 }
                 sonars=sonars+tot;
             }
@@ -1568,14 +1565,14 @@ function getSelectedProductSonarIssues (int selected)(json){
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1666,14 +1663,14 @@ function getSelectedProductSonarIssuesForTypeAndSeverity(int selected, int issue
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1737,7 +1734,6 @@ function getSelectedProductSonarIssuesForTypeAndSeverity(int selected, int issue
                 tot = iv;
             }else{
                 jsons:set(data,"$.error",true);
-                return data;
             }
             sonars=sonars+tot;
         }
@@ -1763,14 +1759,14 @@ function getSelectedProductSonarIssuesForSeverity(int selected, int severity)(js
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1832,7 +1828,6 @@ function getSelectedProductSonarIssuesForSeverity(int selected, int severity)(js
                 VULNERABILITIES= VULNERABILITIES + iv;
             }else{
                 jsons:set(data,"$.error",true);
-                return data;
             }
 
             sonars=sonars+tot;
@@ -1866,14 +1861,14 @@ function getSelectedProductSonarIssuesForType(int selected, int issueType)(json)
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -1933,7 +1928,6 @@ function getSelectedProductSonarIssuesForType(int selected, int issueType)(json)
                 INFO = INFO + iv;
             }else{
                 jsons:set(data,"$.error",true);
-                return data;
             }
             sonars=sonars+tot;
         }
@@ -1969,14 +1963,14 @@ function getSelectedComponentSonarIssues(int selected)(json){
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -2060,14 +2054,14 @@ function getSelectedComponentSonarIssuesForTypeAndSeverity(int selected,int issu
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -2098,14 +2092,14 @@ function getSelectedComponentSonarIssuesForSeverity(int selected,int severity)(j
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -2163,7 +2157,6 @@ function getSelectedComponentSonarIssuesForSeverity(int selected,int severity)(j
             VULNERABILITIES= VULNERABILITIES + iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
     }
     datatables:close(idt);
@@ -2189,14 +2182,14 @@ function getSelectedComponentSonarIssuesForType(int selected,int issueType)(json
     sql:Parameter[] params = [];
 
     datatable ssdt = sql:ClientConnector.select(dbConnector,GET_SNAPSHOT_ID,params);
-    Snapshots ss;
+    Snapshots latestSnaphot;
     int snapshot_id;
     errors:TypeCastError err;
     while (datatables:hasNext(ssdt)) {
         any row = datatables:next(ssdt);
-        ss, err = (Snapshots )row;
+        latestSnaphot, err = (Snapshots )row;
 
-        snapshot_id= ss.snapshot_id;
+        snapshot_id= latestSnaphot.snapshot_id;
 
     }
     datatables:close(ssdt);
@@ -2253,7 +2246,6 @@ function getSelectedComponentSonarIssuesForType(int selected,int issueType)(json
             INFO = INFO + iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
     }
     datatables:close(idt);
@@ -2275,18 +2267,9 @@ function getSelectedComponentSonarIssuesForType(int selected,int issueType)(json
     return data;
 }
 
-function authHeader (message req) (message) {
-    string sonarAccessToken=jsons:getString(configData,"$.SONAR.SONAR_ACCESS_TOKEN");
-    string token=sonarAccessToken+":";
-    string encodedToken = utils:base64encode(token);
-    string passingToken = "Basic "+encodedToken;
-    messages:setHeader(req, "Authorization", passingToken);
-    messages:setHeader(req, "Content-Type", "application/json");
-    return req;
 
-}
 
-function getDailyHistoryAllArea (string start, string end) (json) {
+function getDailyHistoryForAllArea (string start, string end) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2314,7 +2297,7 @@ function getDailyHistoryAllArea (string start, string end) (json) {
     return data;
 }
 
-function getDailyHistoryAllAreaForSeverity(string start,string end,int severity)(json){
+function getDailyHistoryForAllAreaForSeverity (string start, string end, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2347,7 +2330,6 @@ function getDailyHistoryAllAreaForSeverity(string start,string end,int severity)
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2359,7 +2341,7 @@ function getDailyHistoryAllAreaForSeverity(string start,string end,int severity)
     return data;
 }
 
-function getDailyHistoryAllAreaForType (string start, string end, int issueType) (json) {
+function getDailyHistoryForAllAreaForType (string start, string end, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2388,7 +2370,6 @@ function getDailyHistoryAllAreaForType (string start, string end, int issueType)
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2400,7 +2381,7 @@ function getDailyHistoryAllAreaForType (string start, string end, int issueType)
     return data;
 }
 
-function getDailyHistoryAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity) (json) {
+function getDailyHistoryForAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2453,7 +2434,6 @@ function getDailyHistoryAllAreaForTypeAndSeverity (string start, string end, int
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2465,7 +2445,7 @@ function getDailyHistoryAllAreaForTypeAndSeverity (string start, string end, int
     return data;
 }
 
-function getMonthlyHistoryAllArea(string start, string end)(json){
+function getMonthlyHistoryForAllArea (string start, string end) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2493,7 +2473,7 @@ function getMonthlyHistoryAllArea(string start, string end)(json){
 
 }
 
-function getMonthlyHistoryAllAreaForSeverity(string start, string end, int severity)(json){
+function getMonthlyHistoryForAllAreaForSeverity (string start, string end, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2525,7 +2505,6 @@ function getMonthlyHistoryAllAreaForSeverity(string start, string end, int sever
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2537,7 +2516,7 @@ function getMonthlyHistoryAllAreaForSeverity(string start, string end, int sever
     return data;
 }
 
-function getMonthlyHistoryAllAreaForType (string start, string end, int issueType) (json) {
+function getMonthlyHistoryForAllAreaForType (string start, string end, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2565,7 +2544,6 @@ function getMonthlyHistoryAllAreaForType (string start, string end, int issueTyp
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2577,7 +2555,7 @@ function getMonthlyHistoryAllAreaForType (string start, string end, int issueTyp
     return data;
 }
 
-function getMonthlyHistoryAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity)(json) {
+function getMonthlyHistoryForAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2629,7 +2607,6 @@ function getMonthlyHistoryAllAreaForTypeAndSeverity (string start, string end, i
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2641,7 +2618,7 @@ function getMonthlyHistoryAllAreaForTypeAndSeverity (string start, string end, i
     return data;
 }
 
-function getQuarterlyHistoryAllArea(string start, string end)(json){
+function getQuarterlyHistoryForAllArea (string start, string end) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2669,7 +2646,7 @@ function getQuarterlyHistoryAllArea(string start, string end)(json){
 
 }
 
-function getQuarterlyHistoryAllAreaForSeverity(string start, string end, int severity)(json){
+function getQuarterlyHistoryForAllAreaForSeverity (string start, string end, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2701,7 +2678,6 @@ function getQuarterlyHistoryAllAreaForSeverity(string start, string end, int sev
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2713,7 +2689,7 @@ function getQuarterlyHistoryAllAreaForSeverity(string start, string end, int sev
     return data;
 }
 
-function getQuarterlyHistoryAllAreaForType (string start, string end, int issueType) (json) {
+function getQuarterlyHistoryForAllAreaForType (string start, string end, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2741,7 +2717,6 @@ function getQuarterlyHistoryAllAreaForType (string start, string end, int issueT
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2753,7 +2728,7 @@ function getQuarterlyHistoryAllAreaForType (string start, string end, int issueT
     return data;
 }
 
-function getQuarterlyHistoryAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity)(json) {
+function getQuarterlyHistoryForAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2805,7 +2780,6 @@ function getQuarterlyHistoryAllAreaForTypeAndSeverity (string start, string end,
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2817,7 +2791,7 @@ function getQuarterlyHistoryAllAreaForTypeAndSeverity (string start, string end,
     return data;
 }
 
-function getYearlyHistoryAllArea(string start, string end)(json){
+function getYearlyHistoryForAllArea (string start, string end) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2845,7 +2819,7 @@ function getYearlyHistoryAllArea(string start, string end)(json){
 
 }
 
-function getYearlyHistoryAllAreaForSeverity(string start, string end, int severity)(json){
+function getYearlyHistoryForAllAreaForSeverity (string start, string end, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2877,7 +2851,6 @@ function getYearlyHistoryAllAreaForSeverity(string start, string end, int severi
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2889,7 +2862,7 @@ function getYearlyHistoryAllAreaForSeverity(string start, string end, int severi
     return data;
 }
 
-function getYearlyHistoryAllAreaForType (string start, string end, int issueType) (json) {
+function getYearlyHistoryForAllAreaForType (string start, string end, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2917,7 +2890,6 @@ function getYearlyHistoryAllAreaForType (string start, string end, int issueType
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2929,7 +2901,7 @@ function getYearlyHistoryAllAreaForType (string start, string end, int issueType
     return data;
 }
 
-function getYearlyHistoryAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity)(json) {
+function getYearlyHistoryForAllAreaForTypeAndSeverity (string start, string end, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -2981,7 +2953,6 @@ function getYearlyHistoryAllAreaForTypeAndSeverity (string start, string end, in
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -2994,7 +2965,7 @@ function getYearlyHistoryAllAreaForTypeAndSeverity (string start, string end, in
 }
 
 
-function getDailyHistorySelectedArea (string start, string end,int selected) (json) {
+function getDailyHistoryForSelectedArea (string start, string end, int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3023,7 +2994,7 @@ function getDailyHistorySelectedArea (string start, string end,int selected) (js
     return data;
 }
 
-function getDailyHistorySelectedAreaForSeverity(string start,string end,int selected,int severity)(json){
+function getDailyHistoryForSelectedAreaForSeverity (string start, string end, int selected, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3058,7 +3029,6 @@ function getDailyHistorySelectedAreaForSeverity(string start,string end,int sele
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3070,7 +3040,7 @@ function getDailyHistorySelectedAreaForSeverity(string start,string end,int sele
     return data;
 }
 
-function getDailyHistorySelectedAreaForType (string start, string end, int selected,int issueType) (json) {
+function getDailyHistoryForSelectedAreaForType (string start, string end, int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3100,7 +3070,6 @@ function getDailyHistorySelectedAreaForType (string start, string end, int selec
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3112,7 +3081,7 @@ function getDailyHistorySelectedAreaForType (string start, string end, int selec
     return data;
 }
 
-function getDailyHistorySelectedAreaForTypeAndSeverity (string start, string end,int selected ,int issueType, int severity) (json) {
+function getDailyHistoryForSelectedAreaForTypeAndSeverity (string start, string end, int selected, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3166,7 +3135,6 @@ function getDailyHistorySelectedAreaForTypeAndSeverity (string start, string end
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3178,7 +3146,7 @@ function getDailyHistorySelectedAreaForTypeAndSeverity (string start, string end
     return data;
 }
 
-function getMonthlyHistorySelectedArea(string start, string end,int selected)(json){
+function getMonthlyHistoryForSelectedArea (string start, string end, int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3207,7 +3175,7 @@ function getMonthlyHistorySelectedArea(string start, string end,int selected)(js
 
 }
 
-function getMonthlyHistorySelectedAreaForSeverity(string start, string end,int selected ,int severity)(json){
+function getMonthlyHistoryForSelectedAreaForSeverity (string start, string end, int selected, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3240,7 +3208,6 @@ function getMonthlyHistorySelectedAreaForSeverity(string start, string end,int s
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3252,7 +3219,7 @@ function getMonthlyHistorySelectedAreaForSeverity(string start, string end,int s
     return data;
 }
 
-function getMonthlyHistorySelectedAreaForType (string start, string end,int selected, int issueType) (json) {
+function getMonthlyHistoryForSelectedAreaForType (string start, string end, int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3281,7 +3248,6 @@ function getMonthlyHistorySelectedAreaForType (string start, string end,int sele
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3293,7 +3259,7 @@ function getMonthlyHistorySelectedAreaForType (string start, string end,int sele
     return data;
 }
 
-function getMonthlyHistorySelectedAreaForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getMonthlyHistoryForSelectedAreaForTypeAndSeverity (string start, string end, int selected, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3346,7 +3312,6 @@ function getMonthlyHistorySelectedAreaForTypeAndSeverity (string start, string e
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3358,7 +3323,7 @@ function getMonthlyHistorySelectedAreaForTypeAndSeverity (string start, string e
     return data;
 }
 
-function getQuarterlyHistorySelectedArea(string start, string end,int selected)(json){
+function getQuarterlyHistoryForSelectedArea (string start, string end, int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3387,7 +3352,7 @@ function getQuarterlyHistorySelectedArea(string start, string end,int selected)(
 
 }
 
-function getQuarterlyHistorySelectedAreaForSeverity(string start, string end,int selected, int severity)(json){
+function getQuarterlyHistoryForSelectedAreaForSeverity (string start, string end, int selected, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3420,7 +3385,6 @@ function getQuarterlyHistorySelectedAreaForSeverity(string start, string end,int
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3432,7 +3396,7 @@ function getQuarterlyHistorySelectedAreaForSeverity(string start, string end,int
     return data;
 }
 
-function getQuarterlyHistorySelectedAreaForType (string start, string end,int selected, int issueType) (json) {
+function getQuarterlyHistoryForSelectedAreaForType (string start, string end, int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3461,7 +3425,6 @@ function getQuarterlyHistorySelectedAreaForType (string start, string end,int se
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3473,7 +3436,7 @@ function getQuarterlyHistorySelectedAreaForType (string start, string end,int se
     return data;
 }
 
-function getQuarterlyHistorySelectedAreaForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getQuarterlyHistoryForSelectedAreaForTypeAndSeverity (string start, string end, int selected, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3526,7 +3489,6 @@ function getQuarterlyHistorySelectedAreaForTypeAndSeverity (string start, string
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3538,7 +3500,7 @@ function getQuarterlyHistorySelectedAreaForTypeAndSeverity (string start, string
     return data;
 }
 
-function getYearlyHistorySelectedArea(string start, string end, int selected)(json){
+function getYearlyHistoryForSelectedArea (string start, string end, int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3567,7 +3529,7 @@ function getYearlyHistorySelectedArea(string start, string end, int selected)(js
 
 }
 
-function getYearlyHistorySelectedAreaForSeverity(string start, string end,int selected ,int severity)(json){
+function getYearlyHistoryForSelectedAreaForSeverity (string start, string end, int selected, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3600,7 +3562,6 @@ function getYearlyHistorySelectedAreaForSeverity(string start, string end,int se
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3612,7 +3573,7 @@ function getYearlyHistorySelectedAreaForSeverity(string start, string end,int se
     return data;
 }
 
-function getYearlyHistorySelectedAreaForType (string start, string end,int selected, int issueType) (json) {
+function getYearlyHistoryForSelectedAreaForType (string start, string end, int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3641,7 +3602,6 @@ function getYearlyHistorySelectedAreaForType (string start, string end,int selec
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3653,7 +3613,7 @@ function getYearlyHistorySelectedAreaForType (string start, string end,int selec
     return data;
 }
 
-function getYearlyHistorySelectedAreaForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getYearlyHistoryForSelectedAreaForTypeAndSeverity (string start, string end, int selected, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3706,7 +3666,6 @@ function getYearlyHistorySelectedAreaForTypeAndSeverity (string start, string en
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3719,7 +3678,7 @@ function getYearlyHistorySelectedAreaForTypeAndSeverity (string start, string en
 }
 
 
-function getDailyHistorySelectedProduct (string start, string end,int selected) (json) {
+function getDailyHistoryForSelectedProduct (string start, string end, int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3748,7 +3707,7 @@ function getDailyHistorySelectedProduct (string start, string end,int selected) 
     return data;
 }
 
-function getDailyHistorySelectedProductForSeverity(string start,string end,int selected,int severity)(json){
+function getDailyHistoryForSelectedProductForSeverity (string start, string end, int selected, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3782,7 +3741,6 @@ function getDailyHistorySelectedProductForSeverity(string start,string end,int s
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3794,7 +3752,7 @@ function getDailyHistorySelectedProductForSeverity(string start,string end,int s
     return data;
 }
 
-function getDailyHistorySelectedProductForType (string start, string end, int selected,int issueType) (json) {
+function getDailyHistoryForSelectedProductForType (string start, string end, int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3824,7 +3782,6 @@ function getDailyHistorySelectedProductForType (string start, string end, int se
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3836,7 +3793,7 @@ function getDailyHistorySelectedProductForType (string start, string end, int se
     return data;
 }
 
-function getDailyHistorySelectedProductForTypeAndSeverity (string start, string end,int selected ,int issueType, int severity) (json) {
+function getDailyHistoryForSelectedProductForTypeAndSeverity (string start, string end, int selected, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3890,7 +3847,6 @@ function getDailyHistorySelectedProductForTypeAndSeverity (string start, string 
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3902,7 +3858,7 @@ function getDailyHistorySelectedProductForTypeAndSeverity (string start, string 
     return data;
 }
 
-function getMonthlyHistorySelectedProduct(string start, string end,int selected)(json){
+function getMonthlyHistoryForSelectedProduct (string start, string end, int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3931,7 +3887,7 @@ function getMonthlyHistorySelectedProduct(string start, string end,int selected)
 
 }
 
-function getMonthlyHistorySelectedProductForSeverity(string start, string end,int selected ,int severity)(json){
+function getMonthlyHistoryForSelectedProductForSeverity (string start, string end, int selected, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -3964,7 +3920,6 @@ function getMonthlyHistorySelectedProductForSeverity(string start, string end,in
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -3976,7 +3931,7 @@ function getMonthlyHistorySelectedProductForSeverity(string start, string end,in
     return data;
 }
 
-function getMonthlyHistorySelectedProductForType (string start, string end,int selected, int issueType) (json) {
+function getMonthlyHistoryForSelectedProductForType (string start, string end, int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4005,7 +3960,6 @@ function getMonthlyHistorySelectedProductForType (string start, string end,int s
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4017,7 +3971,7 @@ function getMonthlyHistorySelectedProductForType (string start, string end,int s
     return data;
 }
 
-function getMonthlyHistorySelectedProductForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getMonthlyHistoryForSelectedProductForTypeAndSeverity (string start, string end, int selected, int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4070,7 +4024,6 @@ function getMonthlyHistorySelectedProductForTypeAndSeverity (string start, strin
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4082,7 +4035,7 @@ function getMonthlyHistorySelectedProductForTypeAndSeverity (string start, strin
     return data;
 }
 
-function getQuarterlyHistorySelectedProduct(string start, string end,int selected)(json){
+function getQuarterlyHistoryForSelectedProduct (string start, string end, int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4111,7 +4064,7 @@ function getQuarterlyHistorySelectedProduct(string start, string end,int selecte
 
 }
 
-function getQuarterlyHistorySelectedProductForSeverity(string start, string end,int selected, int severity)(json){
+function getQuarterlyHistoryForSelectedProductForSeverity (string start, string end, int selected, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4144,7 +4097,6 @@ function getQuarterlyHistorySelectedProductForSeverity(string start, string end,
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4156,7 +4108,7 @@ function getQuarterlyHistorySelectedProductForSeverity(string start, string end,
     return data;
 }
 
-function getQuarterlyHistorySelectedProductForType (string start, string end,int selected, int issueType) (json) {
+function getQuarterlyHistoryForSelectedProductForType (string start, string end, int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4185,7 +4137,6 @@ function getQuarterlyHistorySelectedProductForType (string start, string end,int
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4197,7 +4148,7 @@ function getQuarterlyHistorySelectedProductForType (string start, string end,int
     return data;
 }
 
-function getQuarterlyHistorySelectedProductForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getQuarterlyHistoryForSelectedProductForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4250,7 +4201,6 @@ function getQuarterlyHistorySelectedProductForTypeAndSeverity (string start, str
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4262,7 +4212,7 @@ function getQuarterlyHistorySelectedProductForTypeAndSeverity (string start, str
     return data;
 }
 
-function getYearlyHistorySelectedProduct(string start, string end, int selected)(json){
+function getYearlyHistoryForSelectedProduct(string start, string end, int selected)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4291,7 +4241,7 @@ function getYearlyHistorySelectedProduct(string start, string end, int selected)
 
 }
 
-function getYearlyHistorySelectedProductForSeverity(string start, string end,int selected ,int severity)(json){
+function getYearlyHistoryForSelectedProductForSeverity(string start, string end,int selected ,int severity)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4324,7 +4274,6 @@ function getYearlyHistorySelectedProductForSeverity(string start, string end,int
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4336,7 +4285,7 @@ function getYearlyHistorySelectedProductForSeverity(string start, string end,int
     return data;
 }
 
-function getYearlyHistorySelectedProductForType (string start, string end,int selected, int issueType) (json) {
+function getYearlyHistoryForSelectedProductForType (string start, string end,int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4365,7 +4314,6 @@ function getYearlyHistorySelectedProductForType (string start, string end,int se
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4377,7 +4325,7 @@ function getYearlyHistorySelectedProductForType (string start, string end,int se
     return data;
 }
 
-function getYearlyHistorySelectedProductForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getYearlyHistoryForSelectedProductForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4430,7 +4378,6 @@ function getYearlyHistorySelectedProductForTypeAndSeverity (string start, string
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4443,7 +4390,7 @@ function getYearlyHistorySelectedProductForTypeAndSeverity (string start, string
 }
 
 
-function getDailyHistorySelectedComponent (string start, string end,int selected) (json) {
+function getDailyHistoryForSelectedComponent (string start, string end,int selected) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4472,7 +4419,7 @@ function getDailyHistorySelectedComponent (string start, string end,int selected
     return data;
 }
 
-function getDailyHistorySelectedComponentForSeverity(string start,string end,int selected,int severity)(json){
+function getDailyHistoryForSelectedComponentForSeverity(string start,string end,int selected,int severity)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4506,7 +4453,6 @@ function getDailyHistorySelectedComponentForSeverity(string start,string end,int
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4518,7 +4464,7 @@ function getDailyHistorySelectedComponentForSeverity(string start,string end,int
     return data;
 }
 
-function getDailyHistorySelectedComponentForType (string start, string end, int selected,int issueType) (json) {
+function getDailyHistoryForSelectedComponentForType (string start, string end, int selected,int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4548,7 +4494,6 @@ function getDailyHistorySelectedComponentForType (string start, string end, int 
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4560,7 +4505,7 @@ function getDailyHistorySelectedComponentForType (string start, string end, int 
     return data;
 }
 
-function getDailyHistorySelectedComponentForTypeAndSeverity (string start, string end,int selected ,int issueType, int severity) (json) {
+function getDailyHistoryForSelectedComponentForTypeAndSeverity (string start, string end,int selected ,int issueType, int severity) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4614,7 +4559,6 @@ function getDailyHistorySelectedComponentForTypeAndSeverity (string start, strin
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4626,7 +4570,7 @@ function getDailyHistorySelectedComponentForTypeAndSeverity (string start, strin
     return data;
 }
 
-function getMonthlyHistorySelectedComponent(string start, string end,int selected)(json){
+function getMonthlyHistoryForSelectedComponent(string start, string end,int selected)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4655,7 +4599,7 @@ function getMonthlyHistorySelectedComponent(string start, string end,int selecte
 
 }
 
-function getMonthlyHistorySelectedComponentForSeverity(string start, string end,int selected ,int severity)(json){
+function getMonthlyHistoryForSelectedComponentForSeverity(string start, string end,int selected ,int severity)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4688,7 +4632,6 @@ function getMonthlyHistorySelectedComponentForSeverity(string start, string end,
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4700,7 +4643,7 @@ function getMonthlyHistorySelectedComponentForSeverity(string start, string end,
     return data;
 }
 
-function getMonthlyHistorySelectedComponentForType (string start, string end,int selected, int issueType) (json) {
+function getMonthlyHistoryForSelectedComponentForType (string start, string end,int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4729,7 +4672,6 @@ function getMonthlyHistorySelectedComponentForType (string start, string end,int
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4741,7 +4683,7 @@ function getMonthlyHistorySelectedComponentForType (string start, string end,int
     return data;
 }
 
-function getMonthlyHistorySelectedComponentForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getMonthlyHistoryForSelectedComponentForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4794,7 +4736,6 @@ function getMonthlyHistorySelectedComponentForTypeAndSeverity (string start, str
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4806,7 +4747,7 @@ function getMonthlyHistorySelectedComponentForTypeAndSeverity (string start, str
     return data;
 }
 
-function getQuarterlyHistorySelectedComponent(string start, string end,int selected)(json){
+function getQuarterlyHistoryForSelectedComponent(string start, string end,int selected)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4835,7 +4776,7 @@ function getQuarterlyHistorySelectedComponent(string start, string end,int selec
 
 }
 
-function getQuarterlyHistorySelectedComponentForSeverity(string start, string end,int selected, int severity)(json){
+function getQuarterlyHistoryForSelectedComponentForSeverity(string start, string end,int selected, int severity)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4868,7 +4809,6 @@ function getQuarterlyHistorySelectedComponentForSeverity(string start, string en
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4880,7 +4820,7 @@ function getQuarterlyHistorySelectedComponentForSeverity(string start, string en
     return data;
 }
 
-function getQuarterlyHistorySelectedComponentForType (string start, string end,int selected, int issueType) (json) {
+function getQuarterlyHistoryForSelectedComponentForType (string start, string end,int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4909,7 +4849,6 @@ function getQuarterlyHistorySelectedComponentForType (string start, string end,i
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4921,7 +4860,7 @@ function getQuarterlyHistorySelectedComponentForType (string start, string end,i
     return data;
 }
 
-function getQuarterlyHistorySelectedComponentForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getQuarterlyHistoryForSelectedComponentForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -4974,7 +4913,6 @@ function getQuarterlyHistorySelectedComponentForTypeAndSeverity (string start, s
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -4986,7 +4924,7 @@ function getQuarterlyHistorySelectedComponentForTypeAndSeverity (string start, s
     return data;
 }
 
-function getYearlyHistorySelectedComponent(string start, string end, int selected)(json){
+function getYearlyHistoryForSelectedComponent(string start, string end, int selected)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -5015,7 +4953,7 @@ function getYearlyHistorySelectedComponent(string start, string end, int selecte
 
 }
 
-function getYearlyHistorySelectedComponentForSeverity(string start, string end,int selected ,int severity)(json){
+function getYearlyHistoryForSelectedComponentForSeverity(string start, string end,int selected ,int severity)(json){
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -5048,7 +4986,6 @@ function getYearlyHistorySelectedComponentForSeverity(string start, string end,i
             tot=ib+ic+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -5060,7 +4997,7 @@ function getYearlyHistorySelectedComponentForSeverity(string start, string end,i
     return data;
 }
 
-function getYearlyHistorySelectedComponentForType (string start, string end,int selected, int issueType) (json) {
+function getYearlyHistoryForSelectedComponentForType (string start, string end,int selected, int issueType) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -5089,7 +5026,6 @@ function getYearlyHistorySelectedComponentForType (string start, string end,int 
             tot=bv+cv+mav+miv+iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);
@@ -5101,7 +5037,7 @@ function getYearlyHistorySelectedComponentForType (string start, string end,int 
     return data;
 }
 
-function getYearlyHistorySelectedComponentForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
+function getYearlyHistoryForSelectedComponentForTypeAndSeverity (string start, string end,int selected, int issueType, int severity)(json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
@@ -5154,7 +5090,6 @@ function getYearlyHistorySelectedComponentForTypeAndSeverity (string start, stri
             tot = iv;
         }else{
             jsons:set(data,"$.error",true);
-            return data;
         }
         json history={"date":date,"count":tot};
         jsons:addToArray(allAreas,"$.data",history);

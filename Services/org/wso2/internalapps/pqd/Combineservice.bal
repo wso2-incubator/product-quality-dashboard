@@ -17,90 +17,13 @@ struct ComponentRepo{
 
 
 
+
 @http:configuration {basePath:"/internal/product-quality/v1.0", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> ProductQualityService {
 
-    json configData = getConfigData(CONFIG_PATH);
+    boolean issuesDBConBool = createIssuesDBcon();
 
-    map propertiesMap = getSQLconfigData(configData);
-    sql:ClientConnector sqlCon = create sql:ClientConnector(propertiesMap);
-
-    @http:GET {}
-    @http:Path {value:"/data"}
-    resource getIssuesData (message m) {
-        message response = {};
-
-        json jsonResponse = {"data": [], "error": false};
-
-        sql:Parameter[] params = [];
-
-        datatable productDatatable = sql:ClientConnector.select(sqlCon, GET_PRODUCT_DB_QUERY, params);
-
-        while (datatables:hasNext(productDatatable)){
-            any dataStruct1 = datatables:next(productDatatable);
-            var productRowSet, _ = (Product)dataStruct1;
-            logger:trace("Product retrieved " + productRowSet.pqd_product_name);
-
-            json productJson = {"name": productRowSet.pqd_product_name,
-                                   "id": productRowSet.pqd_product_id,
-                                   "component": []
-                               };
-
-            int productTotalOpenIssues = 0;
-            int productGithubOpenIssues = 0;
-
-            sql:Parameter productIdParam = {sqlType:"varchar", value:productRowSet.pqd_product_id};
-            sql:Parameter[] componentParams = [productIdParam];
-
-            datatable componentDatatable = sql:ClientConnector.select(sqlCon, GET_COMPONENT_DB_QUERY, componentParams);
-
-
-            while (datatables:hasNext(componentDatatable)){
-                any dataStruct2 = datatables:next(componentDatatable);
-                var componentRowSet, _ = (ComponentRepo)dataStruct2;
-
-                logger:trace("Component Data retrieved : " + componentRowSet.pqd_component_name);
-
-                int componentGithubOpenIssues = getGithubRepoOpenIssues(componentRowSet.pqd_github_repo_name);
-                //get jira issue count here and add to the total
-
-                int componentTotalOpenIssues = componentGithubOpenIssues;
-
-                productTotalOpenIssues = productTotalOpenIssues + componentTotalOpenIssues;
-                productGithubOpenIssues = productGithubOpenIssues + componentGithubOpenIssues;
-
-                json componentJson = {"name": componentRowSet.pqd_component_name,
-                                         "id": componentRowSet.pqd_component_id,
-                                         "githubOpenIssues": componentGithubOpenIssues,
-                                         "totalOpenIssues": componentTotalOpenIssues
-                                     };
-
-                jsons:addToArray(productJson, "$.component", componentJson);
-            }
-
-            jsons:addToObject(productJson, "$", "githubOpenIssues", productGithubOpenIssues);
-            jsons:addToObject(productJson, "$", "totalOpenIssues", productTotalOpenIssues);
-
-
-            jsons:addToArray(jsonResponse, "$.data", productJson);
-
-
-
-            datatables:close(componentDatatable);
-        }
-
-        datatables:close(productDatatable);
-
-        messages:setJsonPayload(response, jsonResponse);
-
-        messages:setHeader(response, "Access-Control-Allow-Origin", "*");
-
-        messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
-
-
-
-        reply response;
-    }
+    sql:ClientConnector sqlCon = issuesDBcon;
 
     @http:GET {}
     @http:Path {value:"/issues/all"}
@@ -111,7 +34,7 @@ service<http> ProductQualityService {
         json responseJson = {"error":false, "data":{ "items": [] }};
 
         json sonarAllJson = getAllAreaSonarIssues();
-        json issuesAllJson = getGithubIssuesData(sqlCon, "all", 0, 0, 0);
+        json issuesAllJson = getIssuesData(sqlCon, "all", 0, 0, 0);
 
         sql:Parameter[] paramsForArea = [];
 
@@ -127,9 +50,7 @@ service<http> ProductQualityService {
         while(a < lengthof allAreasJson){
 
             json currentAreaIssuesJson = jsons:getJson(issuesAllJson, "$.data.items[?(@.id=="+ jsons:getInt(allAreasJson[a], "$.pqd_area_id") +
-                                                                   ")].issues");
-
-            //logger:info(jsons:getInt(allAreasJson[a], , "$.pqd_area_id") + " " + currentAreaIssuesJson);
+                                                                      ")].issues");
 
             int currentAreaIssues;
 
@@ -141,7 +62,7 @@ service<http> ProductQualityService {
 
 
             json currentAreaSonarsJson = jsons:getJson(sonarAllJson, "$.data.items[?(@.id=="+ jsons:getInt(allAreasJson[a], "$.pqd_area_id") +
-                                                                                                                          ")].sonar");
+                                                                     ")].sonar");
 
             int currentAreaSonars;
 
@@ -152,9 +73,9 @@ service<http> ProductQualityService {
             }
 
             json currentAreaJson = {"name": jsons:getString(allAreasJson[a], "$.pqd_area_name"),
-                                      "id": jsons:getInt(allAreasJson[a], "$.pqd_area_id"),
-                                      "issues": currentAreaIssues, "sonar": currentAreaSonars
-                                  };
+                                       "id": jsons:getInt(allAreasJson[a], "$.pqd_area_id"),
+                                       "issues": currentAreaIssues, "sonar": currentAreaSonars
+                                   };
 
 
             jsons:addToArray(responseJson, "$.data.items", currentAreaJson);
@@ -200,7 +121,7 @@ service<http> ProductQualityService {
         //json sonarAllJson = allAreaSonars();
         //json issuesAllJson = getAllAreaIssue(sqlCon);
 
-        json issuesAreaJson = getGithubIssuesData(sqlCon, "area", areaId, 0, 0);
+        json issuesAreaJson = getIssuesData(sqlCon, "area", areaId, 0, 0);
         json sonarAreaJson = getSelectionResult("area", areaId, 0, 0);
 
         sql:Parameter areaIdParam = {sqlType:"integer", value:areaId};
@@ -218,10 +139,7 @@ service<http> ProductQualityService {
         while(a < lengthof allProductJson){
 
             json currentProductIssuesJson = jsons:getJson(issuesAreaJson, "$.data.items[?(@.id==" + jsons:getInt(allProductJson[a], "$.pqd_product_id") +
-                                                                      ")].issues");
-
-            //logger:info(jsons:getInt(allAreasJson[a], , "$.pqd_area_id") + " " + currentAreaIssuesJson);
-
+                                                                          ")].issues");
             int currentProductIssues;
 
             if(lengthof currentProductIssuesJson != 0) {
@@ -232,7 +150,7 @@ service<http> ProductQualityService {
 
 
             json currentProductSonarsJson = jsons:getJson(sonarAreaJson, "$.data.items[?(@.id==" + jsons:getInt(allProductJson[a], "$.pqd_product_id") +
-                                                                     ")].sonar");
+                                                                         ")].sonar");
 
             int currentProductSonars;
 
@@ -243,9 +161,9 @@ service<http> ProductQualityService {
             }
 
             json currentProductJson = {"name":jsons:getString(allProductJson[a], "$.pqd_product_name"),
-                                       "id": jsons:getInt(allProductJson[a], "$.pqd_product_id"),
-                                       "issues": currentProductIssues, "sonar": currentProductSonars
-                                   };
+                                          "id": jsons:getInt(allProductJson[a], "$.pqd_product_id"),
+                                          "issues": currentProductIssues, "sonar": currentProductSonars
+                                      };
 
 
             jsons:addToArray(responseJson, "$.data.items", currentProductJson);
@@ -281,13 +199,13 @@ service<http> ProductQualityService {
     @http:GET {}
     @http:Path {value:"/issues/product/{productId}"}
     resource getAllIssuesForProduct(message m,
-                                        @http:PathParam{value:"productId"} int productId){
+                                    @http:PathParam{value:"productId"} int productId){
 
         message response = {};
 
         json responseJson = {"error":false, "data":{ "items": [] }};
 
-        json issuesProductJson = getGithubIssuesData(sqlCon, "product", productId, 0, 0);
+        json issuesProductJson = getIssuesData(sqlCon, "product", productId, 0, 0);
         json sonarProductJson = getSelectionResult("product", productId, 0, 0);
 
         sql:Parameter productIdParam = {sqlType:"integer", value:productId};
@@ -304,17 +222,12 @@ service<http> ProductQualityService {
 
         while(a < lengthof allComponentJson){
 
-            //logger:info(issuesProductJson);
-
             int currentComponentId = jsons:getInt(allComponentJson[a], "$.pqd_component_id");
             json currentComponentIssuesJson;
 
             currentComponentIssuesJson = jsons:getJson(issuesProductJson, "$.data.items[?(@.id==" +  currentComponentId +
                                                                           ")].issues");
 
-            //logger:info(currentComponentIssuesJson);
-
-            //logger:info(jsons:getInt(allAreasJson[a], , "$.pqd_area_id") + " " + currentAreaIssuesJson);
 
             int currentComponentIssues;
 
@@ -326,7 +239,7 @@ service<http> ProductQualityService {
 
 
             json currentComponentSonarsJson = jsons:getJson(sonarProductJson, "$.data.items[?(@.id==" + jsons:getInt(allComponentJson[a], "$.pqd_component_id") +
-                                                                         ")].sonar");
+                                                                              ")].sonar");
 
             int currentComponentSonars;
 
@@ -337,9 +250,9 @@ service<http> ProductQualityService {
             }
 
             json currentComponentJson = {"name":jsons:getString(allComponentJson[a], "$.pqd_component_name"),
-                                          "id": currentComponentId,
-                                          "issues": currentComponentIssues, "sonar": currentComponentSonars
-                                      };
+                                            "id": currentComponentId,
+                                            "issues": currentComponentIssues, "sonar": currentComponentSonars
+                                        };
 
 
             jsons:addToArray(responseJson, "$.data.items", currentComponentJson);
@@ -375,7 +288,7 @@ service<http> ProductQualityService {
     @http:GET {}
     @http:Path {value:"/issues/component/{componentId}"}
     resource getAllIssuesForComponent(message m,
-                                    @http:PathParam{value:"componentId"} int componentId){
+                                      @http:PathParam{value:"componentId"} int componentId){
 
         message response = {};
 
@@ -398,7 +311,7 @@ service<http> ProductQualityService {
         sql:Parameter paramForProduct = {sqlType: "integer", value:productId};
         sql:Parameter[] paramsForProduct = [paramForProduct];
 
-        json issuesComponentJson = getGithubIssuesData(sqlCon, "component", componentId, 0, 0);
+        json issuesComponentJson = getIssuesData(sqlCon, "component", componentId, 0, 0);
         json sonarComponentJson = getSelectionResult("component", componentId, 0, 0);
 
 
@@ -410,17 +323,11 @@ service<http> ProductQualityService {
 
         while(a < lengthof allComponentJson){
 
-            //logger:info(issuesProductJson);
-
             int currentComponentId = jsons:getInt(allComponentJson[a], "$.pqd_component_id");
             json currentComponentIssuesJson;
 
             currentComponentIssuesJson = jsons:getJson(issuesComponentJson, "$.data.items[?(@.id==" +  currentComponentId +
-                                                                          ")].issues");
-
-            //logger:info(currentComponentIssuesJson);
-
-            //logger:info(jsons:getInt(allAreasJson[a], , "$.pqd_area_id") + " " + currentAreaIssuesJson);
+                                                                            ")].issues");
 
             int currentComponentIssues;
 
@@ -432,7 +339,7 @@ service<http> ProductQualityService {
 
 
             json currentComponentSonarsJson = jsons:getJson(sonarComponentJson, "$.data.items[?(@.id==" + jsons:getInt(allComponentJson[a], "$.pqd_component_id") +
-                                                                              ")].sonar");
+                                                                                ")].sonar");
 
             int currentComponentSonars;
 
@@ -521,7 +428,7 @@ function getSQLconfigData(json configData)(map){
 
     string jdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
 
-    map propertiesMap = {"jdbcUrl": jdbcUrl,"username": dbUsername, "password": dbPassword};
+    map propertiesMap = {"jdbcUrl": jdbcUrl,"username": dbUsername, "password": dbPassword, "maximumPoolSize":maxPoolConnections};
 
     return propertiesMap;
 
@@ -551,6 +458,14 @@ function getIssueTypesAndSeverities()(json){
     sql:ClientConnector.close(sqlCon);
     jsons:addToObject(data, "$", "data", info);
     return data;
+}
+
+function createIssuesDBcon()(boolean){
+    if(issuesDBcon == null){
+        map sqlProperties = getSQLconfigData(configData);
+        issuesDBcon = create sql:ClientConnector(sqlProperties);
+    }
+    return true;
 }
 
 

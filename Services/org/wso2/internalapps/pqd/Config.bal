@@ -1,10 +1,10 @@
 package org.wso2.internalapps.pqd;
 
-const string GET_AREA_DETAIL = "SELECT pqd_product_jira_id,pqd_product_jira_key, pqd_product_jira_name FROM pqd_product_jira";
-
 const string CONFIG_PATH = "config.json";
 
 const string API_VERSION = "v1.0";
+
+const int FILE_READ_CHARACTER_LIMIT = 10000;
 
 const string GET_ALL_ISSUE_TYPE_DB_QUERY_VERSION2 = "SELECT pqd_issue_type_id, pqd_issue_type FROM pqd_issue_type";
 
@@ -36,11 +36,10 @@ const string GET_ALL_ISSUE_TYPE_COUNT_1 = "SELECT pqd_jira_issue_type, SUM(pqd_i
 const string GET_PRODUCT_DB_QUERY = "SELECT pqd_product_jira_id,pqd_product_jira_key, pqd_product_jira_name FROM pqd_product_jira";
 const string GET_PRODUCT_DB_QUERY_VERSION2= "SELECT pqd_area_id,pqd_product_id, jira_project_id FROM pqd_product WHERE jira_project_id != 0";
 
-const string GET_ISSUE_TYPE_DB_QUERY = "SELECT pqd_issue_type FROM pqd_jira_issue_type";
-const string GET_ISSUE_TYPE_DB_QUERY_VERSION2 = "SELECT pqd_issue_type_id, pqd_issue_type FROM pqd_issue_type WHERE jira_issue_type IS NOT NULL";
+const string GET_ISSUE_TYPE_DB_QUERY = "SELECT pqd_issue_type_id, pqd_issue_type FROM pqd_issue_type WHERE jira_issue_type IS NOT NULL";
 
+const string GET_SEVERITY_DB_QUERY = "SELECT pqd_severity_id, pqd_severity FROM pqd_severity";
 
-const string GET_SEVERITY_DB_QUERY = "SELECT pqd_jira_severity FROM pqd_jira_severity";
 
 
 const string GET_JIRA_PROJECTS_DB_QUERY = "SELECT * FROM pqd_jira_projects WHERE pqd_product_id = ?";
@@ -49,11 +48,9 @@ const string GET_JIRA_COMPONENTS_DB_QUERY = "SELECT * FROM pqd_jira_components W
 
 const string GET_COMPONENT_DB_QUERY = "SELECT * FROM pqd_component_repo where pqd_product_id = ?";
 
-const string GET_PROJECT_VERSIONS = "SELECT pqd_product_jira_version FROM pqd_product_jira_version where pqd_product_jira_id = ?";
-const string GET_PROJECT_VERSIONS_VERSION2 = "SELECT pqd_product_version_id, pqd_product_version FROM pqd_product_version where pqd_product_id = ?";
+const string GET_PROJECT_VERSIONS = "SELECT pqd_product_version_id, pqd_product_version FROM pqd_product_version where pqd_product_id = ?";
 
-const string GET_PROJECT_COMPONENTS = "SELECT pqd_component_jira_id FROM pqd_component_jira where pqd_product_jira_id = ?";
-const string GET_PROJECT_COMPONENTS_VERSION2 = "SELECT pqd_component_id, jira_component_id FROM pqd_component where pqd_product_id = ? AND jira_component_id != 0";
+const string GET_PROJECT_COMPONENTS = "SELECT pqd_component_id, jira_component_id FROM pqd_component where pqd_product_id = ? AND jira_component_id != 0";
 
 const string INSERT_SNAPSHOT_ID = "INSERT INTO pqd_jira_snapshot () VALUES ()";
 
@@ -116,11 +113,8 @@ const string INSERT_JIRA_ISSUES_BY_VERSION = "INSERT INTO pqd_jira_issues_by_pro
                                       "VALUES (?,?,?,?,?,?)";
 
 
-const string GET_ISSUE_COUNT_BY_PRODUCT = "SELECT a.pqd_product_jira_id AS pqd_product_jira_id, b.pqd_product_jira_name AS pqd_product_jira_name, SUM(pqd_issue_count) " +
-                                          "AS product_level_issues FROM pqd_jira_issues AS a JOIN pqd_product_jira AS b " +
-                                          "ON a.pqd_product_jira_id = b.pqd_product_jira_id JOIN pqd_product_areas AS c ON a.pqd_product_jira_id = c.pqd_product_jira_id WHERE " +
-                                          "pqd_component_jira_id = ? AND pqd_product_jira_version = ? AND c.pqd_area_name = ? GROUP BY pqd_product_jira_id";
-const string GET_ISSUE_COUNT_BY_PRODUCT_FOR_AREA_TESTING = "SELECT pqd_product_id, SUM(pqd_issue_count) " +
+
+const string GET_ISSUE_COUNT_BY_PRODUCT_FOR_AREA = "SELECT pqd_product_id, SUM(pqd_issue_count) " +
                                           "AS product_level_issues FROM pqd_jira_issues_by_product " +
                                           "WHERE pqd_area_id = ? GROUP BY pqd_product_id";
 const string GET_ISSUE_COUNT_BY_PRODUCT_OF_AREA_FOR_ISSUE_TYPE_TESTING = "SELECT pqd_product_id, SUM(pqd_issue_count) " +
@@ -743,22 +737,15 @@ const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_COMPONENT_TESTING = "SELECT pqd_i
                                              "GROUP BY pqd_issue_type_id";
 
 
-const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_AREA = "SELECT pqd_jira_issue_type, SUM(pqd_issue_count) AS issue_type_level_issues " +
-                                                      "FROM pqd_jira_issues " +
-                                                      "WHERE pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
-                                                      "GROUP BY pqd_jira_issue_type";
-const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_ALL_TESTING =
+const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_ALL =
                                         "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
                                         "FROM pqd_jira_issues_by_product GROUP BY pqd_issue_type_id";
 const string GET_ISSUE_COUNT_BY_ISSUE_TYPE_OF_ALL_FOR_SEVERIRY_TESTING =
                                         "SELECT pqd_issue_type_id, SUM(pqd_issue_count) AS issue_type_level_issues " +
                                         "FROM pqd_jira_issues_by_product WHERE pqd_severity_id = ? GROUP BY pqd_issue_type_id";
 
-const string GET_ISSUE_COUNT_BY_SEVERITY_OF_PRODUCT_FOR_AREA = "SELECT pqd_jira_severity, SUM(pqd_issue_count) AS severity_level_issues" +
-                                                               " FROM pqd_jira_issues WHERE " +
-                                                               " pqd_component_jira_id = ? AND pqd_product_jira_version = ? " +
-                                                               " GROUP BY pqd_jira_severity";
-const string GET_ISSUE_COUNT_BY_SEVERITY_FOR_ALL_TESTING = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
+
+const string GET_ISSUE_COUNT_BY_SEVERITY_FOR_ALL = "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
                                                             " FROM pqd_jira_issues_by_product GROUP BY pqd_severity_id";
 const string GET_ISSUE_COUNT_BY_SEVERITY_OF_ALL_FOR_ISSUE_TYPE_TESTING =
                                                 "SELECT pqd_severity_id, SUM(pqd_issue_count) AS severity_level_issues" +
@@ -798,11 +785,7 @@ const string GET_ISSUE_COUNT_OF_VERSION_BY_PRODUCT = "SELECT pqd_product_jira_ve
                                              " pqd_product_jira_version != ?  " +
                                              "GROUP BY pqd_product_jira_version";
 
-const string GET_ISSUE_COUNT_FOR_AREA = "SELECT c.pqd_area_name, SUM(pqd_issue_count) AS area_level_issues, a.pqd_product_jira_id " +
-                                        "FROM pqd_jira_issues AS a JOIN pqd_product_areas AS c ON a.pqd_product_jira_id = c.pqd_product_jira_id" +
-                                        " WHERE pqd_component_jira_id = ? AND pqd_product_jira_version = ?  " +
-                                        "GROUP BY c.pqd_area_name";
-const string GET_ISSUE_COUNT_FOR_AREA_TESTING = "SELECT pqd_area_id, SUM(pqd_issue_count) AS area_level_issues " +
+const string GET_ISSUE_COUNT_FOR_AREA = "SELECT pqd_area_id, SUM(pqd_issue_count) AS area_level_issues " +
                                         "FROM pqd_jira_issues_by_product " +
                                         "GROUP BY pqd_area_id";
 const string GET_ISSUE_COUNT_OF_AREA_FOR_ISSUE_TYPE_TESTING = "SELECT pqd_area_id, SUM(pqd_issue_count) AS area_level_issues " +
@@ -1162,10 +1145,27 @@ const string GET_YEARLY_HISTORY_FOR_SELECTED_COMPONENT = "SELECT year(date) as y
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const string QUERIES_FOR_GITHUB_SERVICE_QUERY_START_HERE = "message";
+
+
 const string GET_GITHUB_AREA_QUERY = "SELECT pqd_area_id, pqd_area_name FROM pqd_area";
 
-const string GET_GITHUB_PRODUCT_QUERY = "SELECT pqd_product_id, pqd_product_name, pqd_area_id, github_repo_name " +
-                                        "FROM pqd_product";
 
 const string GET_GITHUB_AREA_PRODUCT_QUERY = "SELECT pqd_product_id, pqd_product_name, pqd_area_id, github_repo_name " +
                                              "FROM pqd_product WHERE pqd_area_id = ?";
@@ -1185,22 +1185,10 @@ const string GET_GITHUB_ISSUE_TYPE_QUERY = "SELECT pqd_issue_type_id, pqd_issue_
 const string GET_GITHUB_SEVERITY_QUERY = "SELECT pqd_severity_id, pqd_severity, pqd_severity_github_label_text, pqd_severity_github_label_color " +
                                          "FROM pqd_severity WHERE pqd_severity <> 'Unknown'";
 
-const string GET_GITHUB_ISSUE_TYPE_UNKNOWN_ID_QUERY = "SELECT pqd_issue_type_id FROM pqd_issue_type WHERE pqd_issue_type = 'Unknown'";
 
-const string GET_GITHUB_SEVERITY_UNKNOWN_ID_QUERY = "SELECT pqd_severity FROM pqd_severity WHERE pqd_severity = 'Unknown'";
+const string GET_GITHUB_ISSUE_TYPE_UNKNOWN_QUERY = "SELECT `pqd_issue_type_id` FROM `pqd_issue_type` WHERE `pqd_issue_type` = 'Unknown'";
 
-const string GET_GITHUB_LAST_SNAPSHOT = "SELECT pqd_snapshot_id from pqd_snapshot ORDER BY pqd_snapshot_id DESC LIMIT 1";
-
-const string GET_GITHUB_AREA_ISSUES1 = "SELECT pqd_area_id, pqd_issue_type_id, pqd_severity_id, pqd_issues_count " +
-                                       "FROM pqd_area_issues WHERE pqd_snapshot_id = ? AND pqd_area_id = ?";
-
-const string GET_GITHUB_PRODUCT_ISSUES1 = "SELECT pqd_product_id, pqd_issue_type_id, pqd_severity_id, pqd_issues_count " +
-                                          "FROM pqd_product_issues WHERE pqd_snapshot_id = ? AND pqd_product_id = ?";
-
-const string GET_GITHUB_VERSION_ISSUES = "SELECT pqd_product_version_id, pqd_issue_type_id, pqd_severity_id, pqd_issues_count " +
-                                         "FROM pqd_product_version_issues WHERE pqd_snapshot_id = ? AND pqd_product_version_id = ?";
-
-
+const string GET_GITHUB_SEVERITY_UNKNOWN_QUERY = "SELECT `pqd_severity_id` FROM `pqd_severity` WHERE `pqd_severity` = 'Unknown'";
 
 const string GET_GITHUB_COMPONENT_ISSUES = "SELECT pqd_component.pqd_component_name, pqd_issue_type.pqd_issue_type, " +
                                            "pqd_severity.pqd_severity, pqd_component_issues.pqd_issues_count, " +
@@ -1211,78 +1199,7 @@ const string GET_GITHUB_COMPONENT_ISSUES = "SELECT pqd_component.pqd_component_n
                                            "AND pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
                                            "AND pqd_component_issues.pqd_component_id = ?";
 
-const string GET_GITHUB_PRODUCT_ISSUES = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                         "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                         "FROM pqd_product INNER JOIN pqd_product_issues WHERE " +
-                                         "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
-                                         "AND pqd_product.pqd_product_id = ? GROUP BY pqd_product_id";
-
-const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES = "";
-
-const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES = "";
-
-const string GET_GITHUB_PRODUCT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "";
-
-const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES = "";
-
-const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES = "";
-
-const string GET_GITHUB_PRODUCT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "";
-
-const string GET_GITHUB_PRODUCT_SUM_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, SUM(pqd_product_issues.pqd_issues_count) " +
-                                            "AS pqd_issues_count FROM pqd_product INNER JOIN pqd_product_issues " +
-                                            "WHERE pqd_product_issues.pqd_product_id = ? AND " +
-                                            "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id";
-
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES = "";
-
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE = "";
-
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_SEVERITY = "";
-
-const string GET_GITHUB_PRODUCT_COMPONENT_ISSUES_FILTERED_BY_ISSUETYPE_SEVERITY = "";
-
-const string GET_GITHUB_COMPONENT_ISSUETYPE_ISSUES_FILTER_BY_SEVERITY = "";
-
-
-const string GET_GITHUB_COMPONENT_SEVERITY_ISSUES_FILTER_BY_ISSUETYPE = "";
-
-const string GET_GITHUB_PRODUCT_PRODUCT_ISSUES = "SELECT pqd_product.pqd_product_id AS pqd_component_id, pqd_product.pqd_product_name " +
-                                                 "AS pqd_component_name, SUM(pqd_product_issues.pqd_issues_count) " +
-                                                 "AS pqd_issues_count FROM pqd_product INNER JOIN pqd_product_issues WHERE " +
-                                                 "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id AND " +
-                                                 "pqd_product.pqd_product_id = ? GROUP BY pqd_product.pqd_product_id, " +
-                                                 "pqd_product.pqd_product_name";
-
-const string GET_GITHUB_AREA_SUM_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, SUM(pqd_area_issues.pqd_issues_count) " +
-                                         "AS pqd_issues_count FROM pqd_area INNER JOIN pqd_area_issues " +
-                                         "WHERE pqd_area_issues.pqd_area_id = ? AND " +
-                                         "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id";
-
-
-const string GET_GITHUB_AREA_PRODUCT_ISSUES = "";
-
-const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_ISSUETYPE_ISSUES = "";
-
-const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_ISSUES = "";
-
-const string GET_GITHUB_AREA_PRODUCT_FILTER_BY_SEVERITY_AND_ISSUETYPE = "";
-
-
-const string GET_GITHUB_AREA_ISSUETYPE_ISSUES = "";
-
-const string GET_GITHUB_AREA_ISSUETYPE_FILTER_BY_SEVERITY_ISSUES = "";
-
-const string GET_GITHUB_AREA_SEVERITY_FILTER_BY_ISSUETYPE_ISSUES = "";
-
-
-const string GET_GITHUB_AREA_SEVERITY_ISSUES = "";
-
-
-
 const string DELETE_GITHUB_COMPONENT_ISSUES_QUERY = "TRUNCATE TABLE pqd_component_issues";
-
-const string DELETE_GITHUB_PRODUCT_ISSUES_QUERY = "TRUNCATE TABLE pqd_product_issues";
 
 const string INSERT_GITHUB_COMPONENT_ISSUES_QUERY = "INSERT INTO pqd_component_issues(pqd_component_id, pqd_issue_type_id, " +
                                                     "pqd_severity_id, pqd_issues_count) " +
@@ -1314,23 +1231,10 @@ const string GET_GITHUB_AREA_CURRENT_ISSUES_QUERY = "SELECT pqd_area_id, pqd_iss
                                                     "FROM pqd_area_issues";
 
 
-
-const string GET_GITHUB_ALL_AREAS_FILTERED_CURRENT_ISSUES_QUERY = "";
-
-const string GET_GITHUB_ALL_AREAS_ISSUETYPE_QUERY = "";
-
-const string GET_GITHUB_ALL_AREAS_SEVERITY_QUERY = "";
-
-const string GET_GITHUB_ALL_AREAS_SEVERITY_ISSUETYPE_QUERY = "";
-
-const string GET_GITHUB_ALL_AREAS_ISSUETYPE_SEVERITY_QUERY = "";
-
 const string GET_GITHUB_COMPONENT_QUERY = "SELECT pqd_component_id, pqd_component_name, pqd_product_id, github_repo_name, github_repo_organization " +
                                           "FROM pqd_component";
 
 const string GET_GITHUB_COMPONENT_NAME_QUERY = "SELECT pqd_component_name FROM pqd_component WHERE pqd_component_id = ?";
-
-const string GET_GITHUB_ORGANIZATION_QUERY = "SELECT pqd_organization_name FROM pqd_github_organization";
 
 const string GET_PRODUCT_TOTAL_ISSUES_QUERY = "INSERT INTO pqd_product_issues(pqd_product_id, pqd_issue_type_id, " +
                                               "pqd_severity_id, pqd_issues_count) " +
@@ -1361,593 +1265,858 @@ const string GET_PRODUCT_ID_FOR_COMPONENT_ID = "SELECT pqd_product.pqd_product_i
                                                "WHERE pqd_product.pqd_product_id = pqd_component.pqd_product_id AND pqd_component.pqd_component_id = ?";
 
 
+const string GET_GITHUB_COMPONENT_HISTORY_DATES_QUERY = "SELECT DISTINCT pqd_date FROM pqd_github_component_issues_history WHERE pqd_date = ?";
 
 
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                        "(SELECT pqd_date, pqd_issues_count FROM pqd_github_area_issues_history " +
+                                                        "UNION ALL SELECT pqd_updated AS pqd_date, pqd_issue_count AS pqd_issues_count " +
+                                                        "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_date " +
+                                                        "BETWEEN ? AND ? GROUP BY pqd_date";
 
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_area_issues_history` " +
-                                                   "WHERE pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                         "(SELECT pqd_date, pqd_issues_count, pqd_issue_type_id " +
+                                                                         "FROM pqd_github_area_issues_history UNION ALL SELECT pqd_updated " +
+                                                                         "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_issue_type_id " +
+                                                                         "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_issue_type_id = ? " +
+                                                                         "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
 
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_area_issues_history` " +
-                                                                    "WHERE pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                        "(SELECT pqd_date, pqd_issues_count, pqd_severity_id " +
+                                                                        "FROM pqd_github_area_issues_history UNION ALL SELECT pqd_updated " +
+                                                                        "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_severity_id " +
+                                                                        "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_severity_id = ? " +
+                                                                        "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
 
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_area_issues_history` " +
-                                                                   "WHERE pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                             "`pqd_github_area_issues_history` WHERE pqd_issue_type_id=? " +
-                                                                             "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? " +
-                                                                             "GROUP BY pqd_date";
-
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                     "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                     "`pqd_github_area_issues_history` WHERE pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                     "GROUP BY year,month";
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                      " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                      "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                      "`pqd_github_area_issues_history` WHERE pqd_issue_type_id=? AND " +
-                                                                      "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                      "GROUP BY year,month";
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                     " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "`pqd_github_area_issues_history` WHERE pqd_severity_id=? " +
-                                                                     "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                     "GROUP BY year,month";
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                                               "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                               "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                               "FROM `pqd_github_area_issues_history` " +
-                                                                               "WHERE pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                               "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                               "GROUP BY year,month";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                                  "(SELECT pqd_date, pqd_issues_count, pqd_severity_id, pqd_issue_type_id " +
+                                                                                  "FROM pqd_github_area_issues_history UNION ALL " +
+                                                                                  "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                  "AS pqd_issues_count, pqd_severity_id, pqd_issue_type_id " +
+                                                                                  "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                                  "WHERE pqd_issue_type_id = ? AND pqd_severity_id = ? AND pqd_date " +
+                                                                                  "BETWEEN ? AND ? GROUP BY pqd_date";
 
 
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                       "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                       "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                       "`pqd_github_area_issues_history` WHERE pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                       "GROUP BY year,quarter";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
+                                                          "AVG(pqd_issues_count) as pqd_issues_count FROM (SELECT pqd_date," +
+                                                          "SUM(pqd_issues_count) as pqd_issues_count FROM (SELECT pqd_date, " +
+                                                          "pqd_issues_count FROM pqd_github_area_issues_history UNION ALL " +
+                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count AS pqd_issues_count " +
+                                                          "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_date " +
+                                                          "BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year,month";
 
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                        " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                        "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                        "`pqd_github_area_issues_history` WHERE pqd_issue_type_id=? AND " +
-                                                                        "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                        "GROUP BY year,quarter";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
+                                                                           "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                           "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                           "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, " +
+                                                                           "pqd_issue_type_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                           "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                           "AS pqd_issues_count, pqd_issue_type_id " +
+                                                                           "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                           "WHERE pqd_issue_type_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                           "GROUP BY pqd_date)AS T GROUP BY year,month";
 
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                       " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                       "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                       "`pqd_github_area_issues_history` WHERE pqd_severity_id=? " +
-                                                                       "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                       "GROUP BY year,quarter";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
+                                                                          "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                          "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                          "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, " +
+                                                                          "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                          "AS pqd_issues_count, pqd_severity_id " +
+                                                                          "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                          "WHERE pqd_severity_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                          "GROUP BY pqd_date)AS T GROUP BY year,month";
 
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                                                 "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                                 "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                                 "FROM `pqd_github_area_issues_history` " +
-                                                                                 "WHERE pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                                 "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                                 "GROUP BY year,quarter";
-
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                    "`pqd_github_area_issues_history` WHERE pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                    "GROUP BY year";
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "`pqd_github_area_issues_history` WHERE pqd_issue_type_id=? AND " +
-                                                                     "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                     "GROUP BY year";
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                    "`pqd_github_area_issues_history` WHERE pqd_severity_id=? " +
-                                                                    "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                    "GROUP BY year";
-
-const string GET_GITHUB_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                              "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                              "FROM `pqd_github_area_issues_history` " +
-                                                                              "WHERE pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                              "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                              "GROUP BY year";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
+                                                                                    "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                                    "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                                    "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, " +
+                                                                                    "pqd_issue_type_id, pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                                    "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                    "AS pqd_issues_count, pqd_issue_type_id, pqd_severity_id " +
+                                                                                    "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                                    "WHERE pqd_issue_type_id = ? AND pqd_severity_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                                    "GROUP BY pqd_date)AS T GROUP BY year,month";
 
 
-const string GET_GITHUB_AREA_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_area_issues_history` " +
-                                              "WHERE pqd_area_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
+                                                            "AVG(pqd_issues_count) as pqd_issues_count FROM (SELECT pqd_date," +
+                                                            "SUM(pqd_issues_count) as pqd_issues_count FROM (SELECT pqd_date, " +
+                                                            "pqd_issues_count FROM pqd_github_area_issues_history UNION ALL " +
+                                                            "SELECT pqd_updated AS pqd_date, pqd_issue_count AS pqd_issues_count " +
+                                                            "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_date " +
+                                                            "BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
+                                                            "GROUP BY year,quarter";
 
-const string GET_GITHUB_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_area_issues_history` " +
-                                                               "WHERE pqd_area_id=? AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
+                                                                             "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                             "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                             "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, " +
+                                                                             "pqd_issue_type_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                             "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                             "AS pqd_issues_count, pqd_issue_type_id " +
+                                                                             "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                             "WHERE pqd_issue_type_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                             "GROUP BY pqd_date)AS T GROUP BY year,quarter";
 
-const string GET_GITHUB_AREA_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_area_issues_history` " +
-                                                              "WHERE pqd_area_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
+                                                                            "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                            "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                            "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, " +
+                                                                            "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                            "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                            "AS pqd_issues_count, pqd_severity_id " +
+                                                                            "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                            "WHERE pqd_severity_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                            "GROUP BY pqd_date)AS T GROUP BY year,quarter";
 
-const string GET_GITHUB_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                        "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_issue_type_id=? " +
-                                                                        "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? " +
-                                                                        "GROUP BY pqd_date";
-
-
-const string GET_GITHUB_AREA_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                "GROUP BY year,month";
-
-const string GET_GITHUB_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                 " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                 "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                 "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_issue_type_id=? AND " +
-                                                                 "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                 "GROUP BY year,month";
-
-const string GET_GITHUB_AREA_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_severity_id=? " +
-                                                                "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                "GROUP BY year,month";
-
-const string GET_GITHUB_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                                          "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                          "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                          "FROM `pqd_github_area_issues_history` " +
-                                                                          "WHERE pqd_area_id=? AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                          "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                          "GROUP BY year,month";
-
-
-const string GET_GITHUB_AREA_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                  "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                  "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                  "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                  "GROUP BY year,quarter";
-
-const string GET_GITHUB_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                   " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                   "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                   "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_issue_type_id=? AND " +
-                                                                   "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                   "GROUP BY year,quarter";
-
-const string GET_GITHUB_AREA_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                  " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                  "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                  "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_severity_id=? " +
-                                                                  "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                  "GROUP BY year,quarter";
-
-const string GET_GITHUB_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                                            "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                            "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                            "FROM `pqd_github_area_issues_history` " +
-                                                                            "WHERE pqd_area_id=? AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                            "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                            "GROUP BY year,quarter";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
+                                                                                      "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                                      "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                                      "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, pqd_issue_type_id, " +
+                                                                                      "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                                      "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                      "AS pqd_issues_count, pqd_issue_type_id, pqd_severity_id " +
+                                                                                      "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                                      "WHERE pqd_issue_type_id = ? AND pqd_severity_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                                      "GROUP BY pqd_date)AS T GROUP BY year,quarter";
 
 
-const string GET_GITHUB_AREA_HISTORY_BY_YEAR = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                               "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                               "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                               "GROUP BY year";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR = "SELECT year(pqd_date)year, " +
+                                                         "AVG(pqd_issues_count) as pqd_issues_count FROM (SELECT pqd_date," +
+                                                         "SUM(pqd_issues_count) as pqd_issues_count FROM (SELECT pqd_date, " +
+                                                         "pqd_issues_count FROM pqd_github_area_issues_history UNION ALL " +
+                                                         "SELECT pqd_updated AS pqd_date, pqd_issue_count AS pqd_issues_count " +
+                                                         "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_date " +
+                                                         "BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
+                                                         "GROUP BY year";
 
-const string GET_GITHUB_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_issue_type_id=? AND " +
-                                                                "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                "GROUP BY year";
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, " +
+                                                                          "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                          "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                          "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, " +
+                                                                          "pqd_issue_type_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                          "AS pqd_issues_count, pqd_issue_type_id " +
+                                                                          "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                          "WHERE pqd_issue_type_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                          "GROUP BY pqd_date)AS T GROUP BY year";
 
-const string GET_GITHUB_AREA_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                               "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                               "`pqd_github_area_issues_history` WHERE pqd_area_id=? AND pqd_severity_id=? " +
-                                                               "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                               "GROUP BY year";
-
-const string GET_GITHUB_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                         "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                         "FROM `pqd_github_area_issues_history` " +
-                                                                         "WHERE pqd_area_id=? AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                         "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year, " +
+                                                                         " AVG(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                         "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                         "`pqd_github_area_issues_history` WHERE pqd_severity_id = ? " +
+                                                                         "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date) AS T " +
                                                                          "GROUP BY year";
 
-
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_product_issues_history` " +
-                                                 "WHERE pqd_product_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_product_issues_history` " +
-                                                                  "WHERE pqd_product_id=? AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_product_issues_history` " +
-                                                                 "WHERE pqd_product_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                           "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_issue_type_id=? " +
-                                                                           "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? " +
-                                                                           "GROUP BY pqd_date";
-
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                   "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                   "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                   "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                   "GROUP BY year,month";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                    " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                    "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_issue_type_id=? AND " +
-                                                                    "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                    "GROUP BY year,month";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                   " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                   "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                   "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_severity_id=? " +
-                                                                   "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                   "GROUP BY year,month";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                                             "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                             "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                             "FROM `pqd_github_product_issues_history` " +
-                                                                             "WHERE pqd_product_id=? AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                             "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                             "GROUP BY year,month";
-
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                     "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                     "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                     "GROUP BY year,quarter";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                      " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                      "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                      "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_issue_type_id=? AND " +
-                                                                      "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                      "GROUP BY year,quarter";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                     " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_severity_id=? " +
-                                                                     "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                     "GROUP BY year,quarter";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                                               "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                               "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                               "FROM `pqd_github_product_issues_history` " +
-                                                                               "WHERE pqd_product_id=? AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                               "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                               "GROUP BY year,quarter";
-
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_YEAR = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                  "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                  "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                  "GROUP BY year";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                   "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                   "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_issue_type_id=? AND " +
-                                                                   "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                   "GROUP BY year";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                  "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                  "`pqd_github_product_issues_history` WHERE pqd_product_id=? AND pqd_severity_id=? " +
-                                                                  "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                  "GROUP BY year";
-
-const string GET_GITHUB_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                            "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                            "FROM `pqd_github_product_issues_history` " +
-                                                                            "WHERE pqd_product_id=? AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                            "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                            "GROUP BY year";
-
-
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_component_issues_history` " +
-                                                   "WHERE pqd_component_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_component_issues_history` " +
-                                                                    "WHERE pqd_component_id=? AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM `pqd_github_component_issues_history` " +
-                                                                   "WHERE pqd_component_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                             "`pqd_github_component_issues_history` WHERE pqd_component_id=? AND pqd_issue_type_id=? " +
-                                                                             "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? " +
-                                                                             "GROUP BY pqd_date";
-
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                     "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                     "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                     "GROUP BY year,month";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                      " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                      "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                      "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_issue_type_id=? AND " +
-                                                                      "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                      "GROUP BY year,month";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month," +
-                                                                     " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_severity_id=? " +
-                                                                     "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                     "GROUP BY year,month";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month, " +
-                                                                               "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                               "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                               "FROM `pqd_github_component_issues_history` " +
-                                                                               "WHERE `pqd_component_id=?` AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                               "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                               "GROUP BY year,month";
-
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                       "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                       "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                       "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                       "GROUP BY year,quarter";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                        " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                        "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                        "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_issue_type_id=? AND " +
-                                                                        "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                        "GROUP BY year,quarter";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter," +
-                                                                       " AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                       "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                       "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_severity_id=? " +
-                                                                       "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                       "GROUP BY year,quarter";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, " +
-                                                                                 "AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                                 "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                                 "FROM `pqd_github_component_issues_history` " +
-                                                                                 "WHERE `pqd_component_id=?` AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                                 "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                                 "GROUP BY year,quarter";
-
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_YEAR = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                    "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                    "GROUP BY year";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                     "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_issue_type_id=? AND " +
-                                                                     "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                     "GROUP BY year";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                    "`pqd_github_component_issues_history` WHERE `pqd_component_id=?` AND pqd_severity_id=? " +
-                                                                    "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                    "GROUP BY year";
-
-const string GET_GITHUB_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM " +
-                                                                              "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count " +
-                                                                              "FROM `pqd_github_component_issues_history` " +
-                                                                              "WHERE `pqd_component_id=?` AND pqd_issue_type_id=? AND pqd_severity_id=? " +
-                                                                              "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T " +
-                                                                              "GROUP BY year";
-
-
-const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                              "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                              "FROM pqd_area INNER JOIN pqd_area_issues " +
-                                                              "WHERE pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                              "GROUP BY pqd_area_id";
-
-const string GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                   "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
-                                                                   "INNER JOIN pqd_area_issues " +
-                                                                   "WHERE pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                                   "GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                  "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                  "FROM pqd_severity INNER JOIN pqd_area_issues " +
-                                                                  "WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                                                  "GROUP BY pqd_severity_id";
-
-
-const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                                                  "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                  "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
-                                                                                  "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                                                  "AND pqd_area_issues.pqd_issue_type_id = ? GROUP BY pqd_area_id";
-
-const string GET_GITHUB_ALL_AREAS_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                                      "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                      "FROM pqd_severity INNER JOIN pqd_area_issues " +
-                                                                                      "WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                                                                      "AND pqd_area_issues.pqd_issue_type_id = ? " +
-                                                                                      "GROUP BY pqd_severity_id";
-
-const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                                                 "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                 "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
-                                                                                 "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                                                 "AND pqd_area_issues.pqd_severity_id = ? GROUP BY pqd_area_id";
-
-const string GET_GITHUB_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                                      "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                      "FROM pqd_issue_type INNER JOIN pqd_area_issues " +
-                                                                                      "WHERE pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                                                      "AND pqd_area_issues.pqd_severity_id = ? " +
-                                                                                      "GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
-                                                                                     "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                     "FROM pqd_area INNER JOIN pqd_area_issues WHERE " +
-                                                                                     "pqd_area.pqd_area_id = pqd_area_issues.pqd_area_id " +
-                                                                                     "AND pqd_area_issues.pqd_issue_type_id = ? " +
-                                                                                     "AND pqd_area_issues.pqd_severity_id = ? GROUP BY pqd_area_id";
-
-
-const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                                            "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                            "FROM pqd_product INNER JOIN pqd_product_issues WHERE " +
-                                                            "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id AND " +
-                                                            "pqd_product.pqd_area_id = ? GROUP BY pqd_product_id";
-
-const string GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                              "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
-                                                              "INNER JOIN pqd_area_issues WHERE " +
-                                                              "pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                              "AND pqd_area_issues.pqd_area_id = ? GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                             "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
-                                                             "INNER JOIN pqd_area_issues WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                                             "AND pqd_area_issues.pqd_area_id = ? GROUP BY pqd_severity_id";
-
-
-const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                                                                "SUM(pqd_product_issues.pqd_issues_count) AS " +
-                                                                                "pqd_issues_count FROM pqd_product INNER JOIN " +
-                                                                                "pqd_product_issues WHERE " +
-                                                                                "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
-                                                                                "AND pqd_product.pqd_area_id = ? AND " +
-                                                                                "pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_product_id";
-
-const string GET_GITHUB_AREA_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                                 "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
-                                                                                 "INNER JOIN pqd_area_issues WHERE pqd_severity.pqd_severity_id = pqd_area_issues.pqd_severity_id " +
-                                                                                 "AND pqd_area_issues.pqd_area_id = ? AND pqd_area_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
-
-const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                                                               "SUM(pqd_product_issues.pqd_issues_count) AS " +
-                                                                               "pqd_issues_count FROM pqd_product INNER JOIN " +
-                                                                               "pqd_product_issues WHERE " +
-                                                                               "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
-                                                                               "AND pqd_product.pqd_area_id = ? AND " +
-                                                                               "pqd_product_issues.pqd_severity_id = ? GROUP BY pqd_product_id";
-
-const string GET_GITHUB_AREA_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                                 "SUM(pqd_area_issues.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
-                                                                                 "INNER JOIN pqd_area_issues WHERE " +
-                                                                                 "pqd_issue_type.pqd_issue_type_id = pqd_area_issues.pqd_issue_type_id " +
-                                                                                 "AND pqd_area_issues.pqd_area_id = ? AND pqd_area_issues.pqd_severity_id = ? " +
-                                                                                 "GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
-                                                                                   "SUM(pqd_product_issues.pqd_issues_count) AS " +
-                                                                                   "pqd_issues_count FROM pqd_product INNER JOIN " +
-                                                                                   "pqd_product_issues WHERE " +
-                                                                                   "pqd_product.pqd_product_id = pqd_product_issues.pqd_product_id " +
-                                                                                   "AND pqd_product.pqd_area_id = ? AND " +
-                                                                                   "pqd_product_issues.pqd_severity_id = ? " +
-                                                                                   "AND pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_product_id";
-
-
-
-const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                                                 "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                 "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                                                 "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                                 "AND pqd_component.pqd_product_id = ? GROUP BY pqd_component_id, pqd_component_name";
-
-const string GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                 "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                 "FROM pqd_issue_type INNER JOIN pqd_product_issues WHERE " +
-                                                                 "pqd_issue_type.pqd_issue_type_id = pqd_product_issues.pqd_issue_type_id " +
-                                                                 "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                "FROM pqd_severity INNER JOIN pqd_product_issues WHERE " +
-                                                                "pqd_severity.pqd_severity_id = pqd_product_issues.pqd_severity_id " +
-                                                                "AND pqd_product_issues.pqd_product_id = ? GROUP BY pqd_severity_id";
-
-
-const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                                                                     "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                     "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                                                                     "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                                                     "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_component_id, pqd_component_name";
-
-const string GET_GITHUB_PRODUCT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                                    "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                    "FROM pqd_severity INNER JOIN pqd_product_issues WHERE " +
-                                                                                    "pqd_severity.pqd_severity_id = pqd_product_issues.pqd_severity_id " +
-                                                                                    "AND pqd_product_issues.pqd_product_id = ? " +
-                                                                                    "AND pqd_product_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
-
-const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                                                                    "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                    "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                                                                    "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                                                    "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
-                                                                                    "GROUP BY pqd_component_id, pqd_component_name";
-
-const string GET_GITHUB_PRODUCT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                                    "SUM(pqd_product_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                    "FROM pqd_issue_type INNER JOIN pqd_product_issues WHERE " +
-                                                                                    "pqd_issue_type.pqd_issue_type_id = pqd_product_issues.pqd_issue_type_id " +
-                                                                                    "AND pqd_product_issues.pqd_product_id = ? AND pqd_product_issues.pqd_severity_id = ? " +
-                                                                                    "GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
-                                                                                        "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                        "FROM pqd_component INNER JOIN pqd_component_issues WHERE " +
-                                                                                        "pqd_component.pqd_component_id = pqd_component_issues.pqd_component_id " +
-                                                                                        "AND pqd_component.pqd_product_id = ? AND pqd_component_issues.pqd_issue_type_id = ? " +
-                                                                                        "AND pqd_component_issues.pqd_severity_id = ? GROUP BY pqd_component_id, pqd_component_name";
-
-
-
-const string GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                   "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                   "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
-                                                                   "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
-                                                                   "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_issue_type_id";
-
-const string GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                  "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                  "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
-                                                                  "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
-                                                                  "AND pqd_component_issues.pqd_component_id = ? GROUP BY pqd_severity_id";
-
-const string GET_GITHUB_COMPONENT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
-                                                                                      "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                      "FROM pqd_severity INNER JOIN pqd_component_issues WHERE " +
-                                                                                      "pqd_severity.pqd_severity_id = pqd_component_issues.pqd_severity_id " +
-                                                                                      "AND pqd_component_issues.pqd_component_id = ? " +
-                                                                                      "AND pqd_component_issues.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
-
-const string GET_GITHUB_COMPONENT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
-                                                                                      "SUM(pqd_component_issues.pqd_issues_count) AS pqd_issues_count " +
-                                                                                      "FROM pqd_issue_type INNER JOIN pqd_component_issues WHERE " +
-                                                                                      "pqd_issue_type.pqd_issue_type_id = pqd_component_issues.pqd_issue_type_id " +
-                                                                                      "AND pqd_component_issues.pqd_component_id = ? AND pqd_component_issues.pqd_severity_id = ? " +
-                                                                                      "GROUP BY pqd_issue_type_id";
-
+const string GET_GITHUB_JIRA_ALL_AREAS_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, " +
+                                                                                   "AVG(pqd_issues_count) as pqd_issues_count " +
+                                                                                   "FROM (SELECT pqd_date,SUM(pqd_issues_count) as " +
+                                                                                   "pqd_issues_count FROM (SELECT pqd_date, pqd_issues_count, pqd_issue_type_id, " +
+                                                                                   "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                                   "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                   "AS pqd_issues_count, pqd_issue_type_id, pqd_severity_id " +
+                                                                                   "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                                   "WHERE pqd_issue_type_id = ? AND pqd_severity_id = ? AND pqd_date BETWEEN ? AND ? " +
+                                                                                   "GROUP BY pqd_date)AS T GROUP BY year";
+
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                   "(SELECT pqd_date, pqd_issues_count, pqd_area_id FROM pqd_github_area_issues_history " +
+                                                   "UNION ALL SELECT pqd_updated AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_area_id " +
+                                                   "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id = ? AND pqd_date " +
+                                                   "BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                    "(SELECT pqd_date, pqd_issues_count, pqd_area_id, pqd_issue_type_id " +
+                                                                    "FROM pqd_github_area_issues_history UNION ALL SELECT pqd_updated " +
+                                                                    "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_area_id, pqd_issue_type_id " +
+                                                                    "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id = ? AND pqd_issue_type_id = ? " +
+                                                                    "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                   "(SELECT pqd_date, pqd_issues_count, pqd_area_id, pqd_severity_id " +
+                                                                   "FROM pqd_github_area_issues_history UNION ALL SELECT pqd_updated " +
+                                                                   "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_area_id, pqd_severity_id " +
+                                                                   "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id = ? AND pqd_severity_id = ? " +
+                                                                   "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                             "(SELECT pqd_date, pqd_issues_count, pqd_area_id, pqd_severity_id, pqd_issue_type_id " +
+                                                                             "FROM pqd_github_area_issues_history UNION ALL " +
+                                                                             "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                             "AS pqd_issues_count, pqd_area_id, pqd_severity_id, pqd_issue_type_id " +
+                                                                             "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                             "WHERE pqd_area_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? AND pqd_date " +
+                                                                             "BETWEEN ? AND ? GROUP BY pqd_date";
+
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, AVG(pqd_issues_count) as "+
+                                                     "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                     "FROM (SELECT pqd_date, pqd_issues_count, pqd_area_id " +
+                                                     "FROM pqd_github_area_issues_history UNION ALL " +
+                                                     "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                     "AS pqd_issues_count, pqd_area_id " +
+                                                     "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? AND "+
+                                                     "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                      "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                      "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                      "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id FROM "+
+                                                                      "pqd_github_area_issues_history UNION ALL SELECT pqd_updated AS "+
+                                                                      "pqd_date, pqd_issue_count AS pqd_issues_count,pqd_area_id,pqd_issue_type_id FROM "+
+                                                                      "pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                      "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                      " pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                     "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                     "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id, " +
+                                                                     "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                     "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                     "AS pqd_issues_count,pqd_area_id,pqd_severity_id " +
+                                                                     "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                     "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                     " pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                               "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                               "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                               "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                                               "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                               "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                               "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                               "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                               "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                               " pqd_date)AS T GROUP BY year,month";
+
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, AVG(pqd_issues_count) as "+
+                                                       "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                       "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                       "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                       "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                       "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                       "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? AND "+
+                                                       "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                        "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                        "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                        "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                                        "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                        "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                        "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                        "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                        "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                        " pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                       "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                       "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                       "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                                       "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                       "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                       "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                       "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                       "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                       " pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                                 "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                                 "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                                 "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                                                 "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                                 "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                 "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                                 "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                                 "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                                 " pqd_date)AS T GROUP BY year,quarter";
+
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as "+
+                                                    "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                    "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                    "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                    "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                    "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                    "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? AND "+
+                                                    "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                     "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                     "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                                     "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                     "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                     "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                     "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                     "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                     " pqd_date)AS T GROUP BY year";
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                    "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                                    "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                    "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                    "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                    "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                    "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                    " pqd_date)AS T GROUP BY year";
+
+
+const string GET_GITHUB_JIRA_AREA_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                              "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                              "FROM (SELECT pqd_date, pqd_issues_count,pqd_area_id,pqd_issue_type_id, " +
+                                                                              "pqd_severity_id FROM pqd_github_area_issues_history UNION ALL " +
+                                                                              "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                              "AS pqd_issues_count,pqd_area_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                              "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_area_id=? "+
+                                                                              "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                              " pqd_date)AS T GROUP BY year";
+
+
+
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                      "(SELECT pqd_date, pqd_issues_count, pqd_product_id FROM pqd_github_product_issues_history " +
+                                                      "UNION ALL SELECT pqd_updated AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_product_id " +
+                                                      "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id = ? AND pqd_date " +
+                                                      "BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                       "(SELECT pqd_date, pqd_issues_count, pqd_product_id, pqd_issue_type_id " +
+                                                                       "FROM pqd_github_product_issues_history UNION ALL SELECT pqd_updated " +
+                                                                       "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_product_id, pqd_issue_type_id " +
+                                                                       "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id = ? AND pqd_issue_type_id = ? " +
+                                                                       "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                      "(SELECT pqd_date, pqd_issues_count, pqd_product_id, pqd_severity_id " +
+                                                                      "FROM pqd_github_product_issues_history UNION ALL SELECT pqd_updated " +
+                                                                      "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_product_id, pqd_severity_id " +
+                                                                      "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id = ? AND pqd_severity_id = ? " +
+                                                                      "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                                "(SELECT pqd_date, pqd_issues_count, pqd_product_id, pqd_severity_id, pqd_issue_type_id " +
+                                                                                "FROM pqd_github_product_issues_history UNION ALL " +
+                                                                                "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                "AS pqd_issues_count, pqd_product_id, pqd_severity_id, pqd_issue_type_id " +
+                                                                                "FROM pqd_jira_issues_history_by_product) AS gj " +
+                                                                                "WHERE pqd_product_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? AND pqd_date " +
+                                                                                "BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, AVG(pqd_issues_count) as "+
+                                                        "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                        "FROM (SELECT pqd_date, pqd_issues_count, pqd_product_id " +
+                                                        "FROM pqd_github_product_issues_history UNION ALL " +
+                                                        "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                        "AS pqd_issues_count, pqd_product_id " +
+                                                        "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? AND "+
+                                                        "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                         "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                         "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                         "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id FROM "+
+                                                                         "pqd_github_product_issues_history UNION ALL SELECT pqd_updated AS "+
+                                                                         "pqd_date, pqd_issue_count AS pqd_issues_count,pqd_product_id,pqd_issue_type_id FROM "+
+                                                                         "pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                         "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                         " pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                        "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                        "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                        "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id, " +
+                                                                        "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                        "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                        "AS pqd_issues_count,pqd_product_id,pqd_severity_id " +
+                                                                        "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                        "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                        " pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                                  "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                                  "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                                  "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                                                  "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                                  "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                  "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                                  "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                                  "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                                  " pqd_date)AS T GROUP BY year,month";
+
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, AVG(pqd_issues_count) as "+
+                                                          "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                          "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                          "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                          "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                          "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? AND "+
+                                                          "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                           "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                           "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                           "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                                           "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                           "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                           "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                           "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                           "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                           " pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                          "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                          "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                          "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                                          "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                          "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                          "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                          "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                          " pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                                    "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                                    "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                                                    "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                                    "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                    "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                                    "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                                    "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                                    " pqd_date)AS T GROUP BY year,quarter";
+
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as "+
+                                                       "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                       "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                       "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                       "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                       "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                       "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? AND "+
+                                                       "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                        "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                        "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                                        "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                        "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                        "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                        "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                        "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                        " pqd_date)AS T GROUP BY year";
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                       "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                       "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                                       "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                       "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                       "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                       "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                       "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                       " pqd_date)AS T GROUP BY year";
+
+
+const string GET_GITHUB_JIRA_PRODUCT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                                 "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                                 "FROM (SELECT pqd_date, pqd_issues_count,pqd_product_id,pqd_issue_type_id, " +
+                                                                                 "pqd_severity_id FROM pqd_github_product_issues_history UNION ALL " +
+                                                                                 "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                 "AS pqd_issues_count,pqd_product_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                                 "FROM pqd_jira_issues_history_by_product) AS gj WHERE pqd_product_id=? "+
+                                                                                 "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                                 " pqd_date)AS T GROUP BY year";
+
+
+
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                        "(SELECT pqd_date, pqd_issues_count, pqd_component_id FROM pqd_github_component_issues_history " +
+                                                        "UNION ALL SELECT pqd_updated AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_component_id " +
+                                                        "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id = ? AND pqd_date " +
+                                                        "BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                         "(SELECT pqd_date, pqd_issues_count, pqd_component_id, pqd_issue_type_id " +
+                                                                         "FROM pqd_github_component_issues_history UNION ALL SELECT pqd_updated " +
+                                                                         "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_component_id, pqd_issue_type_id " +
+                                                                         "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id = ? AND pqd_issue_type_id = ? " +
+                                                                         "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY_FILTER_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                        "(SELECT pqd_date, pqd_issues_count, pqd_component_id, pqd_severity_id " +
+                                                                        "FROM pqd_github_component_issues_history UNION ALL SELECT pqd_updated " +
+                                                                        "AS pqd_date, pqd_issue_count AS pqd_issues_count, pqd_component_id, pqd_severity_id " +
+                                                                        "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id = ? AND pqd_severity_id = ? " +
+                                                                        "AND pqd_date BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_DAY_FILTER_ISSUETYPE_SEVERITY = "SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count FROM " +
+                                                                                  "(SELECT pqd_date, pqd_issues_count, pqd_component_id, pqd_severity_id, pqd_issue_type_id " +
+                                                                                  "FROM pqd_github_component_issues_history UNION ALL " +
+                                                                                  "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                  "AS pqd_issues_count, pqd_component_id, pqd_severity_id, pqd_issue_type_id " +
+                                                                                  "FROM pqd_jira_issues_history_by_component) AS gj " +
+                                                                                  "WHERE pqd_component_id = ? AND pqd_issue_type_id = ? AND pqd_severity_id = ? AND pqd_date " +
+                                                                                  "BETWEEN ? AND ? GROUP BY pqd_date";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH = "SELECT year(pqd_date)year, month(pqd_date) as month, AVG(pqd_issues_count) as "+
+                                                          "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                          "FROM (SELECT pqd_date, pqd_issues_count, pqd_component_id " +
+                                                          "FROM pqd_github_component_issues_history UNION ALL " +
+                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                          "AS pqd_issues_count, pqd_component_id " +
+                                                          "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? AND "+
+                                                          "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                           "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                           "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                           "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id FROM "+
+                                                                           "pqd_github_component_issues_history UNION ALL SELECT pqd_updated AS "+
+                                                                           "pqd_date, pqd_issue_count AS pqd_issues_count,pqd_component_id,pqd_issue_type_id FROM "+
+                                                                           "pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                           "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                           " pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH_FILTER_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                          "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                          "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                          "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id, " +
+                                                                          "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                          "AS pqd_issues_count,pqd_component_id,pqd_severity_id " +
+                                                                          "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                          "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                          " pqd_date)AS T GROUP BY year,month";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_MONTH_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, month(pqd_date) as month,"+
+                                                                                    "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                                    "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                                    "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                                                    "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                                    "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                    "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                                    "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                                    "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                                    " pqd_date)AS T GROUP BY year,month";
+
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter, AVG(pqd_issues_count) as "+
+                                                            "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                            "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                            "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                            "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                            "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                            "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? AND "+
+                                                            "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                             "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                             "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                             "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                                             "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                             "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                             "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                             "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                             "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                             " pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER_FILTER_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                            "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                            "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                            "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                                            "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                            "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                            "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                            "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                            "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                            " pqd_date)AS T GROUP BY year,quarter";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_QUARTER_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year, quarter(pqd_date) as quarter,"+
+                                                                                      "AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                                      "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                                      "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                                                      "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                                      "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                      "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                                      "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                                      "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                                      " pqd_date)AS T GROUP BY year,quarter";
+
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as "+
+                                                         "pqd_issues_count FROM (SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                         "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                         "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                         "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                         "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                         "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? AND "+
+                                                         "pqd_date BETWEEN ? AND ? GROUP BY pqd_date)AS T GROUP BY year";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE = "SELECT year(pqd_date)year, AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                          "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                          "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                                          "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                          "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                          "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                          "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                          "AND pqd_issue_type_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                          " pqd_date)AS T GROUP BY year";
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR_FILTER_SEVERITY = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                         "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                         "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                                         "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                         "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                         "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                         "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                         "AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                         " pqd_date)AS T GROUP BY year";
+
+
+const string GET_GITHUB_JIRA_COMPONENT_HISTORY_BY_YEAR_FILTER_ISSUETYPE_SEVERITY = "SELECT year(pqd_date)year,AVG(pqd_issues_count) as pqd_issues_count FROM "+
+                                                                                   "(SELECT pqd_date,SUM(pqd_issues_count) as pqd_issues_count "+
+                                                                                   "FROM (SELECT pqd_date, pqd_issues_count,pqd_component_id,pqd_issue_type_id, " +
+                                                                                   "pqd_severity_id FROM pqd_github_component_issues_history UNION ALL " +
+                                                                                   "SELECT pqd_updated AS pqd_date, pqd_issue_count " +
+                                                                                   "AS pqd_issues_count,pqd_component_id,pqd_issue_type_id, pqd_severity_id " +
+                                                                                   "FROM pqd_jira_issues_history_by_component) AS gj WHERE pqd_component_id=? "+
+                                                                                   "AND pqd_issue_type_id=? AND pqd_severity_id=? AND pqd_date BETWEEN ? AND ? GROUP BY"+
+                                                                                   " pqd_date)AS T GROUP BY year";
+
+
+const string GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, SUM(gj.pqd_issues_count) " +
+                                                                   "AS pqd_issues_count FROM pqd_area INNER JOIN " +
+                                                                   "(SELECT pqd_area_id, pqd_issues_count FROM pqd_area_issues " +
+                                                                   "UNION ALL SELECT pqd_area_id, pqd_issue_count AS pqd_issues_count " +
+                                                                   "FROM pqd_jira_issues_by_product) AS gj WHERE " +
+                                                                   "pqd_area.pqd_area_id = gj.pqd_area_id GROUP BY pqd_area_id";
+
+const string GET_GITHUB_JIRA_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                        "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                        "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count FROM pqd_area_issues " +
+                                                                        "UNION ALL SELECT pqd_issue_type_id, pqd_issue_count AS pqd_issues_count " +
+                                                                        "FROM pqd_jira_issues_by_product) AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                        "GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_JIRA_ALL_AREAS_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                       "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                       "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count FROM pqd_area_issues " +
+                                                                       "UNION ALL SELECT pqd_severity_id, pqd_issue_count AS pqd_issues_count " +
+                                                                       "FROM pqd_jira_issues_by_product) AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                       "GROUP BY pqd_severity_id";
+
+
+const string GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
+                                                                                       "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM " +
+                                                                                       "pqd_area INNER JOIN (SELECT pqd_area_id, pqd_issues_count, " +
+                                                                                       "pqd_issue_type_id FROM pqd_area_issues UNION ALL SELECT pqd_area_id, pqd_issue_count " +
+                                                                                       "AS pqd_issues_count, pqd_issue_type_id FROM pqd_jira_issues_by_product) AS gj " +
+                                                                                       "WHERE pqd_area.pqd_area_id = gj.pqd_area_id AND gj.pqd_issue_type_id = ? GROUP BY pqd_area_id";
+
+const string GET_GITHUB_JIRA_ALL_AREAS_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                           "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                                           "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count, pqd_issue_type_id " +
+                                                                                           "FROM pqd_area_issues UNION ALL SELECT pqd_severity_id, pqd_issue_count " +
+                                                                                           "AS pqd_issues_count, pqd_issue_type_id FROM pqd_jira_issues_by_product) " +
+                                                                                           "AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                                           "AND gj.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
+                                                                                      "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM " +
+                                                                                      "pqd_area INNER JOIN (SELECT pqd_area_id, pqd_issues_count, " +
+                                                                                      "pqd_severity_id FROM pqd_area_issues UNION ALL SELECT pqd_area_id, pqd_issue_count " +
+                                                                                      "AS pqd_issues_count, pqd_severity_id FROM pqd_jira_issues_by_product) AS gj " +
+                                                                                      "WHERE pqd_area.pqd_area_id = gj.pqd_area_id AND gj.pqd_severity_id = ? GROUP BY pqd_area_id";
+
+const string GET_GITHUB_JIRA_ALL_AREAS_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                           "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                                           "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count, pqd_severity_id " +
+                                                                                           "FROM pqd_area_issues UNION ALL SELECT pqd_issue_type_id, pqd_issue_count " +
+                                                                                           "AS pqd_issues_count, pqd_severity_id FROM pqd_jira_issues_by_product) " +
+                                                                                           "AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                                           "AND gj.pqd_severity_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_JIRA_ALL_AREAS_AREA_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_area.pqd_area_id, pqd_area.pqd_area_name, " +
+                                                                                          "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM " +
+                                                                                          "pqd_area INNER JOIN (SELECT pqd_area_id, pqd_issues_count, " +
+                                                                                          "pqd_issue_type_id, pqd_severity_id FROM pqd_area_issues UNION ALL SELECT pqd_area_id, pqd_issue_count " +
+                                                                                          "AS pqd_issues_count, pqd_issue_type_id, pqd_severity_id FROM pqd_jira_issues_by_product) AS gj " +
+                                                                                          "WHERE pqd_area.pqd_area_id = gj.pqd_area_id AND gj.pqd_issue_type_id = ? " +
+                                                                                          "AND gj.pqd_severity_id = ? GROUP BY pqd_area_id";
+
+
+const string GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                                 "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_product " +
+                                                                 "INNER JOIN (SELECT pqd_product_id, pqd_issues_count " +
+                                                                 "FROM pqd_product_issues UNION ALL SELECT pqd_product_id, pqd_issue_count " +
+                                                                 "AS pqd_issues_count FROM pqd_jira_issues_by_product) " +
+                                                                 "AS gj WHERE pqd_product.pqd_product_id = gj.pqd_product_id " +
+                                                                 "AND pqd_product.pqd_area_id = ? GROUP BY pqd_product_id";
+
+const string GET_GITHUB_JIRA_AREA_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                   "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                   "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count, pqd_area_id " +
+                                                                   "FROM pqd_area_issues UNION ALL SELECT pqd_issue_type_id, pqd_issue_count " +
+                                                                   "AS pqd_issues_count, pqd_area_id FROM pqd_jira_issues_by_product) " +
+                                                                   "AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                   "AND gj.pqd_area_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_JIRA_AREA_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                  "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                  "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count, pqd_area_id " +
+                                                                  "FROM pqd_area_issues UNION ALL SELECT pqd_severity_id, pqd_issue_count " +
+                                                                  "AS pqd_issues_count, pqd_area_id FROM pqd_jira_issues_by_product) " +
+                                                                  "AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                  "AND gj.pqd_area_id = ? GROUP BY pqd_severity_id";
+
+
+const string GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                                                     "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_product " +
+                                                                                     "INNER JOIN (SELECT pqd_product_id, pqd_issues_count, pqd_issue_type_id " +
+                                                                                     "FROM pqd_product_issues UNION ALL SELECT pqd_product_id, pqd_issue_count " +
+                                                                                     "AS pqd_issues_count, pqd_issue_type_id FROM pqd_jira_issues_by_product) " +
+                                                                                     "AS gj WHERE pqd_product.pqd_product_id = gj.pqd_product_id " +
+                                                                                     "AND pqd_product.pqd_area_id = ? AND gj.pqd_issue_type_id = ? GROUP BY pqd_product_id";
+
+const string GET_GITHUB_JIRA_AREA_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                      "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                                      "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count, pqd_area_id, pqd_issue_type_id " +
+                                                                                      "FROM pqd_area_issues UNION ALL SELECT pqd_severity_id, pqd_issue_count " +
+                                                                                      "AS pqd_issues_count, pqd_area_id, pqd_issue_type_id FROM pqd_jira_issues_by_product) " +
+                                                                                      "AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                                      "AND gj.pqd_area_id = ? AND gj.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                                                    "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_product " +
+                                                                                    "INNER JOIN (SELECT pqd_product_id, pqd_issues_count, pqd_severity_id " +
+                                                                                    "FROM pqd_product_issues UNION ALL SELECT pqd_product_id, pqd_issue_count " +
+                                                                                    "AS pqd_issues_count, pqd_severity_id FROM pqd_jira_issues_by_product) " +
+                                                                                    "AS gj WHERE pqd_product.pqd_product_id = gj.pqd_product_id " +
+                                                                                    "AND pqd_product.pqd_area_id = ? AND gj.pqd_severity_id = ? GROUP BY pqd_product_id";
+
+const string GET_GITHUB_JIRA_AREA_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                      "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                                      "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count, pqd_area_id, pqd_severity_id " +
+                                                                                      "FROM pqd_area_issues UNION ALL SELECT pqd_issue_type_id, pqd_issue_count " +
+                                                                                      "AS pqd_issues_count, pqd_area_id, pqd_severity_id FROM pqd_jira_issues_by_product) " +
+                                                                                      "AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                                      "AND gj.pqd_area_id = ? AND gj.pqd_severity_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_JIRA_AREA_PRODUCT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_product.pqd_product_id, pqd_product.pqd_product_name, " +
+                                                                                        "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_product " +
+                                                                                        "INNER JOIN (SELECT pqd_product_id, pqd_issues_count, pqd_issue_type_id, pqd_severity_id " +
+                                                                                        "FROM pqd_product_issues UNION ALL SELECT pqd_product_id, pqd_issue_count " +
+                                                                                        "AS pqd_issues_count, pqd_issue_type_id, pqd_severity_id FROM pqd_jira_issues_by_product) " +
+                                                                                        "AS gj WHERE pqd_product.pqd_product_id = gj.pqd_product_id " +
+                                                                                        "AND pqd_product.pqd_area_id = ? AND gj.pqd_issue_type_id = ? AND gj.pqd_severity_id = ? GROUP BY pqd_product_id";
+
+
+
+const string GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                                      "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_component " +
+                                                                      "INNER JOIN (SELECT pqd_component_id, pqd_issues_count " +
+                                                                      "FROM pqd_component_issues UNION ALL SELECT pqd_component_id, pqd_issue_count " +
+                                                                      "AS pqd_issues_count FROM pqd_jira_issues_by_component) " +
+                                                                      "AS gj WHERE pqd_component.pqd_component_id = gj.pqd_component_id " +
+                                                                      "AND pqd_component.pqd_product_id = ? GROUP BY pqd_component_id";
+
+const string GET_GITHUB_JIRA_PRODUCT_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                      "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                      "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count, pqd_product_id " +
+                                                                      "FROM pqd_product_issues UNION ALL SELECT pqd_issue_type_id, pqd_issue_count " +
+                                                                      "AS pqd_issues_count, pqd_product_id FROM pqd_jira_issues_by_product) " +
+                                                                      "AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                      "AND gj.pqd_product_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_JIRA_PRODUCT_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                     "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                     "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count, pqd_product_id " +
+                                                                     "FROM pqd_product_issues UNION ALL SELECT pqd_severity_id, pqd_issue_count " +
+                                                                     "AS pqd_issues_count, pqd_product_id FROM pqd_jira_issues_by_product) " +
+                                                                     "AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                     "AND gj.pqd_product_id = ? GROUP BY pqd_severity_id";
+
+
+const string GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                                                          "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_component " +
+                                                                                          "INNER JOIN (SELECT pqd_component_id, pqd_issues_count, pqd_issue_type_id " +
+                                                                                          "FROM pqd_component_issues UNION ALL SELECT pqd_component_id, pqd_issue_count " +
+                                                                                          "AS pqd_issues_count, pqd_issue_type_id FROM pqd_jira_issues_by_component) " +
+                                                                                          "AS gj WHERE pqd_component.pqd_component_id = gj.pqd_component_id " +
+                                                                                          "AND pqd_component.pqd_product_id = ? AND gj.pqd_issue_type_id = ? GROUP BY pqd_component_id";
+
+const string GET_GITHUB_JIRA_PRODUCT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                         "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                                         "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count, pqd_product_id, pqd_issue_type_id " +
+                                                                                         "FROM pqd_product_issues UNION ALL SELECT pqd_severity_id, pqd_issue_count " +
+                                                                                         "AS pqd_issues_count, pqd_product_id, pqd_issue_type_id FROM pqd_jira_issues_by_product) " +
+                                                                                         "AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                                         "AND gj.pqd_product_id = ? AND gj.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                                                         "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_component " +
+                                                                                         "INNER JOIN (SELECT pqd_component_id, pqd_issues_count, pqd_severity_id " +
+                                                                                         "FROM pqd_component_issues UNION ALL SELECT pqd_component_id, pqd_issue_count " +
+                                                                                         "AS pqd_issues_count, pqd_severity_id FROM pqd_jira_issues_by_component) " +
+                                                                                         "AS gj WHERE pqd_component.pqd_component_id = gj.pqd_component_id " +
+                                                                                         "AND pqd_component.pqd_product_id = ? AND gj.pqd_severity_id = ? GROUP BY pqd_component_id";
+
+const string GET_GITHUB_JIRA_PRODUCT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                         "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                                         "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count, pqd_product_id, pqd_severity_id " +
+                                                                                         "FROM pqd_product_issues UNION ALL SELECT pqd_issue_type_id, pqd_issue_count " +
+                                                                                         "AS pqd_issues_count, pqd_product_id, pqd_severity_id FROM pqd_jira_issues_by_product) " +
+                                                                                         "AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                                         "AND gj.pqd_product_id = ? AND gj.pqd_severity_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_JIRA_PRODUCT_COMPONENT_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_SEVERITY = "SELECT pqd_component.pqd_component_id, pqd_component.pqd_component_name, " +
+                                                                                             "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_component " +
+                                                                                             "INNER JOIN (SELECT pqd_component_id, pqd_issues_count, pqd_issue_type_id, pqd_severity_id " +
+                                                                                             "FROM pqd_component_issues UNION ALL SELECT pqd_component_id, pqd_issue_count " +
+                                                                                             "AS pqd_issues_count, pqd_issue_type_id, pqd_severity_id FROM pqd_jira_issues_by_component) " +
+                                                                                             "AS gj WHERE pqd_component.pqd_component_id = gj.pqd_component_id " +
+                                                                                             "AND pqd_component.pqd_product_id = ? AND gj.pqd_issue_type_id = ? AND gj.pqd_severity_id = ? GROUP BY pqd_component_id";
+
+
+
+const string GET_GITHUB_JIRA_COMPONENT_ISSUETYPE_CURRENT_ISSUES_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                        "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                        "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count, pqd_component_id " +
+                                                                        "FROM pqd_component_issues UNION ALL SELECT pqd_issue_type_id, pqd_issue_count " +
+                                                                        "AS pqd_issues_count, pqd_component_id FROM pqd_jira_issues_by_component) " +
+                                                                        "AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                        "AND gj.pqd_component_id = ? GROUP BY pqd_issue_type_id";
+
+const string GET_GITHUB_JIRA_COMPONENT_SEVERITY_CURRENT_ISSUES_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                       "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                       "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count, pqd_component_id " +
+                                                                       "FROM pqd_component_issues UNION ALL SELECT pqd_severity_id, pqd_issue_count " +
+                                                                       "AS pqd_issues_count, pqd_component_id FROM pqd_jira_issues_by_component) " +
+                                                                       "AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                       "AND gj.pqd_component_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_JIRA_COMPONENT_SEVERITY_CURRENT_ISSUES_FILTER_BY_ISSUETYPE_QUERY = "SELECT pqd_severity.pqd_severity_id, pqd_severity.pqd_severity, " +
+                                                                                           "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_severity " +
+                                                                                           "INNER JOIN (SELECT pqd_severity_id, pqd_issues_count, pqd_component_id, pqd_issue_type_id " +
+                                                                                           "FROM pqd_component_issues UNION ALL SELECT pqd_severity_id, pqd_issue_count " +
+                                                                                           "AS pqd_issues_count, pqd_component_id, pqd_issue_type_id FROM pqd_jira_issues_by_component) " +
+                                                                                           "AS gj WHERE pqd_severity.pqd_severity_id = gj.pqd_severity_id " +
+                                                                                           "AND gj.pqd_component_id = ? AND gj.pqd_issue_type_id = ? GROUP BY pqd_severity_id";
+
+const string GET_GITHUB_JIRA_COMPONENT_ISSUETYPE_CURRENT_ISSUES_FILTER_BY_SEVERITY_QUERY = "SELECT pqd_issue_type.pqd_issue_type_id, pqd_issue_type.pqd_issue_type, " +
+                                                                                           "SUM(gj.pqd_issues_count) AS pqd_issues_count FROM pqd_issue_type " +
+                                                                                           "INNER JOIN (SELECT pqd_issue_type_id, pqd_issues_count, pqd_component_id, pqd_severity_id " +
+                                                                                           "FROM pqd_component_issues UNION ALL SELECT pqd_issue_type_id, pqd_issue_count " +
+                                                                                           "AS pqd_issues_count, pqd_component_id, pqd_severity_id FROM pqd_jira_issues_by_component) " +
+                                                                                           "AS gj WHERE pqd_issue_type.pqd_issue_type_id = gj.pqd_issue_type_id " +
+                                                                                           "AND gj.pqd_component_id = ? AND gj.pqd_severity_id = ? GROUP BY pqd_issue_type_id";
 
 
