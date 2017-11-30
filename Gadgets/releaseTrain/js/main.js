@@ -1,3 +1,4 @@
+  
   var url="digitalops.services.wso2.com";
   var port="9092";
   // create a handlebars template
@@ -8,24 +9,24 @@
   var container = document.getElementById('visualization');
 
 
-  var Data1={};
-  var Data2={};
-  var Data3={};
-  var Data4={};
-  var Data5={};
-  var Data6={};
-  var Data7={};
-  var Data8={};
+  var Data1={}; //all
+  var Data2={}; //apim
+  var Data3={}; //analytics
+  var Data4={}; //cloud
+  var Data5={}; //integration
+  var Data6={}; //iot
+  var Data7={}; //is
+  var Data8={}; //other
 
 
-  var f1=0;
-  var f2=0;
-  var f3=0;
-  var f4=0;
-  var f5=0;
-  var f6=0;
-  var f7=0;
-  var f8=0;
+  var f1=0; //flag for all
+  var f2=0; //flag for apim
+  var f3=0; //flag for analytics
+  var f4=0; //flag for cloud
+  var f5=0; //flag for integration
+  var f6=0; //flag for iot
+  var f7=0; //flag for is
+  var f8=0; //flag for other
 
 
   // get the initial data to the time line
@@ -34,68 +35,72 @@
       async:false,
       success: function(data){
         Data1=data;  
+        //console.log(Data1);
       }
   });
 
 
+  //draw the timeline depending on the product area
   $(document).ready(function () {
     $('input[type=radio][name=optradio]').change(function() {
 
         if ($('input[name=optradio]:checked').val() == 'All') {
             
             $('#featureTable').hide();
-            x(Data1,template);
+            drawTimeLine(Data1,template);
         }
         else if (this.value == 'API Manager') {
             $('#featureTable').hide();
             getData(f2,"apim");
-            x(Data2,template);
+            drawTimeLine(Data2,template);
         }
         else if (this.value == 'Analytics') {
             $('#featureTable').hide();
             getData(f3,"analytics");
-            x(Data3,template);
+            drawTimeLine(Data3,template);
         }
         else if (this.value == 'Cloud') {
             $('#featureTable').hide();
             getData(f4,"cloud");
-            x(Data4,template);
+            drawTimeLine(Data4,template);
         }
         else if (this.value == 'Integration') {
             $('#featureTable').hide();
             getData(f5,"integration");
-            x(Data5,template);
+            drawTimeLine(Data5,template);
         }
         else if (this.value == 'IOT') {
             $('#featureTable').hide();
             getData(f6,"iot");
-            x(Data6,template);
+            drawTimeLine(Data6,template);
         }else if (this.value == 'IS') {
             $('#featureTable').hide();
             getData(f7,"identity");
-            x(Data7,template);
+            drawTimeLine(Data7,template);
         }else if (this.value == 'Other') {
             $('#featureTable').hide();
             getData(f8,"other");
-            x(Data8,template);
+            drawTimeLine(Data8,template);
 
         }
     });
-
   });
 
+
+  // hide the summary and feature table
   $('#storySummary').hide();
   $('#featureSummary').hide();
 
   
 
-  
   // Create a Timeline
   var timeline = new vis.Timeline(container);
 
-  x(Data1,template);
+  // by this function call, initial timeline items will be displayed
+  drawTimeLine(Data1,template);
 
-  function x(Data,template){
+  //draw the timeline
+  function drawTimeLine(Data,template){
       var now = moment().minutes(0).seconds(0).milliseconds(0);
    
       // Configuration for the Timeline
@@ -104,7 +109,9 @@
         template: template,
         zoomable:false,
         timeAxis: {scale: 'day', step:1 },
-        height:"40vh",
+        //height:"277px",
+        height:"550px",
+        //orientation: {axis: 'both'}
 
       };
 
@@ -118,8 +125,6 @@
             var currentLoopDate=new Date(Data[i].start);
 
             if(start<=currentLoopDate  &&  currentLoopDate<= end){
-              
-              
               
 
               options1= jQuery.extend(options, {start:start,end:end});
@@ -157,25 +162,24 @@
       }
 
       
-
+      // by clicking on today button time line will redraw the data.
       document.getElementById('toggleRollingMode').onclick = function () { 
         
 
         options = {
         
+          start: now.clone().add(-28, 'days'),
+          end: now.clone().add(28, 'days'),
+          template: template,
+          zoomable:false,
+          timeAxis: {scale: 'day', step:1 },
+          //height:"277px",
+          height:"550px",
+          //orientation: {axis: 'both'}
 
-        start: now.clone().add(-28, 'days'),
-        end: now.clone().add(28, 'days'),
+        };
 
-        
-        template: template,
-        zoomable:false,
-        timeAxis: {scale: 'day', step:1 },
-        height:"40vh",
-
-      };
-
-      timeline.setOptions(options);
+        timeline.setOptions(options);
       };
 
       
@@ -184,11 +188,10 @@
 
       
       timeline.setOptions(options);
-      timeline.setItems(items);
-      
+      timeline.setItems(items);    
   };
 
-
+  // today button logic
   timeline.on('rangechanged', function (properties) {
     
     var now = moment().minutes(0).seconds(0).milliseconds(0);
@@ -221,12 +224,7 @@
   
 
     
-
-
   });
 
   
-
-
-  $('#featureTable').hide();
   

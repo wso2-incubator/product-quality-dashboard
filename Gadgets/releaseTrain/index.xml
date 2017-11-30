@@ -30,17 +30,21 @@
   <!-- Include Date Range Picker css-->
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
 
- 
+  <!-- wso2 loader css-->
+  <link rel="stylesheet" href="css/wso2loading.css">
+  
+  
+
   <script id="item-template" type="text/x-handlebars-template">
     <div class="pane">
       <table class="ex2">
 
         {{#each releases}}
           <tr onclick="test({{this.id}})">
-              <td id='{{this.id}}'  class="btn label" data-control="userBtn" style="font-size: 10px;background-color:{{this.color}}; padding-top: 0px;padding-bottom: 0px;align-items: left;">
+              <td id='{{this.id}}'  class="btn label btn-x" data-control="userBtn" style="font-size: 10px;background-color:{{this.color}}; padding-top: 0px;padding-bottom: 0px;align-items: left;">
                 <span class="glyphicon glyphicon-bullhorn"></span>
-                <span>{{this.PROJECT_NAME}} -</span>
-                <span > {{this.releaseProduct}} </span>
+                <span>{{this.releaseProduct}} -</span>
+                <span > {{this.releaseVersion}} </span>
                 <!-- <span>{{this.id}}</span> -->
               </td>
           </tr>
@@ -56,7 +60,7 @@
           
             <li align="left">
               <span class="label label-default" style="font-size: 15px;padding-bottom:0px;padding-top: 0px;">
-                <span class="glyphicon glyphicon-bullhorn"></span> Release Name: {{releaseProduct}}
+                <span class="glyphicon glyphicon-bullhorn"></span> Release Name: {{releaseVersion}}
                <!--  <span class="badge" style="background-color:#F79431; font-size: 10px;color: black;height: 12px"> {{releaseProduct}}</span>  -->
               </span>
             </li>
@@ -97,24 +101,24 @@
           
 
           
-            <li id="Fixed_Issues" align="left" onclick="showFixedIssues({{PROJECT_ID}},{{VERSION_ID}},this.id)">
+            <li id="Fixed_Issues" align="left" onclick="showFixedIssues({{projectId}},{{versionId}},{{gitVersionId}},this.id)">
               <span class="btn label btn-success"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
-                <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues
+                <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues {{fixedIssuesCount}}
               </span>
             </li>
           
 
           
-            <li id="Reported_Issues" align="left" onclick="showReportedIssues({{PROJECT_ID}},{{VERSION_ID}},this.id)">
+            <li id="Reported_Issues" align="left" onclick="showReportedIssues({{projectId}},{{versionId}},{{gitVersionId}},this.id)">
               <span class="btn label btn-warning"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
-                <span class="glyphicon glyphicon-alert"></span> Reported Issues
+                <span class="glyphicon glyphicon-alert"></span> Reported Issues {{reportedIssuesCount}}
               </span>
             </li>
           
           <!-- <tr><td align="left"><span class="btn label btn-danger"><span class="glyphicon glyphicon-list-alt"></span> Epic: {{featuresCount}}</span></td></tr> -->
 
           
-            <li id="Stories" align="left" onclick="showStories({{this.storiesCount}},{{this.VERSION_ID}},this.id)">
+            <li id="Stories" align="left" onclick="showStories({{this.storiesCount}},{{this.versionId}},this.id)">
               <span class="btn label btn-danger"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
                 <span class="glyphicon glyphicon-list-alt"></span> Stories: {{storiesCount}}
               </span>
@@ -122,7 +126,7 @@
           
 
           
-            <li id="Features" align="left" onclick="showFeatures({{this.featuresCount}},{{this.VERSION_ID}},this.id)">
+            <li id="Features" align="left" onclick="showFeatures({{this.featuresCount}},{{this.versionId}},this.id)">
               <span class="btn label btn-danger"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
                 <span class="glyphicon glyphicon-list-alt"></span> Features: {{featuresCount}}
               </span>
@@ -134,8 +138,8 @@
 
 <script id="managerTable" type="text/x-handlebars-template">  
   <tr id={{this.id}} onclick="drawManagerSummaryTable({{this.id}})">
-    <td>{{this.PROJECT_NAME}}</td> 
-    <td>{{this.releaseProduct}}</td>
+    <td>{{this.releaseProduct}}</td> 
+    <td>{{this.releaseVersion}}</td>
     <td>{{this.releaseManagerF}} {{this.releaseManagerL}}</td>
     <td>{{this.warrantyManagerF}} {{this.warrantyManagerL}}</td>
     <td>{{this.start}}</td>
@@ -162,13 +166,14 @@
 
 <body>
 
-  
+
+
+
 
 
 <div style="display:block;" id="myDiv" class="animate-bottom container-fluid">
         
-        
-
+       
         <ul class="nav nav-tabs">
           <li class="active"><a data-toggle="tab" href="#releasetrain" onclick="hideSummaryTable()">Releases</a></li>
           <li><a data-toggle="tab" href="#managers" onclick="hideSummaryTable()">Managers</a></li>
@@ -235,12 +240,12 @@
                     
             </div>
               <div class=col-sm-9 style="padding-left:2px;width: 82%">
-                  <div class="container-fluid" style="background-color:#29313E;color: white">Releases</div>
+                <div class="container-fluid" style="background-color:#29313E;color: white">Release Train</div>
                 <div id="visualization">
                   <div class="todayposition"> 
                       <table class="badge" style="background-color:#29313E;border: 2px solid gray;">
                         <td><span id=leftArrow class="glyphicon glyphicon-arrow-left"></span>
-                        <td><input type="button" id="toggleRollingMode" value="Today" class="btn" style="background-color:#29313E;"></td>
+                        <td><input type="button" id="toggleRollingMode" value="Today" class="btn btn-x" style="background-color:#29313E;"></td>
                         <td><span id=rightArrow class="glyphicon glyphicon-arrow-right"></span></td>
                       </table>
                   </div>
@@ -276,12 +281,11 @@
                     <option value="identity">Identity and Access Management</option>
                     <option value="other">Other</option>
                   </select>
-                </div> 
-	
-		
+                </div>     
           </div>
 
           <div class="managertbl managerTable1">
+          <div id="managerInit">
             <table class="table table-bordered  table-hover ">
               <thead style="background-color: #29313E;color:white;">
                   <tr>
@@ -299,6 +303,12 @@
               </tbody>
             </table>
           </div>
+          <div id=errormsg >
+            <div class=well ><p> no data </p></div>
+          </div>
+          </div>
+
+
 
           
           </div>
@@ -306,7 +316,7 @@
 
         
 
-        <div id="featureTable" >
+        <div id="featureTable" class="modal">
           <div class="container-fluid">
             <div class="row">
               <div class="well">
@@ -399,6 +409,9 @@
 
 <!-- Include Date Range Picker js-->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+
+<!-- wso2 loader js-->
+<script type="text/javascript" src="js/wso2loading.js"></script>
 
 <!--custom js-->
 <script type="text/javascript" src="js/main.js"></script>
