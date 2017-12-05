@@ -333,7 +333,8 @@ service<http> JiraService {
     resource saveIssuesSummaryDaily(message m) {
         saveIssuesSummaryDaily();
         message response = {};
-	messages:setJsonPayload(response, {"error":false});
+	json responseJson = {"error":false};
+	messages:setJsonPayload(response, responseJson);
         reply response;
     }
 
