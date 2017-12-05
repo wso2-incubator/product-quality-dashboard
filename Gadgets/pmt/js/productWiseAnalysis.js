@@ -57,9 +57,11 @@ function createSummaryGraph(drilldownTitle,defaultTitle,summaryArray,drillDown,d
             events: {
                 drilldown: function (e) {
                     chart.setTitle({text: drilldownTitle + e.point.name+' '+temp},{text: "Ordered by total patch count"});
+                    document.getElementById('weekPatchReport').style.display = 'none';
                 },
                 drillup: function(e) {
                     chart.setTitle({ text: defaultTitle },{text: "Click on the columns to view more details.."});
+                    document.getElementById('weekPatchReport').style.display = 'block';
                 }
             }
         },title: {
@@ -116,6 +118,7 @@ function getCountsTotal(start,end){
             document.getElementById('pComplete').innerHTML = data.jsonResOfCompleteCounts[0].total;
             document.getElementById('pProcess').innerHTML = data.jsonResOfDevCounts[0].total;
             document.getElementById('bugCount').innerHTML = data.jsonResOfBugCount[0].bugs;
+            document.getElementById('partiallyCount').innerHTML = data.jsonResOfPartiallyCompleteCount[0].total;
         }
     });
 
@@ -156,6 +159,7 @@ function getAllVersionCount(start,end) {
             document.getElementById('pComplete').innerHTML = data.jsonResOfCompleteCounts[0].total;
             document.getElementById('pProcess').innerHTML = data.jsonResOfDevCounts[0].total;
             document.getElementById('bugCount').innerHTML = data.jsonResOfBugCount[0].bugs;
+            document.getElementById('partiallyCount').innerHTML = data.jsonResOfPartiallyCompleteCount[0].total;
         }
     });
 }
@@ -175,16 +179,18 @@ function allProductDetails(duration,start,end){
         allVersions[y] = document.getElementById(array[y+2]).innerHTML.split(' ')[1].split('<')[0];
         versionString += allVersions[y]+'-';
     }
-    console.log(allVersions)
+
     versionString = versionString.substring(0, versionString.length-1);
     // console.log(allVersions);
 
     //get counts of all versions
     var allCounts = [];
+    var completedCounts = [];
+    var partiallyCompletedCounts = [];
     var category = [];
     var flag = false;
     // for(var q=0;q<allVersions.length;q++){
-        // console.log('https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-all-version-release-trend/'+product+'/'+allVersions[q]+'/'+duration+'/'+start+'/'+end);
+    //     console.log('https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-all-version-release-trend/'+product+'/'+versionString+'/'+duration+'/'+start+'/'+end);
         $.ajax({
             type: "GET",
             url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-all-version-release-trend/'+product+'/'+versionString+'/'+duration+'/'+start+'/'+end,
@@ -196,9 +202,15 @@ function allProductDetails(duration,start,end){
                     flag = false;
                 }
                 allCounts= data.versionReleaseTrend;
+                completedCounts= data.versionCompletedReleaseTrend;
+                partiallyCompletedCounts= data.versionPartiallyCompletedReleasedTrend;
             }
         });
     // }
+
+    // console.log(allCounts);
+    // console.log(completedCounts);
+    // console.log(partiallyCompletedCounts);
 
     // //get category
     $.ajax({
@@ -215,7 +227,6 @@ function allProductDetails(duration,start,end){
         }
     });
 
-
     if(flag){
         var finalData = [];
         var categories = [];
@@ -231,7 +242,7 @@ function allProductDetails(duration,start,end){
                 }else if(duration === 'month'){
                     finalCategory[x] = category[x].YEAR.toString() +'-'+months[category[x].TYPE -1];
                 }else if(duration === 'week'){
-                    console.log(category[x].TYPE);
+                    // console.log(category[x].TYPE);
                     finalCategory[x] = getDateRangeOfWeek(parseInt(category[x].TYPE),parseInt(category[x].YEAR));
                 }else{
                     finalCategory[x] =category[x].TYPE.toString();
@@ -251,10 +262,6 @@ function allProductDetails(duration,start,end){
             }
         }
 
-        // console.log(allNames[0].length);
-        console.log(allCounts);
-        // console.log(category);
-        // console.log(categories);
         var temp1 = [];
         for(var j=0;j<allCounts.length;j++){
             if(allCounts[j].length !== 0){
@@ -296,14 +303,95 @@ function allProductDetails(duration,start,end){
             }
         }
 
+        //adding completed and partially completed patch counts to finalData JSON
+        var allCompleteCountArray = [];
+
+        for(var s=0;s<completedCounts.length;s++){
+            var dump = [];
+            if(completedCounts[s].length != 0){
+                for(var i =0; i<category.length;i++){
+                    var flag = false;
+                    var temp = [];
+                    for(var x=0; x<completedCounts[s].length;x++){
+                        if(category[i].TYPE === completedCounts[s][x].TYPE && category[i].YEAR === completedCounts[s][x].YEAR ){
+                           temp.push(completedCounts[s][x].total);
+                           flag = true;
+                           break;
+                        }
+                    }
+
+                    if(!flag){
+                        temp.push(0);
+                    }
+
+                    dump.push(temp);
+                }
+            }else{
+                for(var d=0; d<category.length;d++){
+                    var temp = [];
+                    temp.push(0);
+                    dump.push(temp);
+                }
+            }
+            allCompleteCountArray.push(dump);
+        }
+
+        // Creating partially completed array
+        var allPartiallyCompleteCountArray = [];
+        for(var s=0;s<partiallyCompletedCounts.length;s++){
+            var dump = [];
+            if(partiallyCompletedCounts[s].length != 0){
+                for(var i =0; i<category.length;i++){
+                    var flag = false;
+                    var temp = [];
+                    for(var x=0; x<partiallyCompletedCounts[s].length;x++){
+                        if(category[i].TYPE === partiallyCompletedCounts[s][x].TYPE && category[i].YEAR === partiallyCompletedCounts[s][x].YEAR ){
+                            temp.push(partiallyCompletedCounts[s][x].total);
+                            flag = true;
+                            break;
+                        }
+                    }
+
+                    if(!flag){
+                        temp.push(0);
+                    }
+
+                    dump.push(temp);
+                }
+            }else{
+                for(var d=0; d<category.length;d++){
+                    var temp = [];
+                    temp.push(0);
+                    dump.push(temp);
+                }
+            }
+            allPartiallyCompleteCountArray.push(dump);
+        }
+
+        var finalDecomposedCompletedPatchArray = [];
+
+        for(var z=0;z<allPartiallyCompleteCountArray.length;z++){
+            var dump = [];
+            for(var c=0;c<allPartiallyCompleteCountArray[z].length;c++){
+                var temp = [];
+                temp.push(allCompleteCountArray[z][c]);
+                temp.push(allPartiallyCompleteCountArray[z][c]);
+                dump.push(temp);
+            }
+            finalDecomposedCompletedPatchArray.push(dump);
+        }
+
+        // console.log(finalDecomposedCompletedPatchArray);
+
+
         for(var z=0;z<allVersions.length;z++){
-            var json={name:"x",data:2016};
+            var json={name:"x",data:2016,sub:[[2,3],[3,4],[4,5],[1,2]]};
             json.name = 'Version-'+allVersions[z];
             json.data = temp1[z];
+            json.sub = finalDecomposedCompletedPatchArray[z];
             finalData.push(json)
         }
 
-        console.log(temp1);
 
         drawAllVersionChart(finalCategory,finalData);
     }else{
@@ -322,6 +410,7 @@ function getCountVersion(start,end) {
             document.getElementById('pComplete').innerHTML = data.jsonResOfCompleteCounts[0].total;
             document.getElementById('pProcess').innerHTML = data.jsonResOfDevCounts[0].total;
             document.getElementById('bugCount').innerHTML = data.jsonResOfBugCount[0].bugs;
+            document.getElementById('partiallyCount').innerHTML = data.jsonResOfPartiallyCompleteCount[0].total;
         }
     });
 }
@@ -341,6 +430,8 @@ function versionDetails(duration,start,end) {
             }
         }
     });
+
+    // console.log(releaseTrendVersion);
 
     if(!flag){
         createVersionChart(releaseTrendVersion,passVersion);
@@ -379,6 +470,19 @@ function drawAllVersionChart(categories,finalData) {
                     enabled: true,
                     format: '{point.y}'
                 }
+            }
+        },
+
+        tooltip: {
+            formatter: function() {
+                var result = '<b>'+this.series.userOptions.name+ ' Release Trend Summary</b>';
+
+                result += '<br />' + 'Total Released Count - <b>'  + this.series.userOptions.data[this.point.index] + '</b>';
+                var array = this.series.userOptions.sub;
+
+                result += '<br />' + 'Completed Release Count - <b>'  + array[this.point.index][0]+ '</b>';
+                result += '<br />' + 'Partially Completed Release Count - <b>'  + array[this.point.index][1]+ '</b>';
+                return result;
             }
         },
 
@@ -435,8 +539,21 @@ function createVersionChart(releaseTrend,version) {
         },
 
         tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name} Summary</span><br>',
-            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> of Total<br/>'
+            shared: true,
+            formatter: function() {
+                var result = '<b>Release Trend Summary</b>';
+                $.each(this.points, function (i, datum) {
+                    result += '<br />' + 'Total Released Count - <b>'  + datum.y + '</b>';
+                    var array = [];
+                    $.each(datum.point.sub, function () {
+                        array.push(this);
+                    });
+
+                    result += '<br />' + 'Completed Release Count - <b>'  + array[0]+ '</b>';
+                    result += '<br />' + 'Partially Completed Release Count - <b>'  + array[1]+ '</b>';
+                });
+                return result;
+            }
         },
 
         series: [{
@@ -481,7 +598,6 @@ function closeDiv() {
 }
 
 //get firstDate from week number
-
 function getDateRangeOfWeek(week,year) {
 
     // Jan 1 of 'year'

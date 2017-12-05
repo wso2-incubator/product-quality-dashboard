@@ -1,4 +1,7 @@
 var dataSet = [];
+var statesIds = [];
+var patchDetails = [];
+var SUPPORT_JIRA_PATH = "https://support.wso2.com/jira/browse/";
 
 function loadStackQueuedGraph(){
     var start = "";
@@ -16,10 +19,12 @@ function loadStackQueuedGraph(){
     var counts = [];
     var stateTransitionData = [];
     var averageData = [];
-    var patchDetails = [];
+    patchDetails = [];
     var finalAverageCountsOfStatesTransition = [];
     var movementAverage = [];
     var finalMovementAverage = [];
+    statesIds = [];
+
     $.ajax({
         type: "GET",
         async:false,
@@ -32,6 +37,8 @@ function loadStackQueuedGraph(){
             averageData = jsonResponse.averageSummary;
             patchDetails = jsonResponse.patchDetails;
             movementAverage = jsonResponse.mainSumamry;
+            statesIds = jsonResponse.statesIds;
+
         }
     });
 
@@ -74,8 +81,14 @@ function loadStackQueuedGraph(){
         }
 
     }
-    console.log(averageData);
-    console.log(movementAverage);
+    // console.log(averageData);
+    // console.log(movementAverage);
+    document.getElementById('lcDetailDate').innerHTML = start+' to '+end;
+    document.getElementById('selectedState').innerHTML = "";
+    document.getElementById('noteOfStateGraph').style.display = 'block';
+    document.getElementById('resetButton').style.display = "none";
+    document.getElementById('resetButtonStates').style.display = "none";
+
     drawStackChart(products,chart);
     generateStateTransitionGraph(stateTransitionData,finalAverageCountsOfStatesTransition,finalMovementAverage);
     loadPatchDetailsToTable(patchDetails);
@@ -147,6 +160,8 @@ function drawStackChart(products,chartData){
 }
 
 function selectProductByMenu(val){
+    document.getElementById('currentStateLegend').style.display = 'none';
+
     var start = "";
     var end = "";
     if(startDate === ''){
@@ -158,10 +173,12 @@ function selectProductByMenu(val){
     }
     var stateTransitionData = [];
     var averageData = [];
-    var patchDetails = [];
+    patchDetails = [];
     var finalAverageCountsOfStatesTransition = [];
     var movementAverage = [];
     var finalMovementAverage = [];
+    statesIds = [];
+
     $.ajax({
         type: "GET",
         async:false,
@@ -171,6 +188,7 @@ function selectProductByMenu(val){
             averageData = jsonResponse.averageDates;
             patchDetails = jsonResponse.patchDetails;
             movementAverage = jsonResponse.mainSumamry;
+            statesIds = jsonResponse.statesIds;
         }
     });
 
@@ -192,6 +210,11 @@ function selectProductByMenu(val){
     }
     // console.log(averageData);
     // console.log(finalAverageCountsOfStatesTransition);
+    document.getElementById('lcDetailDate').innerHTML = start+' to '+end;
+    document.getElementById('selectedState').innerHTML = "";
+    document.getElementById('noteOfStateGraph').style.display = 'block';
+    document.getElementById('resetButton').style.display = "none";
+    document.getElementById('resetButtonStates').style.display = "none";
     generateStateTransitionGraph(stateTransitionData,finalAverageCountsOfStatesTransition,finalMovementAverage);
     loadPatchDetailsToTable(patchDetails);
 }
@@ -247,12 +270,12 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .add();
 
                     // footers
-                    ren.label('(Average '+movementAverage[0]+' Days spend)', 130,320)
+                    ren.label('(Average '+movementAverage[0]+' Day(s) spent)', 130,320)
                         .css({
                             fontWeight: 'bold'
                         })
                         .add();
-                    ren.label('(Average '+movementAverage[1]+' Days spend)', 700,320)
+                    ren.label('(Average '+movementAverage[1]+' Day(s) spent)', 700,320)
                         .css({
                             fontWeight: 'bold'
                         })
@@ -270,7 +293,11 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                        .on('click', function() {
+                            whenStateOnClick(0);
                         })
                         .add()
                         .shadow(true);
@@ -286,7 +313,11 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                         .on('click', function() {
+                            whenStateOnClick(1);
                         })
                         .add();
 
@@ -301,7 +332,11 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                         .on('click', function() {
+                            whenStateOnClick(2);
                         })
                         .add();
 
@@ -316,7 +351,11 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                         .on('click', function() {
+                            whenStateOnClick(3);
                         })
                         .add();
 
@@ -329,7 +368,7 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .translate(115, 105)
                         .add();
 
-                    ren.label('Average '+averageCounts[0]+' Days', 125, 87)
+                    ren.label('Average '+averageCounts[0]+' Day(s)', 125, 87)
                         .css({
                             fontSize: '10px',
                             color: colors[3]
@@ -345,7 +384,7 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .translate(325, 105)
                         .add();
 
-                    ren.label('Average '+averageCounts[1]+' Days', 335, 87)
+                    ren.label('Average '+averageCounts[1]+' Day(s)', 335, 87)
                         .css({
                             fontSize: '10px',
                             color: colors[3]
@@ -361,7 +400,7 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .translate(555, 105)
                         .add();
 
-                    ren.label('Average '+averageCounts[2]+' Days', 565, 87)
+                    ren.label('Average '+averageCounts[2]+' Day(s)', 565, 87)
                         .css({
                             fontSize: '10px',
                             color: colors[3]
@@ -388,7 +427,11 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                         .on('click', function() {
+                            whenStateOnClick(8);
                         })
                         .add();
 
@@ -412,7 +455,11 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                         .on('click', function() {
+                            whenStateOnClick(7);
                         })
                         .add();
 
@@ -428,9 +475,13 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
                         })
                         .add()
+                         .on('click', function() {
+                            whenStateOnClick(4);
+                        })
                         .shadow(true);
 
                     // Arrow from Testing to Released NIPS
@@ -442,7 +493,7 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .translate(765, 105)
                         .add();
 
-                    ren.label('Average '+averageCounts[3]+' Days', 777, 87)
+                    ren.label('Average '+averageCounts[3]+' Day(s)', 777, 87)
                         .css({
                             color:'#7AC29A',
                             fontSize: '10px'
@@ -461,7 +512,11 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                         .on('click', function() {
+                            whenStateOnClick(5);
                         })
                         .add()
                         .shadow(true);
@@ -475,7 +530,7 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .translate(995, 105)
                         .add();
 
-                    ren.label('Average '+averageCounts[4]+' Days', 1012, 87)
+                    ren.label('Average '+averageCounts[4]+' Day(s)', 1002, 87)
                         .css({
                             color:'#7AC29A',
                             fontSize: '10px'
@@ -494,12 +549,16 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .css({
                             color: 'white',
                             width: '100px',
-                            textAlign:'center'
+                            textAlign:'center',
+                            cursor: 'pointer'
+                        })
+                         .on('click', function() {
+                            whenStateOnClick(6);
                         })
                         .add()
                         .shadow(true);
 
-                    // Arrow from Released NIPS to Released
+                    // Arrow from Released NIPS to Released NA
                     ren.path(rightArrow)
                         .attr({
                             'stroke-width': 2,
@@ -508,7 +567,7 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
                         .translate(1225, 105)
                         .add();
 
-                    ren.label('Average '+averageCounts[5]+' Days', 1242, 87)
+                    ren.label('Average '+averageCounts[5]+' Day(s)', 1222, 87)
                         .css({
                             color:'#7AC29A',
                             fontSize: '10px'
@@ -531,6 +590,60 @@ function generateStateTransitionGraph(dataArray,averageCounts,movementAverage){
 function loadPatchDetailsToTable(patchDetails){
     $('#patchDetailsLC').DataTable().destroy();
 
+    //create new array of patches states at that moment
+    var arrayOfStatesAtThatGivenTime = [];
+
+    for(var z = 0; z<patchDetails.length;z++){
+        arrayOfStatesAtThatGivenTime[z] = "Unknown";
+    }
+
+    for(var t=0;t<statesIds.length;t++){
+        if(statesIds[t].length != 0){
+            for(var z=0;z<statesIds[t].length;z++){
+                for(var i=0;i<patchDetails.length;i++){
+                    if(t === 0 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "Queued";
+                        break;
+                    }
+                    if(t === 1 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "PreQADevelopment";
+                        break;
+                    }
+                    if(t === 2 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "Development";
+                        break;
+                    }
+                    if(t === 3 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "ReadyForQA";
+                        break;
+                    }
+                    if(t === 4 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "ReleasedNotInPublicSVN";
+                        break;
+                    }
+                    if(t === 5 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "ReleasedNotAutomated";
+                        break;
+                    }
+                    if(t === 6 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "Released";
+                        break;
+                    }
+                    if(t === 7 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "Broken";
+                        break;
+                    }
+                    if(t === 8 && patchDetails[i].ID === statesIds[t][z][0] &&  patchDetails[i].eID === statesIds[t][z][1]){
+                        arrayOfStatesAtThatGivenTime[i] = "Regression";
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
+
+    //create dataset to feed datatable
     dataSet = [];
     for (var x=0;x<patchDetails.length;x++){
         if(patchDetails[x].LC_STATE === null){
@@ -579,7 +692,9 @@ function loadPatchDetailsToTable(patchDetails){
         var el = [
             patchDetails[x].ID,
             patchDetails[x].PRODUCT_NAME,
+            patchDetails[x].SUPPORT_JIRA.split('browse/')[1],
             patchDetails[x].LC_STATE,
+            arrayOfStatesAtThatGivenTime[x],
             patchDetails[x].REPORT_DATE,
             patchDetails[x].PRE_QA_STARTED_ON,
             patchDetails[x].DEVELOPMENT_STARTED_ON,
@@ -601,7 +716,9 @@ function loadPatchDetailsToTable(patchDetails){
         columns: [
             { title: "Patch ID" },
             { title: "Product Name" },
+            { title: "JIRA ID" },
             { title: "Current State" },
+            { title: "State at that Moment" },
             { title: "Queued On" },
             { title: "Pre QA On" },
             { title: "Dev Started" },
@@ -615,7 +732,9 @@ function loadPatchDetailsToTable(patchDetails){
         ],
         "aoColumnDefs": [
             { "sClass": "column-2", "aTargets": [ 1 ] },
-            { "sClass": "column-12", "aTargets": [ 12 ] }
+            { "sClass": "column-12", "aTargets": [ 14 ] },
+            { "render": function(data, type, row, meta){data = '<a href="' +SUPPORT_JIRA_PATH + data + '" target="_blank">' + data + '</a>';return data;}, "aTargets": [ 2 ] }
+
         ]
     });
 
@@ -624,12 +743,12 @@ function loadPatchDetailsToTable(patchDetails){
         var data = $('#patchDetailsLC').DataTable().row( this ).data();
         $("#patchDetailsLC tbody tr").removeClass('row_selected');
         $(this).addClass('row_selected');
-        getSpecificPatchLifeCycle(data[0],data[12]);
+        getSpecificPatchLifeCycle(data[0],data[14]);
     } );
 }
 
 function getSpecificPatchLifeCycle(patchID,eID){
-    console.log(eID);
+    // console.log(eID);
     var stateTransitionData = [];
     var patchDetails = [];
 
@@ -688,6 +807,10 @@ function getSpecificPatchLifeCycle(patchID,eID){
     }
 
     // console.log(patchDetails[0]);
+    document.getElementById('currentStateLegend').style.display = 'block';
+    document.getElementById('noteOfStateGraph').style.display = 'none';
+    document.getElementById('resetButton').style.display = "block";
+    document.getElementById('resetButtonStates').style.display = "block";
     generatePatchStateTransitionGraph(stateTransitionData,patchDetails[0]);
 }
 
@@ -886,7 +1009,7 @@ function generatePatchStateTransitionGraph(averageCounts,patchDetails){
                         .translate(115, 105)
                         .add();
 
-                    ren.label('Get '+averageCounts[0]+' Days', 125, 87)
+                    ren.label('Takes '+averageCounts[0]+' Day(s)', 125, 87)
                         .css({
                             fontSize: '10px',
                             color: colors[3]
@@ -902,7 +1025,7 @@ function generatePatchStateTransitionGraph(averageCounts,patchDetails){
                         .translate(325, 105)
                         .add();
 
-                    ren.label('Get '+averageCounts[1]+' Days', 335, 87)
+                    ren.label('Takes '+averageCounts[1]+' Day(s)', 335, 87)
                         .css({
                             fontSize: '10px',
                             color: colors[3]
@@ -918,7 +1041,7 @@ function generatePatchStateTransitionGraph(averageCounts,patchDetails){
                         .translate(555, 105)
                         .add();
 
-                    ren.label('Get '+averageCounts[2]+' Days', 565, 87)
+                    ren.label('Takes '+averageCounts[2]+' Day(s)', 565, 87)
                         .css({
                             fontSize: '10px',
                             color: colors[3]
@@ -1054,7 +1177,7 @@ function generatePatchStateTransitionGraph(averageCounts,patchDetails){
                         .translate(765, 105)
                         .add();
 
-                    ren.label('Get '+averageCounts[3]+' Days', 777, 87)
+                    ren.label('Takes '+averageCounts[3]+' Day(s)', 777, 87)
                         .css({
                             color:'#7AC29A',
                             fontSize: '10px'
@@ -1106,7 +1229,7 @@ function generatePatchStateTransitionGraph(averageCounts,patchDetails){
                         .translate(995, 105)
                         .add();
 
-                    ren.label('Get '+averageCounts[4]+' Days', 1012, 87)
+                    ren.label('Takes '+averageCounts[4]+' Day(s)', 1012, 87)
                         .css({
                             color:'#7AC29A',
                             fontSize: '10px'
@@ -1158,7 +1281,7 @@ function generatePatchStateTransitionGraph(averageCounts,patchDetails){
                         .translate(1225, 105)
                         .add();
 
-                    ren.label('Get '+averageCounts[5]+' Days', 1242, 87)
+                    ren.label('Takes '+averageCounts[5]+' Day(s)', 1242, 87)
                         .css({
                             color:'#7AC29A',
                             fontSize: '10px'
@@ -1176,4 +1299,131 @@ function generatePatchStateTransitionGraph(averageCounts,patchDetails){
             }
         }
     });
+}
+
+function whenStateOnClick(index){
+    var patchStates = ["Queued","PreQADevelopment","Development","ReadyForQA","ReleasedNotInPublicSVN","ReleasedNotAutomated","Released","Broken","Regression"];
+    var stateIdsIndex = index;
+    var selectedStateIds = statesIds[stateIdsIndex];
+
+    //fetch only details of selected state patches
+    var selectedStateDetails = [];
+    for(var t=0; t<selectedStateIds.length;t++){
+        for(var s=0; s<patchDetails.length;s++){
+            if(selectedStateIds[t][0] === patchDetails[s].ID && selectedStateIds[t][1] === patchDetails[s].eID ){
+                selectedStateDetails.push(patchDetails[s]);
+            }
+        }
+    }
+
+    $('#patchDetailsLC').DataTable().destroy();
+
+    //create dataset to feed datatable
+    dataSet = [];
+    var arrayOfStatesAtThatGivenTimeString = patchStates[stateIdsIndex];
+    document.getElementById('selectedState').innerHTML = "in "+arrayOfStatesAtThatGivenTimeString+" State";
+    document.getElementById('resetButton').style.display = "block";
+    document.getElementById('resetButtonStates').style.display = "block";
+
+    for (var x=0;x<selectedStateDetails.length;x++){
+        if(selectedStateDetails[x].LC_STATE === null){
+            selectedStateDetails[x].LC_STATE = "Queued";
+        }
+        if(selectedStateDetails[x].PRE_QA_STARTED_ON === null){
+            selectedStateDetails[x].PRE_QA_STARTED_ON = "-";
+        }else{
+            selectedStateDetails[x].PRE_QA_STARTED_ON = selectedStateDetails[x].PRE_QA_STARTED_ON.split(" ")[0];
+        }
+        if(selectedStateDetails[x].DEVELOPMENT_STARTED_ON === null){
+            selectedStateDetails[x].DEVELOPMENT_STARTED_ON = "-";
+        }else{
+            selectedStateDetails[x].DEVELOPMENT_STARTED_ON = selectedStateDetails[x].DEVELOPMENT_STARTED_ON.split(" ")[0];
+        }
+        if(selectedStateDetails[x].QA_STARTED_ON === null){
+            selectedStateDetails[x].QA_STARTED_ON = "-";
+        }else{
+            selectedStateDetails[x].QA_STARTED_ON = selectedStateDetails[x].QA_STARTED_ON.split(" ")[0];
+        }
+        if(selectedStateDetails[x].RELEASED_NOT_IN_PUBLIC_SVN_ON === null){
+            selectedStateDetails[x].RELEASED_NOT_IN_PUBLIC_SVN_ON = "-";
+        }else{
+            selectedStateDetails[x].RELEASED_NOT_IN_PUBLIC_SVN_ON = selectedStateDetails[x].RELEASED_NOT_IN_PUBLIC_SVN_ON.split(" ")[0];
+        }
+        if(selectedStateDetails[x].RELEASED_NOT_AUTOMATED_ON === null){
+            selectedStateDetails[x].RELEASED_NOT_AUTOMATED_ON = "-";
+        }else{
+            selectedStateDetails[x].RELEASED_NOT_AUTOMATED_ON = selectedStateDetails[x].RELEASED_NOT_AUTOMATED_ON.split(" ")[0];
+        }
+        if(selectedStateDetails[x].RELEASED_ON === null){
+            selectedStateDetails[x].RELEASED_ON = "-";
+        }else{
+            selectedStateDetails[x].RELEASED_ON = selectedStateDetails[x].RELEASED_ON.split(" ")[0];
+        }
+        if(selectedStateDetails[x].BROKEN_ON === null){
+            selectedStateDetails[x].BROKEN_ON = "-";
+        }else{
+            selectedStateDetails[x].BROKEN_ON = selectedStateDetails[x].BROKEN_ON.split(" ")[0];
+        }
+        if(selectedStateDetails[x].REGRESSION_ON === null){
+            selectedStateDetails[x].REGRESSION_ON = "-";
+        }else{
+            selectedStateDetails[x].REGRESSION_ON = selectedStateDetails[x].REGRESSION_ON.split(" ")[0];
+        }
+        var el = [
+            selectedStateDetails[x].ID,
+            selectedStateDetails[x].PRODUCT_NAME,
+            selectedStateDetails[x].SUPPORT_JIRA.split('browse/')[1],
+            selectedStateDetails[x].LC_STATE,
+            arrayOfStatesAtThatGivenTimeString,
+            selectedStateDetails[x].REPORT_DATE,
+            selectedStateDetails[x].PRE_QA_STARTED_ON,
+            selectedStateDetails[x].DEVELOPMENT_STARTED_ON,
+            selectedStateDetails[x].QA_STARTED_ON,
+            selectedStateDetails[x].RELEASED_NOT_IN_PUBLIC_SVN_ON,
+            selectedStateDetails[x].RELEASED_NOT_AUTOMATED_ON,
+            selectedStateDetails[x].RELEASED_ON,
+            selectedStateDetails[x].BROKEN_ON,
+            selectedStateDetails[x].REGRESSION_ON,
+            selectedStateDetails[x].eID
+        ];
+
+        dataSet[x] = el;
+    }
+
+
+    $('#patchDetailsLC').DataTable({
+        data: dataSet,
+        columns: [
+            { title: "Patch ID" },
+            { title: "Product Name" },
+            { title: "JIRA ID" },
+            { title: "Current State" },
+            { title: "State at that Moment" },
+            { title: "Queued On" },
+            { title: "Pre QA On" },
+            { title: "Dev Started" },
+            { title: "QA Started" },
+            { title: "Released NIPS" },
+            { title: "Released NS" },
+            { title: "Released On" },
+            { title: "Broken On" },
+            { title: "Regression On" },
+            { title: "ETA ID" }
+        ],
+        "aoColumnDefs": [
+            { "sClass": "column-2", "aTargets": [ 1 ] },
+            { "sClass": "column-12", "aTargets": [ 14 ] },
+            { "render": function(data, type, row, meta){data = '<a href="' +SUPPORT_JIRA_PATH + data + '" target="_blank">' + data + '</a>';return data;}, "aTargets": [ 2 ] }
+        ]
+    });
+
+    //click on the patch detail table and get a specific ID
+    $('#patchDetailsLC tbody').on('click', 'tr', function () {
+        var data = $('#patchDetailsLC').DataTable().row( this ).data();
+        $("#patchDetailsLC tbody tr").removeClass('row_selected');
+        $(this).addClass('row_selected');
+        getSpecificPatchLifeCycle(data[0],data[14]);
+    } );
+
+
 }
