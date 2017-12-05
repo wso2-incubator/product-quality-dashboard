@@ -169,14 +169,14 @@ struct PQDAreaIssuesCount{
 service<http> JiraService {
     json configData = getConfigData(CONFIG_PATH);
 
-    boolean issuesDBConBool = createIssuesDBcon();
-    sql:ClientConnector dbConnector = issuesDBcon;
+
 
     jira:ClientConnector jiraConnector = create jira:ClientConnector(jiraURL, jiraUsername, jiraPassword);
 
     @http:GET {}
     @http:Path {value:"/issues"}
     resource saveJiraIssues(message m) {
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json resp = getJiraIssues(jiraConnector, dbConnector);
 
         message response = {};
@@ -184,75 +184,88 @@ service<http> JiraService {
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
 
+        dbConnector.close();
         reply response;
     }
 
     @http:GET {}
     @http:Path {value:"/issues/summary/all"}
     resource getAllJiraIssueSummary(message m) {
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getOverallJiraIssueSummary(dbConnector);
 
         message response = {};
         messages:setJsonPayload(response, data);
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
+        dbConnector.close();
         reply response;
     }
 
     @http:GET {}
     @http:Path {value:"/issues/summary/area/{area}"}
     resource getAreaLevelIssueSummary(message m, @http:PathParam {value:"area"} int area) {
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data =  getAreaLevelIssueSummary(area, dbConnector);
 
         message response = {};
         messages:setJsonPayload(response, data);
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
+        dbConnector.close();
         reply response;
     }
 
     @http:GET {}
     @http:Path {value:"/issues/summary/product/{product}"}
     resource getProductLevelIssueSummary(message m, @http:PathParam {value:"product"} int product) {
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getProductLevelIssueSummary(product, dbConnector);
 
         message response = {};
         messages:setJsonPayload(response, data);
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
+        dbConnector.close();
         reply response;
     }
     @http:GET {}
     @http:Path {value:"/issues/summary/{product}/version/{version}"}
     resource getProductVersionLevelIssueSummary(message m ,@http:PathParam {value:"product"} int product, @http:PathParam {value:"version"} string version) {
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getProductVersionLevelIssueSummary(product, version, dbConnector);
 
         message response = {};
         messages:setJsonPayload(response, data);
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
+        dbConnector.close();
         reply response;
     }
     @http:GET {}
     @http:Path {value:"/issues/summary/{product}/component/{component}"}
     resource getComponentLevelIssueSummaryTESTING(message m ,@http:PathParam {value:"product"} int product, @http:PathParam {value:"component"} int component) {
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getComponentLevelIssueSummaryT(product, component, dbConnector);
 
         message response = {};
         messages:setJsonPayload(response, data);
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
+        dbConnector.close();
         reply response;
     }
     @http:GET {}
     @http:Path {value:"/issues/summary/component/{component}"}
     resource getComponentLevelIssueSummary(message m , @http:PathParam {value:"component"} int component) {
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getComponentLevelIssueSummary(component, dbConnector);
 
         message response = {};
         messages:setJsonPayload(response, data);
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
+        dbConnector.close();
         reply response;
     }
 
@@ -268,12 +281,13 @@ service<http> JiraService {
                         @http:QueryParam {value:"dateFrom"} string dateFrom,
                         @http:QueryParam {value:"dateTo"} string dateTo,
                         @http:QueryParam {value:"period"} string period) {
-
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getHistory(product, component, version, both, issuetype, severity, dateFrom, dateTo, period, dbConnector);
         message response = {};
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
         messages:setJsonPayload(response, data);
+        dbConnector.close();
         reply response;
     }
     @http:GET {}
@@ -286,12 +300,13 @@ service<http> JiraService {
                                 @http:QueryParam {value:"dateFrom"} string dateFrom,
                                 @http:QueryParam {value:"dateTo"} string dateTo,
                                 @http:QueryParam {value:"period"} string period) {
-
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getHistoryForAreas(area, both, issuetype, severity, dateFrom, dateTo, period, dbConnector);
         message response = {};
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
         messages:setJsonPayload(response, data);
+        dbConnector.close();
         reply response;
     }
     @http:GET {}
@@ -303,12 +318,13 @@ service<http> JiraService {
                               @http:QueryParam {value:"dateFrom"} string dateFrom,
                               @http:QueryParam {value:"dateTo"} string dateTo,
                               @http:QueryParam {value:"period"} string period) {
-
+        sql:ClientConnector dbConnector = createIssuesDBcon();
         json data = getHistoryForAll(both, issuetype, severity, dateFrom, dateTo, period, dbConnector);
         message response = {};
         messages:setHeader(response, "Access-Control-Allow-Origin", "*");
         messages:setHeader(response, "Access-Control-Allow-Methods", "GET, OPTIONS");
         messages:setJsonPayload(response, data);
+        dbConnector.close();
         reply response;
     }
 
@@ -1813,13 +1829,13 @@ function getHistory(int product, int component, string productVersion, string bo
 }
 
 function saveIssuesSummaryDaily(){
-    sql:ClientConnector sqlCon = create sql:ClientConnector(propertiesMap);
+    sql:ClientConnector sqlCon = createIssuesDBcon();
     sql:Parameter[] params = [];
     int numOfUpdatedRows;
     numOfUpdatedRows = sql:ClientConnector.update(sqlCon, INSERT_JIRA_ISSUES_HISTORY_BY_PRODUCT, params);
     numOfUpdatedRows = sql:ClientConnector.update(sqlCon, INSERT_JIRA_ISSUES_HISTORY_BY_VERSION, params);
     numOfUpdatedRows = sql:ClientConnector.update(sqlCon, INSERT_JIRA_ISSUES_HISTORY_BY_COMPONENT, params);
-
+    sqlCon.close();
 }
 
 

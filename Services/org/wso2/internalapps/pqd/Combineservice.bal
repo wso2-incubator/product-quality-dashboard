@@ -5,7 +5,6 @@ import ballerina.data.sql;
 import ballerina.lang.jsons;
 import ballerina.lang.errors;
 import ballerina.utils.logger;
-import ballerina.lang.datatables;
 import ballerina.lang.messages;
 
 struct ComponentRepo{
@@ -21,10 +20,6 @@ struct ComponentRepo{
 @http:configuration {basePath:"/internal/product-quality/v1.0", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> ProductQualityService {
 
-    boolean issuesDBConBool = createIssuesDBcon();
-
-    sql:ClientConnector sqlCon = issuesDBcon;
-
     @http:GET {}
     @http:Path {value:"/issues/all"}
     resource getAllIssues(message m){
@@ -34,22 +29,17 @@ service<http> ProductQualityService {
         json responseJson = {"error":false, "data":{ "items": [] }};
 
         json sonarAllJson = getAllAreaSonarIssues();
-        json issuesAllJson = getIssuesData(sqlCon, "all", 0, 0, 0);
+        json issuesAllJson = getIssuesData("all", 0, 0, 0);
 
         sql:Parameter[] paramsForArea = [];
 
-        datatable allAreasDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_QUERY, paramsForArea);
-        var allAreasVar, _ = <json>allAreasDt;
-        logger:debug(allAreasVar);
-        json allAreasJson = allAreasVar;
-        datatables:close(allAreasDt);
+        json allAreasJson = getDataFromDatabase(GET_GITHUB_AREA_QUERY, paramsForArea);
 
+        int areaIndex = 0;
 
-        int a = 0;
+        while(areaIndex < lengthof allAreasJson) {
 
-        while(a < lengthof allAreasJson){
-
-            json currentAreaIssuesJson = jsons:getJson(issuesAllJson, "$.data.items[?(@.id=="+ jsons:getInt(allAreasJson[a], "$.pqd_area_id") +
+            json currentAreaIssuesJson = jsons:getJson(issuesAllJson, "$.data.items[?(@.id=="+ jsons:getInt(allAreasJson[areaIndex], "$.pqd_area_id") +
                                                                       ")].issues");
 
             int currentAreaIssues;
@@ -61,7 +51,7 @@ service<http> ProductQualityService {
             }
 
 
-            json currentAreaSonarsJson = jsons:getJson(sonarAllJson, "$.data.items[?(@.id=="+ jsons:getInt(allAreasJson[a], "$.pqd_area_id") +
+            json currentAreaSonarsJson = jsons:getJson(sonarAllJson, "$.data.items[?(@.id=="+ jsons:getInt(allAreasJson[areaIndex], "$.pqd_area_id") +
                                                                      ")].sonar");
 
             int currentAreaSonars;
@@ -72,15 +62,15 @@ service<http> ProductQualityService {
                 currentAreaSonars = 0;
             }
 
-            json currentAreaJson = {"name": jsons:getString(allAreasJson[a], "$.pqd_area_name"),
-                                       "id": jsons:getInt(allAreasJson[a], "$.pqd_area_id"),
+            json currentAreaJson = {"name": jsons:getString(allAreasJson[areaIndex], "$.pqd_area_name"),
+                                       "id": jsons:getInt(allAreasJson[areaIndex], "$.pqd_area_id"),
                                        "issues": currentAreaIssues, "sonar": currentAreaSonars
                                    };
 
 
             jsons:addToArray(responseJson, "$.data.items", currentAreaJson);
 
-            a = a + 1;
+            areaIndex = areaIndex + 1;
         }
 
 
@@ -118,21 +108,13 @@ service<http> ProductQualityService {
 
         json responseJson = {"error":false, "data":{ "items": [] }};
 
-        //json sonarAllJson = allAreaSonars();
-        //json issuesAllJson = getAllAreaIssue(sqlCon);
-
-        json issuesAreaJson = getIssuesData(sqlCon, "area", areaId, 0, 0);
+        json issuesAreaJson = getIssuesData("area", areaId, 0, 0);
         json sonarAreaJson = getSelectionResult("area", areaId, 0, 0);
 
         sql:Parameter areaIdParam = {sqlType:"integer", value:areaId};
         sql:Parameter[] paramsForAreaProduct = [areaIdParam];
 
-        datatable allProductsDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_PRODUCT_QUERY, paramsForAreaProduct);
-        var allProductsVar, _ = <json>allProductsDt;
-        logger:debug(allProductsVar);
-        json allProductJson = allProductsVar;
-        datatables:close(allProductsDt);
-
+        json allProductJson = getDataFromDatabase(GET_GITHUB_AREA_PRODUCT_QUERY, paramsForAreaProduct);
 
         int a = 0;
 
@@ -205,18 +187,13 @@ service<http> ProductQualityService {
 
         json responseJson = {"error":false, "data":{ "items": [] }};
 
-        json issuesProductJson = getIssuesData(sqlCon, "product", productId, 0, 0);
+        json issuesProductJson = getIssuesData("product", productId, 0, 0);
         json sonarProductJson = getSelectionResult("product", productId, 0, 0);
 
         sql:Parameter productIdParam = {sqlType:"integer", value:productId};
         sql:Parameter[] paramsForProductComponent = [productIdParam];
 
-        datatable allComponentsDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_QUERY, paramsForProductComponent);
-        var allComponentsVar, _ = <json>allComponentsDt;
-        logger:debug(allComponentsVar);
-        json allComponentJson = allComponentsVar;
-        datatables:close(allComponentsDt);
-
+        json allComponentJson = getDataFromDatabase(GET_GITHUB_PRODUCT_COMPONENT_QUERY, paramsForProductComponent);
 
         int a = 0;
 
@@ -296,7 +273,7 @@ service<http> ProductQualityService {
         sql:Parameter paramForComponentId = {sqlType:"integer", value: componentId};
         sql:Parameter[] paramsForComponent = [paramForComponentId];
 
-        json productIdJson = getDataFromDatabase(sqlCon, GET_PRODUCT_ID_FOR_COMPONENT_ID, paramsForComponent);
+        json productIdJson = getDataFromDatabase(GET_PRODUCT_ID_FOR_COMPONENT_ID, paramsForComponent);
 
         int productId = 0;
 
@@ -311,13 +288,13 @@ service<http> ProductQualityService {
         sql:Parameter paramForProduct = {sqlType: "integer", value:productId};
         sql:Parameter[] paramsForProduct = [paramForProduct];
 
-        json issuesComponentJson = getIssuesData(sqlCon, "component", componentId, 0, 0);
+        json issuesComponentJson = getIssuesData("component", componentId, 0, 0);
         json sonarComponentJson = getSelectionResult("component", componentId, 0, 0);
 
 
 
 
-        json allComponentJson = getDataFromDatabase(sqlCon, GET_GITHUB_PRODUCT_COMPONENT_QUERY, paramsForProduct);
+        json allComponentJson = getDataFromDatabase(GET_GITHUB_PRODUCT_COMPONENT_QUERY, paramsForProduct);
 
         int a = 0;
 
@@ -429,7 +406,6 @@ function getSQLconfigData(json configData)(map){
     string jdbcUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
 
     map propertiesMap = {"jdbcUrl": jdbcUrl,"username": dbUsername, "password": dbPassword, "maximumPoolSize":maxPoolConnections};
-
     return propertiesMap;
 
 }
@@ -442,30 +418,23 @@ function getIssueTypesAndSeverities()(json){
                     sonarSeverities:[{"id":1, "severity":"Blocker"},{"id":2, "severity":"Critical"},{"id":3, "severity":"Major"},
                                      {"id":4, "severity":"Minor"},{"id":5, "severity":"Info"}]};
 
-    sql:ClientConnector sqlCon = create sql:ClientConnector(propertiesMap);
+
     sql:Parameter[] params = [];
 
-    datatable issuetypeTable = sql:ClientConnector.select(sqlCon, GET_ALL_ISSUE_TYPE_DB_QUERY_VERSION2, params);
-    var issuetypes,_ = <json>issuetypeTable;
+    json issuetypes = getDataFromDatabase(GET_ALL_ISSUE_TYPE_DB_QUERY_VERSION2, params);
+    json severities = getDataFromDatabase(GET_SEVERITY_DB_QUERY_VERSION2, params);
+
     jsons:addToObject(info,"$","issueIssuetypes" ,issuetypes);
-    datatables:close(issuetypeTable);
-
-    datatable severityTable = sql:ClientConnector.select(sqlCon, GET_SEVERITY_DB_QUERY_VERSION2, params);
-    var severities,_ = <json>severityTable;
     jsons:addToObject(info,"$","issueSeverities", severities);
-    datatables:close(severityTable);
 
-    sql:ClientConnector.close(sqlCon);
     jsons:addToObject(data, "$", "data", info);
     return data;
 }
 
-function createIssuesDBcon()(boolean){
-    if(issuesDBcon == null){
-        map sqlProperties = getSQLconfigData(configData);
-        issuesDBcon = create sql:ClientConnector(sqlProperties);
-    }
-    return true;
+function createIssuesDBcon()(sql:ClientConnector){
+    map sqlProperties = getSQLconfigData(configData);
+    sql:ClientConnector issuesDBcon = create sql:ClientConnector(sqlProperties);
+    return issuesDBcon;
 }
 
 

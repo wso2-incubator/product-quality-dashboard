@@ -6,6 +6,8 @@ const string API_VERSION = "v1.0";
 
 const int FILE_READ_CHARACTER_LIMIT = 10000;
 
+const string GITHUB_API_DOMAIN_URL = "https://api.github.com";
+
 const string GET_ALL_ISSUE_TYPE_DB_QUERY_VERSION2 = "SELECT pqd_issue_type_id, pqd_issue_type FROM pqd_issue_type";
 
 const string GET_SEVERITY_DB_QUERY_VERSION2 = "SELECT pqd_severity_id, pqd_severity FROM pqd_severity";

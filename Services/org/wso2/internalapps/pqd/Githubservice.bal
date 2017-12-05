@@ -12,8 +12,6 @@ import ballerina.data.sql;
 import ballerina.lang.strings;
 import ballerina.lang.time;
 
-sql:ClientConnector issuesDBcon = null;
-
 struct GithubArea{
     int pqd_area_id;
     string pqd_area_name;
@@ -90,10 +88,6 @@ json githubConfigData = getConfigData(CONFIG_PATH);
 @http:configuration {basePath:"/internal/product-quality/v1.0/fetch-github", httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks", keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> GithubService {
 
-    boolean issuesDBConBool = createIssuesDBcon();
-
-    sql:ClientConnector sqlCon = issuesDBcon;
-
     @http:GET {}
     @http:Path {value:"/issues/update"}
     resource updateDatabaseWithLiveData(message m){
@@ -112,11 +106,9 @@ service<http> GithubService {
             sql:Parameter[][] batchParams = [];
 
             sql:Parameter[] paramsForComponent = [];
-            datatable componentDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_COMPONENT_QUERY, paramsForComponent);
-
-            var componentJson, _ = <json>componentDt;
-
             int a = 0;
+
+            json componentJson = getDataFromDatabase(GET_GITHUB_COMPONENT_QUERY, paramsForComponent);
 
             while(a < lengthof componentJson){
                 logger:debug("check");  //this is added here due to a bug in ballerina. ToDO: Remove it in later versions
@@ -137,11 +129,9 @@ service<http> GithubService {
                 }
             }
 
-            datatables:close(componentDt);
-
             logger:debug(lengthof batchParams);
 
-            updateTotalForComponentIssues(sqlCon, batchParams);
+            updateTotalForComponentIssues(batchParams);
 
             logger:info(time:currentTime());
         }
@@ -153,6 +143,7 @@ service<http> GithubService {
     @http:Path {value:"/issues/store"}
     resource storeDataInHistory(message m){
         logger:debug("storeDataInHistory resource got invoked");
+        sql:ClientConnector sqlCon = createIssuesDBcon();
 
         message response = {};
 
@@ -167,7 +158,7 @@ service<http> GithubService {
 
             sql:Parameter dateParam = {sqlType:"varchar", value:date};
             sql:Parameter[] paramForHistoryDate = [dateParam];
-            json historyDates = getDataFromDatabase(sqlCon, GET_GITHUB_COMPONENT_HISTORY_DATES_QUERY, paramForHistoryDate);
+            json historyDates = getDataFromDatabase(GET_GITHUB_COMPONENT_HISTORY_DATES_QUERY, paramForHistoryDate);
 
             if(lengthof historyDates != 0){
                 abort;
@@ -261,6 +252,7 @@ service<http> GithubService {
             messages:setJsonPayload(response, responseJson);
         }
 
+        sqlCon.close();
 
         logger:debug("storeDataInHistory resource responded successfully");
         reply response;
@@ -278,8 +270,8 @@ function getRepoIssues(string organization, string repoName)(json){
 
     message response = httpGetForGithub("/repos/" + organization +"/" + repoName + "/issues");
     json jsonResponse = messages:getJsonPayload(response);
-
-    json filteredJson = jsons:getJson(jsonResponse, "$.[?(@.state=='open')]");
+    json filterJsonForPullRequest = jsons:getJson(jsonResponse, "$.[?(!@.pull_request)]");
+    json filteredJson = jsons:getJson(filterJsonForPullRequest, "$.[?(@.state=='open')]");
     logger:debug("repo issues received : " + jsons:toString(jsonResponse));
 
     return filteredJson;
@@ -292,7 +284,7 @@ function httpGetForGithub(string path)(message ){
 
     //this is a common method to get github response
     //pass a path to the method and it will give a json response
-    string domainUrl = "https://api.github.com";
+    string domainUrl = GITHUB_API_DOMAIN_URL;
     message request = {};
     message response = {};
 
@@ -446,9 +438,7 @@ function sortGithubIssues(sql:Parameter[][] batchParams, int componentId, string
 
     logger:debug("SortGithubIssues function invoked for component : " + componentName);
 
-    if(issuesDBcon == null){
-        createIssuesDBcon();
-    }
+    sql:ClientConnector sqlCon = createIssuesDBcon();
 
     int issuesJsonLength = lengthof issuesJson;
 
@@ -463,7 +453,7 @@ function sortGithubIssues(sql:Parameter[][] batchParams, int componentId, string
 
     sql:Parameter[] paramsForIssueType = [];
 
-    datatable issueTypeDt = sql:ClientConnector.select(issuesDBcon, GET_GITHUB_ISSUE_TYPE_QUERY, paramsForIssueType);
+    datatable issueTypeDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ISSUE_TYPE_QUERY, paramsForIssueType);
 
     while (datatables:hasNext(issueTypeDt)){
         any dataStruct = datatables:next(issueTypeDt);
@@ -480,7 +470,7 @@ function sortGithubIssues(sql:Parameter[][] batchParams, int componentId, string
 
     sql:Parameter[] paramsForSeverity = [];
 
-    datatable severityDt = sql:ClientConnector.select(issuesDBcon, GET_GITHUB_SEVERITY_QUERY, paramsForSeverity);
+    datatable severityDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_SEVERITY_QUERY, paramsForSeverity);
 
     while (datatables:hasNext(severityDt)){
         any dataStruct = datatables:next(severityDt);
@@ -549,8 +539,8 @@ function sortGithubIssues(sql:Parameter[][] batchParams, int componentId, string
 
 
     sql:Parameter[] paramForUnknown = [];
-    json unknownIssueTypeId = getDataFromDatabase(issuesDBcon, GET_GITHUB_ISSUE_TYPE_UNKNOWN_QUERY, paramForUnknown);
-    json unknownSeverityId = getDataFromDatabase(issuesDBcon, GET_GITHUB_SEVERITY_UNKNOWN_QUERY, paramForUnknown);
+    json unknownIssueTypeId = getDataFromDatabase(GET_GITHUB_ISSUE_TYPE_UNKNOWN_QUERY, paramForUnknown);
+    json unknownSeverityId = getDataFromDatabase(GET_GITHUB_SEVERITY_UNKNOWN_QUERY, paramForUnknown);
 
     jsons:addToArray(issueTypeIDs, "$", jsons:getInt(unknownIssueTypeId, "$[0].pqd_issue_type_id"));
     jsons:addToArray(severityIDs, "$", jsons:getInt(unknownSeverityId, "$[0].pqd_severity_id"));
@@ -578,11 +568,14 @@ function sortGithubIssues(sql:Parameter[][] batchParams, int componentId, string
         p = p + 1;
     }
     logger:debug(issuesCount);
+    sqlCon.close();
 }
 
 
-function updateTotalForComponentIssues(sql:ClientConnector sqlCon, sql:Parameter[][] batchParams){
+function updateTotalForComponentIssues(sql:Parameter[][] batchParams){
     logger:debug("updateTotalForComponentIssues invoked");
+
+    sql:ClientConnector sqlCon = createIssuesDBcon();
 
     transaction{
         sql:Parameter[] paramsForTruncate = [];
@@ -593,14 +586,18 @@ function updateTotalForComponentIssues(sql:ClientConnector sqlCon, sql:Parameter
 
     }aborted{
         logger:info("Updating live github data for components failed");
+        sqlCon.close();
     }committed{
         logger:debug("Updating live github data for components completed");
-        updateTotalForProductIssues(sqlCon);
+        sqlCon.close();
+        updateTotalForProductIssues();
     }
 }
 
-function updateTotalForProductIssues(sql:ClientConnector sqlCon){
+function updateTotalForProductIssues(){
     logger:debug("updateTotalForProductIssues invoked");
+
+    sql:ClientConnector sqlCon = createIssuesDBcon();
 
     transaction{
         sql:Parameter[] paramsForTruncate = [];
@@ -610,15 +607,19 @@ function updateTotalForProductIssues(sql:ClientConnector sqlCon){
         int rowsInserted = sql:ClientConnector.update(sqlCon, GET_PRODUCT_TOTAL_ISSUES_QUERY, paramsForProduct);
     } aborted{
         logger:error("update product github issues transaction aborted");
+        sqlCon.close();
     } committed{
         logger:debug("update product github issues transaction completed");
-        updateTotalForAreaIssues(sqlCon);
+        sqlCon.close();
+        updateTotalForAreaIssues();
     }
 }
 
 
-function updateTotalForAreaIssues(sql:ClientConnector sqlCon){
+function updateTotalForAreaIssues(){
     logger:debug("updateTotalForAreaIssues invoked");
+
+    sql:ClientConnector sqlCon = createIssuesDBcon();
 
     transaction{
         sql:Parameter[] paramsForTruncate = [];
@@ -628,8 +629,10 @@ function updateTotalForAreaIssues(sql:ClientConnector sqlCon){
         int rowsInserted = sql:ClientConnector.update(sqlCon, GET_AREA_ISSUES_QUERY, paramsForArea);
     } aborted{
         logger:error("update area github issues transaction aborted");
+        sqlCon.close();
     } committed{
         logger:debug("update area github issues transaction completed");
+        sqlCon.close();
     }
 }
 
@@ -656,13 +659,8 @@ function getIssueTypeAll(sql:ClientConnector sqlCon)(json){
     //this function will return all the issue type in the database
 
     sql:Parameter[] paramsForIssueTypeAll = [];
-    datatable issueTypeDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_ISSUE_TYPE_ALL_QUERY, paramsForIssueTypeAll);
 
-    var issueTypes, err = <json>issueTypeDt;
-    json issueTypesJson = jsons:getJson(issueTypes, "$");
-
-    datatables:close(issueTypeDt);
-
+    json issueTypesJson = getDataFromDatabase(GET_GITHUB_ISSUE_TYPE_ALL_QUERY, paramsForIssueTypeAll);
     json issueTypesArray = jsons:getJson(issueTypesJson, "$[*].pqd_issue_type");
 
     return issueTypesArray;
@@ -675,13 +673,8 @@ function getSeverityAll(sql:ClientConnector sqlCon)(json){
     //this function will retrieve all the severity type in the database
 
     sql:Parameter[] paramsForSeverityAll = [];
-    datatable severityDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_SEVERITY_ALL_QUERY, paramsForSeverityAll);
 
-    var severity, err = <json>severityDt;
-    json severityJson = jsons:getJson(severity, "$");
-
-    datatables:close(severityDt);
-
+    json severityJson = getDataFromDatabase(GET_GITHUB_SEVERITY_ALL_QUERY, paramsForSeverityAll);
     json severityArray = jsons:getJson(severityJson, "$[*].pqd_severity");
 
     return severityArray;
