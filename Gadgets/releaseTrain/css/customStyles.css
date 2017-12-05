@@ -63,7 +63,7 @@
 			background-color: #bfb8b7;
 		}
 
-		.today1 {
+		.todayButtonRightSide {
             position: absolute;
             /*left: -5px;*/
             top: 0;
@@ -72,7 +72,7 @@
             z-index: 9999;
         }
 
-        .today2 {
+        .todayButtonLeftSide {
             position: absolute;
             left: -5px;
             top: 0;
@@ -81,7 +81,7 @@
             z-index: 9999;
         }
 
-        .today3 {
+        .hideTodayButton {
 			display: none;
 		}
 

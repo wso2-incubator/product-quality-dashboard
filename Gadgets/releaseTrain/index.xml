@@ -15,7 +15,6 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   
   <!-- load visjs time line-->
-  <!-- <link href="http://visjs.org/dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css"/> -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css"/>
 
   <!--  load custom css -->
@@ -34,48 +33,37 @@
   <link rel="stylesheet" href="css/wso2loading.css">
   
   
-
+  <!-- This is the template for item card which display on the timeline -->
   <script id="item-template" type="text/x-handlebars-template">
     <div class="pane">
       <table class="ex2">
 
         {{#each releases}}
-          <tr onclick="test({{this.id}})">
+          <tr onclick="displaySummaryTable({{this.id}})">
               <td id='{{this.id}}'  class="btn label btn-x" data-control="userBtn" style="font-size: 10px;background-color:{{this.color}}; padding-top: 0px;padding-bottom: 0px;align-items: left;">
                 <span class="glyphicon glyphicon-bullhorn"></span>
                 <span>{{this.releaseProduct}} -</span>
                 <span > {{this.releaseVersion}} </span>
-                <!-- <span>{{this.id}}</span> -->
               </td>
           </tr>
         {{/each}}
-    </table>
+
+      </table>
     </div>
   </script>
 
+
+  <!-- This is the template for the summary of the each release (githubItem/redmineItem/managerTableRow) -->
   <script id="releaseSummary" type="text/x-handlebars-template">
-    
     <div class="well">
       <ul>
           
             <li align="left">
               <span class="label label-default" style="font-size: 15px;padding-bottom:0px;padding-top: 0px;">
                 <span class="glyphicon glyphicon-bullhorn"></span> Release Name: {{releaseVersion}}
-               <!--  <span class="badge" style="background-color:#F79431; font-size: 10px;color: black;height: 12px"> {{releaseProduct}}</span>  -->
               </span>
             </li>
-          
-
-         
-            <!-- <li align="left">
-              <span class="label label-default" style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
-                <span class="glyphicon glyphicon-bullhorn"></span> Release Type: 
-                <span class="label label-danger" style="font-size: 9px;">{{releaseType}}</span> 
-              </span>
-            </li> -->
-          
-
-          
+    
             <li align="left" >
               <span class="label label-default"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
                 <span class="glyphicon glyphicon-calendar "></span> 
@@ -83,15 +71,11 @@
               </span>
             </li>
           
-
-         
             <li align="left">
               <span class="label label-info"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
                 <span class="glyphicon glyphicon-user"></span> Release Manager: {{releaseManagerF}} {{releaseManagerL}}
               </span>
             </li>
-          
-
           
             <li align="left">
               <span class="label label-info"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
@@ -99,15 +83,11 @@
               </span>
             </li>
           
-
-          
             <li id="Fixed_Issues" align="left" onclick="showFixedIssues({{projectId}},{{versionId}},{{gitVersionId}},this.id)">
               <span class="btn label btn-success"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
                 <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues {{fixedIssuesCount}}
               </span>
             </li>
-          
-
           
             <li id="Reported_Issues" align="left" onclick="showReportedIssues({{projectId}},{{versionId}},{{gitVersionId}},this.id)">
               <span class="btn label btn-warning"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
@@ -115,16 +95,11 @@
               </span>
             </li>
           
-          <!-- <tr><td align="left"><span class="btn label btn-danger"><span class="glyphicon glyphicon-list-alt"></span> Epic: {{featuresCount}}</span></td></tr> -->
-
-          
             <li id="Stories" align="left" onclick="showStories({{this.storiesCount}},{{this.versionId}},this.id)">
               <span class="btn label btn-danger"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
                 <span class="glyphicon glyphicon-list-alt"></span> Stories: {{storiesCount}}
               </span>
             </li>
-          
-
           
             <li id="Features" align="left" onclick="showFeatures({{this.featuresCount}},{{this.versionId}},this.id)">
               <span class="btn label btn-danger"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
@@ -136,6 +111,7 @@
   </div>
 </script>
 
+<!-- This is the data template for manager table which is in the Managers tab -->
 <script id="managerTable" type="text/x-handlebars-template">  
   <tr id={{this.id}} onclick="drawManagerSummaryTable({{this.id}})">
     <td>{{this.releaseProduct}}</td> 
@@ -146,6 +122,7 @@
   </tr>        
 </script>
 
+<!-- This is the data template for strories table -->
 <script id="storyDetailedTable" type="text/x-handlebars-template">        
   <tr > 
     <td>{{this.no}}</td>
@@ -153,6 +130,7 @@
   </tr>     
 </script>
 
+<!-- This is the data template for features table -->
 <script id="featureDetailedTable" type="text/x-handlebars-template">   
   <tr > 
     <td>{{this.no}}</td>
@@ -166,14 +144,11 @@
 
 <body>
 
-
-
-
-
+ 
 
 <div style="display:block;" id="myDiv" class="animate-bottom container-fluid">
         
-       
+        
         <ul class="nav nav-tabs">
           <li class="active"><a data-toggle="tab" href="#releasetrain" onclick="hideSummaryTable()">Releases</a></li>
           <li><a data-toggle="tab" href="#managers" onclick="hideSummaryTable()">Managers</a></li>
@@ -181,9 +156,11 @@
         </ul>
 
         <div class="tab-content">
+          <!-- start the release train tab -->
           <div id="releasetrain" class="tab-pane fade in active">
             <div  class=row>
                 <br>
+              <!-- Left pane for product areas -->
               <div class=col-sm-3 style="padding-right:0px;width: 18%"> 
                   <div class="container-fluid" style="background-color:#29313E;color: white;">Products</div>
 
@@ -235,10 +212,10 @@
                         <span style="font-size:1vw;">Other</span>
                          <div class="pull-right" style=" width: 15px; height: 15px; background-color: black;"></div>
                       </label>
-                  </div>
+                  </div>    
+              </div>
 
-                    
-            </div>
+              <!-- Timeline area -->
               <div class=col-sm-9 style="padding-left:2px;width: 82%">
                 <div class="container-fluid" style="background-color:#29313E;color: white">Release Train</div>
                 <div id="visualization">
@@ -251,14 +228,16 @@
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         
+          <!-- start the Managers tab -->
           <div id="managers" class="tab-pane fade">
-              <div class="row">
-              <br>
+            <div class="row">
+            <br>
                 
-
+                <!-- calender area -->
                 <div class="col-sm-3" style="padding-right:4px;padding-bottom: 10px">
                   <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 6px 10px; border: 1px solid #ccc; width: 100%;border-radius: 4px;">
                       <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
@@ -266,10 +245,7 @@
                   </div>
                 </div>
 
-
-
-
-
+                <!-- product area dropdown area -->
                 <div class="col-sm-2" style="padding-left: 0px; padding-bottom: 10px;">
                   <select id="productSelect" class="selectpicker">
                     <option value="all">All Products</option>
@@ -282,40 +258,45 @@
                     <option value="other">Other</option>
                   </select>
                 </div>     
-          </div>
+            </div>
 
-          <div class="managertbl managerTable1">
-          <div id="managerInit">
-            <table class="table table-bordered  table-hover ">
-              <thead style="background-color: #29313E;color:white;">
-                  <tr>
-                      <th>Product Name</th>
-                      <th>Release Name</th>
-                      <th>Release Manager</th>
-                      <th>Warranty Manager</th>
-                      <th>Date</th>
-                  </tr>
-              </thead>
-              <tbody id=managerSummary>
-                
-                  
-                    
-              </tbody>
-            </table>
-          </div>
-          <div id=errormsg >
-            <div class=well ><p> no data </p></div>
-          </div>
-          </div>
+            <!-- area for data representation (data or error msg) -->
+            <div class="managertbl managerTable1">
 
+                <!-- If there is data tis area will be displayed (logic check by java script function) -->
+                <div id="managerInit">
+                  <table class="table table-bordered  table-hover ">
+                    <thead style="background-color: #29313E;color:white;">
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Release Name</th>
+                            <th>Release Manager</th>
+                            <th>Warranty Manager</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id=managerSummary>
+                      
+                        
+                          
+                    </tbody>
+                  </table>
+                </div>
 
+                <!-- If there is no data, then this area will be dispalyed (logic check by java script function)-->
+                <div id=errormsg >
+                  <div class=well ><p> No data to display. </p></div>
+                </div>
 
-          
-          </div>
-        </div>
+            </div>
+          </div><!--This is the end of the Manager tab -->
+
+        </div> <!--This is the end of the tabs -->
 
         
-
+        <!-- this table dispaly in both Releases and Managers tabs -->
+        <!-- this table contains two columns (release summary and moredetais) -->
+        <!-- dynamically content of these columns will be changed -->
         <div id="featureTable" class="modal">
           <div class="container-fluid">
             <div class="row">
@@ -334,10 +315,24 @@
 
                     <td class=" col-sm-4">
                       <div class="summary">
+
+                      <!-- After clicking card item in timeline or row in manager table summary will dynamically append to here -->
+
                       </div>
                     </td>
 
-                    <td width="720" height="245"><div style="height: 245px; overflow: auto" ><div class=" col-sm-12 detailedinfo panel-group" id="accordion" role="tablist" aria-multiselectable="true"></div></div></td>
+                    <td width="720" height="245">
+                      <div style="height: 245px; overflow: auto" >
+                        <div class=" col-sm-12 detailedinfo panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                        
+                        <!-- github fixed issues table dynamically append to here -->
+                        <!-- github reported issues dynamically append to here -->
+                        <!-- redmine stories dynamically append to here -->
+                        <!-- redmine features dynamically append to here-->
+
+                        </div>
+                      </div>
+                    </td>
 
                     
 
@@ -350,6 +345,7 @@
         </div>
 
 
+        <!-- This is the redmine stories table which is append to moredetais column in featureTable -->
         <div id="storySummary">
           <table class="table table-bordered table-striped table-hover " >
           <thead style="background-color: #29313E;color:white">
@@ -361,13 +357,13 @@
           </thead>
           <tbody id="storySubjects">
                 
-            
+            <!-- data template for redmine strories table will append here-->
                     
           </tbody>
         </table>  
         </div>
 
-
+        <!-- This is the redmine features table which is append to moredetais column in featureTable -->
         <div id="featureSummary">
           <table class="table table-bordered table-striped table-hover " >
           <thead style="background-color: #29313E;color:white">
@@ -377,7 +373,7 @@
           </thead>
           <tbody id="featureSubjects">
                 
-            
+            <!-- data template for redmine features table will append here-->
                     
           </tbody>
         </table>  
