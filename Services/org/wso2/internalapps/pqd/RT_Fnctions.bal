@@ -14,7 +14,6 @@ import ballerina.lang.strings;
 import ballerina.lang.datatables;
 
 
-sql:ClientConnector rmDB = createDBConnection();
 http:ClientConnector redmineConn = null;
 http:ClientConnector gitHubConn = null;
 
@@ -90,7 +89,7 @@ function getDatabaseMap (json configData)(map) {
 function createDBConnection()(sql:ClientConnector) {
     json confJson = getConfData("config.json");
     map props = getDatabaseMap(confJson);
-    rmDB = create sql:ClientConnector(props);
+    sql:ClientConnector rmDB = create sql:ClientConnector(props);
     return rmDB;
 }
 
@@ -175,6 +174,8 @@ function getCycles(string path, int limit)(int){
 }
 function updateProject() {
 
+
+
     if (redmineConn == null) {
         createRMConnection();
     }
@@ -182,6 +183,7 @@ function updateProject() {
     z -> updateProjectTable;
 
     worker updateProjectTable {
+        sql:ClientConnector rmDB = createDBConnection();
         logger:info("RM_PROJECT TABLE SYNC STARTED...");
         message context;
         context <- default;
@@ -283,9 +285,11 @@ function updateProject() {
         }
         logger:info(updaterows + " RECORDS ARE UPDATED");
         logger:info("RM_PROJECT TABLE SYNC DONE.");
+        rmDB.close();
 
     }}
 function updateUser(){
+
 
 
     if (redmineConn == null) {
@@ -295,6 +299,7 @@ function updateUser(){
     z -> updateUserTable;
 
     worker updateUserTable {
+        sql:ClientConnector rmDB = createDBConnection();
         logger:info("RM_USER TABLE SYNC STARTED...");
         message  context;
         context <- default;
@@ -372,8 +377,11 @@ function updateUser(){
         }
         logger:info(insertrows + " RECORDS ARE INSERTED");
         logger:info("RM_USER TABLE SYNC DONE.");
+        rmDB.close();
     }}
 function updateVersion (){
+
+
 
     if (redmineConn == null) {
         createRMConnection();
@@ -386,6 +394,7 @@ function updateVersion (){
 
 
     worker updateVersionTable {
+        sql:ClientConnector rmDB = createDBConnection();
         logger:info("RM_VERSION TABLE SYNC STARTED...");
         message  context;
         context <- default;
@@ -620,8 +629,11 @@ function updateVersion (){
         logger:info(insertrows + " RECORDS ARE INSERTED");
         logger:info(updaterows + " RECORDS ARE UPDATED");
         logger:info("RM_VERSION TABLE SYNC DONE.");
+        rmDB.close();
     }}
 function updateIssue (){
+
+
 
     if (redmineConn == null) {
         createRMConnection();
@@ -632,6 +644,7 @@ function updateIssue (){
 
 
     worker updateIssueTable {
+        sql:ClientConnector rmDB = createDBConnection();
         logger:info("RM_ISSUE TABLE SYNC STARTED...");
         message  context;
         context <- default;
@@ -759,12 +772,13 @@ function updateIssue (){
         logger:info(insertrows + " RECORDS ARE INSERTED");
         logger:info(updaterows + " RECORDS ARE UPDATED");
         logger:info("RM_ISSUE TABLE SYNC DONE.");
+        rmDB.close();
 
     }}
 
 function getAllReleases()(json){
 
-
+    sql:ClientConnector rmDB = createDBConnection();
 
     sql:Parameter[] params = [];
     sql:Parameter[] params1 = [];
@@ -1003,11 +1017,12 @@ function getAllReleases()(json){
         gitHubLoopIndex = gitHubLoopIndex + 1;
     }
 
-
+    rmDB.close();
     return allReleases;
 }
 function getReleasesByProductArea (string productArea) (json) {
 
+    sql:ClientConnector rmDB = createDBConnection();
 
     sql:Parameter[] params = [];
     sql:Parameter[] params1 = [];
@@ -1245,12 +1260,12 @@ function getReleasesByProductArea (string productArea) (json) {
             gitHubLoopIndex = gitHubLoopIndex + 1;
         }
 
-
+    rmDB.close();
     return allReleases;
 }
 function getManagers(string productArea, string startDate, string endDate) (json) {
 
-
+    sql:ClientConnector rmDB = createDBConnection();
 
     json managerJson = [];
 
@@ -1318,11 +1333,13 @@ function getManagers(string productArea, string startDate, string endDate) (json
         loopIndex = loopIndex + 1;
     }
 
+    rmDB.close();
     return managerJson;
 
 }
 function getTrackerSubjects(int trackerId, int versionId)(json){
 
+    sql:ClientConnector rmDB = createDBConnection();
 
     json trackerSubjects=[];
     sql:Parameter[] params1 = [];
@@ -1338,6 +1355,7 @@ function getTrackerSubjects(int trackerId, int versionId)(json){
     logger:debug(trackerSubjects);
     datatables:close(dtRedmineTrackerSubjects);
 
+    rmDB.close();
     return trackerSubjects;
 }
 
@@ -1520,6 +1538,8 @@ function getReportedGitIssues(string repoName , string versionName)(json){
 
 function getRepoAndVersion(int projectId, int versionId)(json){
 
+    sql:ClientConnector rmDB = createDBConnection();
+
     sql:Parameter[] params1 = [];
     sql:Parameter[] params2 = [];
 
@@ -1544,12 +1564,15 @@ function getRepoAndVersion(int projectId, int versionId)(json){
     var versionName, _=(string)jsonVersion[0].versionName;
 
     json jsonFinal ={"repoNames":jsonRepo, "versionName":versionName};
+
+    rmDB.close();
     return jsonFinal;
 
 
 }
 function getRepoAndGitVersionByGitId(int gitVersionId)(json) {
 
+    sql:ClientConnector rmDB = createDBConnection();
     sql:Parameter[] params1 = [];
 
     sql:Parameter gitHubVersionId = {sqlType:"integer", value:gitVersionId};
@@ -1565,11 +1588,16 @@ function getRepoAndGitVersionByGitId(int gitVersionId)(json) {
     int stringLength= strings:length(versionName);
     var subStringVersionName= strings:subString(versionName,1,stringLength);
     jsonRepo[0].gitVersionName =  subStringVersionName;
+
+    rmDB.close();
     return jsonRepo;
 
 }
 
 function updateGitHubReleases(){
+
+
+
     if(gitHubConn==null){
         createtGitHubConnection();
     }
@@ -1578,6 +1606,7 @@ function updateGitHubReleases(){
     z -> updateGit;
 
     worker updateGit {
+        sql:ClientConnector rmDB = createDBConnection();
         logger:info("GH_RELEASES TABLE SYNC STARTED...");
         message  context;
         context <- default;
@@ -1687,9 +1716,12 @@ function updateGitHubReleases(){
         }
 
     logger:info("GH_RELEASES TABLE SYNC DONE.");
+    rmDB.close();
 
     }}
 function insertGitHubReleases(string repoName, string versionName, string releaseDate, string cursor){
+
+    sql:ClientConnector rmDB = createDBConnection();
 
     time:Time releaseDateAndTime = time:parse(releaseDate, "yyyy-MM-dd'T'HH:mm:ssz");
     time:Time localReleaseDateAndTime = time:toTimezone(releaseDateAndTime, "Asia/Colombo");
@@ -1704,6 +1736,7 @@ function insertGitHubReleases(string repoName, string versionName, string releas
     params1 = [gitHubRepoName, gitHubVersionName, gitHubReleaseDate, gitHubReleaseCursor];
 
     int insertResult = rmDB.update(GITHUB_RELEASES_INSERT, params1);
+    rmDB.close();
 
 }
 
@@ -1732,7 +1765,7 @@ function getinitialGiHubReleases(string repoName)(json){
     }
 
 
-    int i = 1;
+    int loopIndex = 1;
     while(hasNextPage){
 
 
@@ -1742,9 +1775,9 @@ function getinitialGiHubReleases(string repoName)(json){
         nextPageLink, _ = (string)jsonRes.data.repository.releases.pageInfo.endCursor;
         count, _ =(int)jsonRes.data.repository.releases.totalCount;
 
-        jsonFinal[i]=edges;
+        jsonFinal[loopIndex] = edges;
 
-        i = i + 1;
+        loopIndex = loopIndex + 1;
     }
 
     return jsonFinal;
@@ -1759,7 +1792,7 @@ function getGitHubReleases(string repoName, string lastInsertedLink)(json){
     json edges;
     json jsonRes;
 
-    int i = 0;
+    int loopIndex = 0;
     while(hasNextPage){
 
         jsonRes = getNextReleases(repoName, nextPageLink, pageLimit);
@@ -1774,13 +1807,13 @@ function getGitHubReleases(string repoName, string lastInsertedLink)(json){
 
 
             if (count > 0) {
-                jsonFinal[i] = edges;
+                jsonFinal[loopIndex] = edges;
             } else {
                 jsonFinal = [];
             }
         }
 
-        i = i + 1;
+        loopIndex = loopIndex + 1;
     }
 
     return jsonFinal;
