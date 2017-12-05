@@ -150,7 +150,7 @@ service<http> GithubService {
         json responseJson = storeIssuesFromUpdateTable(sqlCon);
         messages:setJsonPayload(response, responseJson);
 
-
+        sqlCon.close();
         logger:debug("storeDataInHistory resource responded successfully");
         reply response;
     }
