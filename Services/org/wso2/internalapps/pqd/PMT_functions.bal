@@ -19,7 +19,7 @@ function getConfigurationData (string FILE_PATH) (json) {
 
     try {
         files:open(configFile, "r");
-        logger:info("CONGIG.JSON READ SUCCESSFULLY");
+        logger:info("CONFIG.JSON READ SUCCESSFULLY");
     } catch (errors:Error err) {
         logger:info("ERROR IN READ CONGIG.JSON - "+ err.msg);
     }
@@ -38,7 +38,9 @@ function getConfigurationData (string FILE_PATH) (json) {
     return configJson;
 }
 
-function setDatabaseConfiguration () {
+function setDatabaseConfiguration()(sql:ClientConnector) {
+    sql:ClientConnector dbConnection = null;
+
     try {
         json configs = getConfigurationData(CONFIGURATION_PATH);
 
@@ -58,6 +60,8 @@ function setDatabaseConfiguration () {
     } catch (errors:Error err) {
         logger:error("ERROR IN INITIALIZING MYSQL DB CONNECTOR - " + err.msg);
     }
+
+    return dbConnection;
 }
 
 function setJIRAConnector () {
@@ -79,9 +83,8 @@ function setJIRAConnector () {
 function loadDashboardWithHistory (string start, string end) (json) {
     logger:info("PMT SERVICES STARTED");
 
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
 
     //SQL parameters
     sql:Parameter[] params = [];
@@ -241,11 +244,16 @@ function loadDashboardWithHistory (string start, string end) (json) {
     datatables:close(resultOfDatabaseProactivePatches);
     datatables:close(resultOfDatabaseSecurityInternalPatches);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return loadCounts;
 
 }
 
 function yetToStartCount (string start, string end) (int) {
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
 
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
@@ -260,12 +268,17 @@ function yetToStartCount (string start, string end) (int) {
 
     datatables:close(resultOfYetToStartPatchCount);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return yetToStartPatchCount;
 }
 
 function completedCount (string start, string end) (int) {
-    sql:Parameter[] params = [];
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
 
+    sql:Parameter[] params = [];
     sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
@@ -277,12 +290,17 @@ function completedCount (string start, string end) (int) {
 
     datatables:close(resultOfCompletePatchCount);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return completeCount;
 }
 
 function partiallyCompletedCount (string start, string end) (int) {
-    sql:Parameter[] params = [];
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
 
+    sql:Parameter[] params = [];
     sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
@@ -294,12 +312,18 @@ function partiallyCompletedCount (string start, string end) (int) {
 
     datatables:close(resultOfPartiallyCompletedCount);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
+
     return partiallyCompleteCount;
 }
 
 function inProgressCount (string start, string end) (int) {
-    sql:Parameter[] params = [];
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
 
+    sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
     sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
@@ -313,12 +337,17 @@ function inProgressCount (string start, string end) (int) {
 
     datatables:close(resultOfInProgressCount);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return inProgressPatchCount;
 }
 
 function overETACount (string start, string end) (int) {
-    sql:Parameter[] params = [];
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
 
+    sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
     sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
@@ -332,13 +361,16 @@ function overETACount (string start, string end) (int) {
 
     datatables:close(resultOfOverETACount);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return etaCount;
 }
 
 function queuedDetails (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
@@ -350,13 +382,16 @@ function queuedDetails (string start, string end) (json) {
 
     logger:info("YET TO START DETAILS SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return jsonResOfQueueDetails;
 }
 
 function devDetails (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
@@ -370,13 +405,16 @@ function devDetails (string start, string end) (json) {
 
     logger:info("IN PROGRESS DETAILS SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return jsonResOfDevDetails;
 }
 
 function completeDetails (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
     sql:Parameter[] params = [];
     sql:Parameter valueOfStatusIsOne = {sqlType:"varchar", value:"1"};
     sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
@@ -388,13 +426,16 @@ function completeDetails (string start, string end) (json) {
 
     logger:info("COMPLETED DETAILS SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return jsonResOfCompleteDetails;
 }
 
 function menuBadgesCounts (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
@@ -423,13 +464,16 @@ function menuBadgesCounts (string start, string end) (json) {
     datatables:close(resultOfProductWiseOverETACount);
     datatables:close(resultOfProductWiseInProgressCount);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return menuBadgeCount;
 }
 
 function menuVersionBadgesCounts (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
@@ -458,13 +502,16 @@ function menuVersionBadgesCounts (string start, string end) (json) {
     datatables:close(resultOfVersionWiseOverETACount);
     datatables:close(resultOfVersionWiseInProgressCount);
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return menuBadgeCount;
 }
 
 function reportedPatchGraph (string duration, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     logger:info("REPORTED PATCHES FOR " + duration + " REQUESTED");
 
@@ -675,16 +722,18 @@ function reportedPatchGraph (string duration, string start, string end) (json) {
 
     logger:info("REPORTED PATCHES FOR " + duration + " DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return reportedPatches;
 }
 
 function totalProductSummaryCounts (string inputProduct, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     sql:Parameter[] params = [];
-
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
     sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
@@ -718,13 +767,16 @@ function totalProductSummaryCounts (string inputProduct, string start, string en
 
     logger:info("RETURNED " + inputProduct + " TOTAL SUMMARY COUNTS");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return totalProductSummaryCount;
 }
 
 function selectedProductTotalReleaseTrend (string inputProduct, string duration, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
@@ -892,13 +944,16 @@ function selectedProductTotalReleaseTrend (string inputProduct, string duration,
 
     logger:info(inputProduct + " TOTAL RELEASE " + duration + " TREND DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return reportedPatches;
 }
 
 function selectedProductVersionSummaryCounts (string inputProduct, string inVersion, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
     sql:Parameter endDate = {sqlType:"date", value:end};
@@ -934,13 +989,16 @@ function selectedProductVersionSummaryCounts (string inputProduct, string inVers
 
     logger:info("RETURNED " + inputProduct + "-" + inVersion + " TOTAL SUMMARY COUNTS");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return versionProductSummaryCount;
 }
 
 function selectedProductVersionReleaseTrend (string inputProduct, string inVersion, string duration, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"date", value:start};
@@ -1109,15 +1167,18 @@ function selectedProductVersionReleaseTrend (string inputProduct, string inVersi
 
     logger:info(inputProduct + "-" + inVersion + " RELEASE TREND DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return reportedPatches;
 }
 
-function selectedProductAllVersionReleaseTrend (string inProduct, string version, string duration, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+function selectedProductAllVersionReleaseTrend (string inProduct, string inVersion, string duration, string start, string end) (json) {
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
 
-    string[] versionArray = strings:split(version, "-");
+
+    string[] versionArray = strings:split(inVersion, "-");
     int versionLength = lengthof versionArray;
     sql:Parameter[] params = [];
     int loop = 0;
@@ -1190,13 +1251,16 @@ function selectedProductAllVersionReleaseTrend (string inProduct, string version
 
     logger:info(inProduct + " ALL VERSION RELEASE TREND DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return reportedPatches;
 }
 
 function getCategoryDatesForSelectedAllProductVersions (string inProduct, string duration, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     sql:Parameter[] params = [];
     sql:Parameter product = {sqlType:"varchar", value:inProduct};
@@ -1226,13 +1290,16 @@ function getCategoryDatesForSelectedAllProductVersions (string inProduct, string
 
     logger:info("ALL VERSION CATEGORIES SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return jsonResOfcategory;
 }
 
 function queuedAgeGraphGenerator (string lastMonthDate) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     logger:info("PMT QUEUED AGE GRAPH TAB SELECTED");
 
@@ -1296,13 +1363,16 @@ function queuedAgeGraphGenerator (string lastMonthDate) (json) {
 
     logger:info("QUEUED AGE GRAPH DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return ageGroup;
 }
 
 function ageDrillDownGraph (string group, string month) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     json fetchData = [];
     json fetchDrillDownData = [];
@@ -1426,13 +1496,16 @@ function ageDrillDownGraph (string group, string month) (json) {
 
     logger:info("QUEUED AGE GRAPH DRILL DOWN DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return ageDrillDownGraphJSON;
 }
 
 function lifeCycleStackGraph (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     logger:info("LIFE-CYCLE TAB SELECTED");
 
@@ -1820,13 +1893,16 @@ function lifeCycleStackGraph (string start, string end) (json) {
 
     logger:info("LIFE-CYCLE DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return stackArray;
 }
 
 function stateTransitionGraphOfLifeCycle (string product, string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     json countsInStates = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     json dayCountAndNumbersOfPatches = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
@@ -2475,13 +2551,16 @@ function stateTransitionGraphOfLifeCycle (string product, string start, string e
 
     logger:info("SELECTED FIELD LIFE-CYCLE DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return response;
 }
 
 function getSpecificPatchLifeCycle (string patchID, string eID) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
 
     json fetchPatchData = [];
     json dayCountAndNumbersOfPatches = [0, 0, 0, 0, 0, 0];
@@ -2588,13 +2667,16 @@ function getSpecificPatchLifeCycle (string patchID, string eID) (json) {
 
     logger:info("SELECTED PATCH LIFE-CYCLE DATA SENT");
 
+    //close MYSQL client connector
+    dbConnection.close();
+
     return response;
 }
 
 function getFirstDateFromWeekNumber (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
     json weekFirstDate = {};
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"varchar", value:start};
@@ -2604,13 +2686,18 @@ function getFirstDateFromWeekNumber (string start, string end) (json) {
     datatable resultOfReportedPatchWeekWiseFirstDate = dbConnection.select(GET_FIRST_DATE_OF_WEEK, params);
     weekFirstDate, _ = <json>resultOfReportedPatchWeekWiseFirstDate;
 
+    logger:debug(weekFirstDate);
+
+    //close MYSQL client connector
+    dbConnection.close();
+
     return weekFirstDate;
 }
 
 function getReleaseFirstDateFromWeekNumber (string start, string end) (json) {
-    if (dbConnection == null) {
-        setDatabaseConfiguration();
-    }
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
     json weekFirstDate = {};
     sql:Parameter[] params = [];
     sql:Parameter startDate = {sqlType:"varchar", value:start};
@@ -2619,6 +2706,11 @@ function getReleaseFirstDateFromWeekNumber (string start, string end) (json) {
 
     datatable resultOfReleasedPatchWeeklyWiseFirstDate = dbConnection.select(GET_RELEASED_WEEK_FIRST_DATE, params);
     weekFirstDate, _ = <json>resultOfReleasedPatchWeeklyWiseFirstDate;
+
+    logger:debug(weekFirstDate);
+
+    //close MYSQL client connector
+    dbConnection.close();
 
     return weekFirstDate;
 }

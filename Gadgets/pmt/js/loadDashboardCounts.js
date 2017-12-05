@@ -16,10 +16,11 @@ var devVersionDetails = [];
 var etaDetails = [];
 var etaVersionDetails = [];
 var target = "";
+var dataSet2 = [];
 
-var BALLERINA_URL = "digitalops.services.wso2.com:9092"
-// var BALLERINA_URL = "192.168.56.2:9092";
+var BALLERINA_URL = "digitalops.services.wso2.com:9092";
 // var BALLERINA_URL = "localhost:9092";
+// var BALLERINA_URL = "203.94.95.237:9092";
 initLoadDashboard();
 var flag1 = true;
 var flag2 = true;
@@ -91,23 +92,14 @@ function initLoadDashboard() {
         }
     }
 
+    document.getElementById('day').style.display = 'block';
+    document.getElementById('week').style.display = 'block';
+    document.getElementById('month').style.display = 'none';
+    document.getElementById('quarter').style.display = 'none';
+    document.getElementById('year').style.display = 'none';
+
     loadPatchCountDrillDown(firstdate,today);
     loadPatchCountVersionDrillDown(firstdate,today);
-
-    // document.onreadystatechange = function () {
-    //     var state = document.readyState;
-    //     if (state === 'interactive') {
-    //         document.getElementById('contents').style.visibility="hidden";
-    //         $('[data-toggle="loading"]').loading('show');
-    //     } else if (state === 'complete') {
-    //         setTimeout(function(){
-    //             document.getElementById('interactive');
-    //             $('[data-toggle="loading"]').loading('hide');
-    //             document.getElementById('loading').style.display="none";
-    //             document.getElementById('contents').style.visibility="visible";
-    //         });
-    //     }
-    // };
 }
 
 function setDate(){
@@ -154,28 +146,41 @@ function globalSubmit(){
     diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) +1 ;
 
     const YEAR = 365;
-    const MONTH = 31;
+    const MONTH = 30;
     const WEEK = 7;
 
-    document.getElementById('day').style.display = 'block';
-    document.getElementById('week').style.display = 'block';
+    document.getElementById('day').style.display = 'none';
+    document.getElementById('week').style.display = 'none';
+    document.getElementById('month').style.display = 'none';
+    document.getElementById('quarter').style.display = 'none';
+    document.getElementById('year').style.display = 'none';
 
     if(diffDays > YEAR || date1.getFullYear() !== date2.getFullYear()){
         document.getElementById('day').style.display = 'none';
-        // document.getElementById('week').style.display = 'none';
+        document.getElementById('week').style.display = 'block';
+        document.getElementById('month').style.display = 'block';
+        document.getElementById('quarter').style.display = 'block';
+        document.getElementById('year').style.display = 'block';
         changeDurationButtonCSS('year');
         patchSummaryGraph('year',startDate,endDate);
     }else if(diffDays >= MONTH *3){
-        document.getElementById('day').style.display = 'none';
+        document.getElementById('day').style.display = 'block';
+        document.getElementById('week').style.display = 'block';
+        document.getElementById('month').style.display = 'block';
+        document.getElementById('quarter').style.display = 'block';
         changeDurationButtonCSS('month');
         patchSummaryGraph('month',startDate,endDate);
     }else if(diffDays > MONTH ){
-        // document.getElementById('day').style.display = 'none';
+        document.getElementById('day').style.display = 'block';
+        document.getElementById('week').style.display = 'block';
         patchSummaryGraph('week',startDate,endDate);
     }else if(diffDays > WEEK){
+        document.getElementById('day').style.display = 'block';
+        document.getElementById('week').style.display = 'block';
         changeDurationButtonCSS('week');
         patchSummaryGraph('week',startDate,endDate);
     }else{
+        document.getElementById('day').style.display = 'block';
         patchSummaryGraph('day',startDate,endDate);
     }
 
@@ -420,6 +425,7 @@ function showTotal(start,end){
             document.getElementById('unCategory').innerHTML = jsonResponse.uncategorizedCount;
             document.getElementById('queuedPatchCount').innerHTML = jsonResponse.yetToStartCount;
             document.getElementById('completePatchCount').innerHTML = jsonResponse.completedCount;
+            document.getElementById('partiallyCompletePatchCount').innerHTML = jsonResponse.partiallyCompletedCount;
             document.getElementById('inProcessPatchCount').innerHTML = jsonResponse.inProgressCount;
             document.getElementById('overETAcount').innerHTML = '('+jsonResponse.ETACount+'<span style="font-size:12px;"> over ETA</span>)';
             totalProducts = jsonResponse.menuDetails.allProducts.length;
@@ -791,6 +797,7 @@ function loadPatchDetails(type) {
                 for(var x=0;x<count;x++){
                     document.getElementById('popupInner').innerHTML += "<tr>" +
                         "<td>"+(parseInt(x)+1)+"</td>" +
+                        "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA+"</a></td>" +
                         "<td>"+data[x].PRODUCT_NAME+"</td>" +
                         "<td>"+data[x].PRODUCT_VERSION+"</td>" +
                         "<td>"+data[x].CLIENT+"</td>" +
@@ -800,34 +807,41 @@ function loadPatchDetails(type) {
                         "</tr>"
                 }
             }
-        })
+        });
+
+        $("#myModal").modal('show');
+
     }else if(type === 'dev'){
-        document.getElementById('myModalLabel').innerHTML = "In Progress Patch Details";
+        document.getElementById('myModalLabel2').innerHTML = "In Progress Patch Details";
         $.ajax({
             type: "GET",
             url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/get-dev-details/'+start+'/'+end,
             success: function(data){
                 var count = data.length;
-                document.getElementById('popupInner').innerHTML = "";
+                document.getElementById('popupInner2').innerHTML = "";
 
                 if(count === undefined){
                     if(data.WORST_CASE_ESTIMATE.split('+')[0] < end ){
-                        document.getElementById('popupInner').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
+                        document.getElementById('popupInner2').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
                             "<td>"+1+"</td>" +
+                            "<td><a href='"+data.SUPPORT_JIRA+"' target='_blank'>"+data.SUPPORT_JIRA+"</a></td>" +
+                            "<td>"+data.PATCH_NAME+"</td>" +
                             "<td>"+data.PRODUCT_NAME+"</td>" +
                             "<td>"+data.PRODUCT_VERSION+"</td>" +
                             "<td>"+data.CLIENT+"</td>" +
-                            "<td>"+data.REPORTER+"</td>" +
+                            "<td>"+data.DEVELOPED_BY+"</td>" +
                             "<td>"+data.ASSIGNED_TO+"</td>" +
                             "<td>"+data.REPORT_DATE+"</td>" +
                             "</tr>"
                     }else{
-                        document.getElementById('popupInner').innerHTML += "<tr>" +
+                        document.getElementById('popupInner2').innerHTML += "<tr>" +
                             "<td>"+1+"</td>" +
+                            "<td><a href='"+data.SUPPORT_JIRA+"' target='_blank'>"+data.SUPPORT_JIRA+"</a></td>" +
+                            "<td>"+data.PATCH_NAME+"</td>" +
                             "<td>"+data.PRODUCT_NAME+"</td>" +
                             "<td>"+data.PRODUCT_VERSION+"</td>" +
                             "<td>"+data.CLIENT+"</td>" +
-                            "<td>"+data.REPORTER+"</td>" +
+                            "<td>"+data.DEVELOPED_BY+"</td>" +
                             "<td>"+data.ASSIGNED_TO+"</td>" +
                             "<td>"+data.REPORT_DATE+"</td>" +
                             "</tr>"
@@ -835,22 +849,26 @@ function loadPatchDetails(type) {
                 }else{
                     for(var x=0;x<count;x++){
                         if(data[x].WORST_CASE_ESTIMATE.split('+')[0] < end ){
-                            document.getElementById('popupInner').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
+                            document.getElementById('popupInner2').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
                                 "<td>"+(parseInt(x)+1)+"</td>" +
+                                "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA+"</a></td>" +
+                                "<td>"+data[x].PATCH_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_VERSION+"</td>" +
                                 "<td>"+data[x].CLIENT+"</td>" +
-                                "<td>"+data[x].REPORTER+"</td>" +
+                                "<td>"+data[x].DEVELOPED_BY+"</td>" +
                                 "<td>"+data[x].ASSIGNED_TO+"</td>" +
                                 "<td>"+data[x].REPORT_DATE+"</td>" +
                                 "</tr>"
                         }else{
-                            document.getElementById('popupInner').innerHTML += "<tr>" +
+                            document.getElementById('popupInner2').innerHTML += "<tr>" +
                                 "<td>"+(parseInt(x)+1)+"</td>" +
+                                "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA+"</a></td>" +
+                                "<td>"+data[x].PATCH_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_VERSION+"</td>" +
                                 "<td>"+data[x].CLIENT+"</td>" +
-                                "<td>"+data[x].REPORTER+"</td>" +
+                                "<td>"+data[x].DEVELOPED_BY+"</td>" +
                                 "<td>"+data[x].ASSIGNED_TO+"</td>" +
                                 "<td>"+data[x].REPORT_DATE+"</td>" +
                                 "</tr>"
@@ -859,35 +877,63 @@ function loadPatchDetails(type) {
                     }
                 }
             }
-        })
+        });
+
+        $("#myModal2").modal('show');
+
     }else if(type === 'complete'){
-        document.getElementById('myModalLabel').innerHTML = "Completed Patch Details";
+        var completedPatches = [];
+        dataSet2 = [];
+
+        document.getElementById('myModalLabel3').innerHTML = "Completed / Partially Completed Patch Details";
         $.ajax({
             type: "GET",
             url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/get-complete-details/'+start+'/'+end,
+            async:false,
             success: function(data){
-                var count = data.length;
-                if(count>=50){
-                    count = 50;
-                }
-                document.getElementById('popupInner').innerHTML = "";
-
-                for(var x=0;x<count;x++){
-                    document.getElementById('popupInner').innerHTML += "<tr>" +
-                        "<td>"+(parseInt(x)+1)+"</td>" +
-                        "<td>"+data[x].PRODUCT_NAME+"</td>" +
-                        "<td>"+data[x].PRODUCT_VERSION+"</td>" +
-                        "<td>"+data[x].CLIENT+"</td>" +
-                        "<td>"+data[x].REPORTER+"</td>" +
-                        "<td>"+data[x].ASSIGNED_TO+"</td>" +
-                        "<td>"+data[x].REPORT_DATE+"</td>" +
-                        "</tr>"
-                }
+                completedPatches = data;
             }
-        })
-    }
+        });
+        // console.log(completedPatches);
 
-    $("#myModal").modal('show');
+        $('#completedAndPartiallyPatchDetails').DataTable().destroy();
+
+        for(var x=0;x<completedPatches.length;x++){
+
+
+            var el = [
+                completedPatches[x].SUPPORT_JIRA,
+                completedPatches[x].PATCH_NAME,
+                completedPatches[x].PRODUCT_NAME,
+                completedPatches[x].PRODUCT_VERSION,
+                completedPatches[x].CLIENT,
+                completedPatches[x].DEVELOPED_BY,
+                completedPatches[x].ASSIGNED_TO,
+                completedPatches[x].LC_STATE
+            ];
+
+            dataSet2[x] = el;
+        }
+
+        $('#completedAndPartiallyPatchDetails').DataTable({
+            data: dataSet2,
+            columns: [
+                { title: "Support JIRA" },
+                { title: "Patch Name" },
+                { title: "Product Name" },
+                { title: "Version" },
+                { title: "Client" },
+                { title: "Developed By" },
+                { title: "Team Lead" },
+                { title: "Patch State" }
+            ],
+            "aoColumnDefs": [
+                { "render": function(data, type, row, meta){data = '<a href="' + data + '" target="_blank">' + data + '</a>';return data;}, "aTargets": [ 0 ] }
+            ]
+        });
+
+        $("#myModal3").modal('show');
+    }
 }
 
 function loadingIcon(){
