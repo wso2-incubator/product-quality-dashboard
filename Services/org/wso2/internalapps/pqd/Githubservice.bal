@@ -143,116 +143,13 @@ service<http> GithubService {
     @http:Path {value:"/issues/store"}
     resource storeDataInHistory(message m){
         logger:debug("storeDataInHistory resource got invoked");
+
         sql:ClientConnector sqlCon = createIssuesDBcon();
 
         message response = {};
+        json responseJson = storeIssuesFromUpdateTable(sqlCon);
+        messages:setJsonPayload(response, responseJson);
 
-        transaction{
-
-            int year;
-            int month;
-            int day;
-            time:Time currentTime = time:currentTime();
-            year, month, day = time:getDate(currentTime);
-            string date = year + "-" + month + "-" + day;
-
-            sql:Parameter dateParam = {sqlType:"varchar", value:date};
-            sql:Parameter[] paramForHistoryDate = [dateParam];
-            json historyDates = getDataFromDatabase(GET_GITHUB_COMPONENT_HISTORY_DATES_QUERY, paramForHistoryDate);
-
-            if(lengthof historyDates != 0){
-                abort;
-            }
-
-            sql:Parameter[] paramForCurrentIssues = [];
-            datatable currentIssueCountDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_COMPONENT_CURRENT_ISSUES_QUERY, paramForCurrentIssues);
-
-            sql:Parameter[][] batchParamsForComponent = [];
-            int a = 0;
-
-            while(datatables:hasNext(currentIssueCountDt)){
-                any currentIssueCountStruct = datatables:next(currentIssueCountDt);
-                var currentIssueCount, _ = (GithubComponentIssue)currentIssueCountStruct;
-
-                sql:Parameter componentIdParam = {sqlType:"integer", value:currentIssueCount.pqd_component_id};
-                sql:Parameter issueTypeIdParam = {sqlType:"integer", value:currentIssueCount.pqd_issue_type_id};
-                sql:Parameter severityIdParam = {sqlType:"integer", value:currentIssueCount.pqd_severity_id};
-                sql:Parameter issuesCountParam = {sqlType:"integer", value:currentIssueCount.pqd_issues_count};
-
-                sql:Parameter[] currentParamsForBatchUpdate = [componentIdParam, issueTypeIdParam, severityIdParam, issuesCountParam, dateParam];
-
-                batchParamsForComponent[a] = currentParamsForBatchUpdate;
-
-                a = a + 1;
-
-            }
-
-            int[] count = sql:ClientConnector.batchUpdate(sqlCon, INSERT_GITHUB_COMPONENT_ISSUES_HISTORY_QUERY, batchParamsForComponent);
-
-            datatables:close(currentIssueCountDt);
-
-
-            datatable currentProductIssueCountDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_CURRENT_ISSUES_QUERY, paramForCurrentIssues);
-
-            sql:Parameter[][] batchParamsForProduct = [];
-            int b = 0;
-
-            while(datatables:hasNext(currentProductIssueCountDt)){
-                any currentProductIssueCountStruct = datatables:next(currentProductIssueCountDt);
-                var currentIssueCount, _ = (GithubProductIssue)currentProductIssueCountStruct;
-
-                sql:Parameter productIdParam = {sqlType:"integer", value:currentIssueCount.pqd_product_id};
-                sql:Parameter issueTypeIdParam = {sqlType:"integer", value:currentIssueCount.pqd_issue_type_id};
-                sql:Parameter severityIdParam = {sqlType:"integer", value:currentIssueCount.pqd_severity_id};
-                sql:Parameter issuesCountParam = {sqlType:"integer", value:currentIssueCount.pqd_issues_count};
-
-                sql:Parameter[] currentParamsForBatchUpdate = [productIdParam, issueTypeIdParam, severityIdParam, issuesCountParam, dateParam];
-
-                batchParamsForProduct[b] = currentParamsForBatchUpdate;
-
-                b = b + 1;
-
-            }
-
-            int[] count1 = sql:ClientConnector.batchUpdate(sqlCon, INSERT_GITHUB_PRODUCT_ISSUES_HISTORY_QUERY, batchParamsForProduct);
-
-            datatables:close(currentProductIssueCountDt);
-
-            datatable currentAreaIssueCountDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_CURRENT_ISSUES_QUERY, paramForCurrentIssues);
-
-            sql:Parameter[][] batchParamsForArea = [];
-            int c = 0;
-
-            while(datatables:hasNext(currentAreaIssueCountDt)){
-                any currentAreaIssueCountStruct = datatables:next(currentAreaIssueCountDt);
-                var currentIssueCount, _ = (GithubAreaIssue)currentAreaIssueCountStruct;
-
-                sql:Parameter areaIdParam = {sqlType:"integer", value:currentIssueCount.pqd_area_id};
-                sql:Parameter issueTypeIdParam = {sqlType:"integer", value:currentIssueCount.pqd_issue_type_id};
-                sql:Parameter severityIdParam = {sqlType:"integer", value:currentIssueCount.pqd_severity_id};
-                sql:Parameter issuesCountParam = {sqlType:"integer", value:currentIssueCount.pqd_issues_count};
-
-                sql:Parameter[] currentParamsForBatchUpdate = [areaIdParam, issueTypeIdParam, severityIdParam, issuesCountParam, dateParam];
-
-                batchParamsForArea[c] = currentParamsForBatchUpdate;
-
-                c = c + 1;
-
-            }
-
-            int[] count2 = sql:ClientConnector.batchUpdate(sqlCon, INSERT_GITHUB_AREA_ISSUES_HISTORY_QUERY, batchParamsForArea);
-
-            datatables:close(currentAreaIssueCountDt);
-
-        } aborted{
-            json responseJson = {"error" : true, "msg":"Inserting data to history table failed. Data for today's date may exist already"};
-            messages:setJsonPayload(response, responseJson);
-        } committed{
-            json responseJson = {"error": false, "msg":"Data successfully stored in history tables"};
-            messages:setJsonPayload(response, responseJson);
-        }
-
-        sqlCon.close();
 
         logger:debug("storeDataInHistory resource responded successfully");
         reply response;
@@ -634,6 +531,119 @@ function updateTotalForAreaIssues(){
         logger:debug("update area github issues transaction completed");
         sqlCon.close();
     }
+}
+
+function storeIssuesFromUpdateTable(sql:ClientConnector sqlCon)(json){
+
+
+    json responseJson = {};
+
+    int year;
+    int month;
+    int day;
+    time:Time currentTime = time:currentTime();
+    year, month, day = time:getDate(currentTime);
+    string date = year + "-" + month + "-" + day;
+
+    sql:Parameter dateParam = {sqlType:"varchar", value:date};
+    sql:Parameter[] paramForHistoryDate = [dateParam];
+    json historyDates = getDataFromDatabase(GET_GITHUB_COMPONENT_HISTORY_DATES_QUERY, paramForHistoryDate);
+
+    if(lengthof historyDates != 0){
+        responseJson = {"error" : true, "msg":"Data for today's date may exist already"};
+        return responseJson;
+    }
+
+    transaction{
+
+        sql:Parameter[] paramForCurrentIssues = [];
+        datatable currentIssueCountDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_COMPONENT_CURRENT_ISSUES_QUERY, paramForCurrentIssues);
+
+        sql:Parameter[][] batchParamsForComponent = [];
+        int a = 0;
+
+        while(datatables:hasNext(currentIssueCountDt)){
+            any currentIssueCountStruct = datatables:next(currentIssueCountDt);
+            var currentIssueCount, _ = (GithubComponentIssue)currentIssueCountStruct;
+
+            sql:Parameter componentIdParam = {sqlType:"integer", value:currentIssueCount.pqd_component_id};
+            sql:Parameter issueTypeIdParam = {sqlType:"integer", value:currentIssueCount.pqd_issue_type_id};
+            sql:Parameter severityIdParam = {sqlType:"integer", value:currentIssueCount.pqd_severity_id};
+            sql:Parameter issuesCountParam = {sqlType:"integer", value:currentIssueCount.pqd_issues_count};
+
+            sql:Parameter[] currentParamsForBatchUpdate = [componentIdParam, issueTypeIdParam, severityIdParam, issuesCountParam, dateParam];
+
+            batchParamsForComponent[a] = currentParamsForBatchUpdate;
+
+            a = a + 1;
+
+        }
+
+        int[] count = sql:ClientConnector.batchUpdate(sqlCon, INSERT_GITHUB_COMPONENT_ISSUES_HISTORY_QUERY, batchParamsForComponent);
+
+        datatables:close(currentIssueCountDt);
+
+
+        datatable currentProductIssueCountDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_PRODUCT_CURRENT_ISSUES_QUERY, paramForCurrentIssues);
+
+        sql:Parameter[][] batchParamsForProduct = [];
+        int b = 0;
+
+        while(datatables:hasNext(currentProductIssueCountDt)){
+            any currentProductIssueCountStruct = datatables:next(currentProductIssueCountDt);
+            var currentIssueCount, _ = (GithubProductIssue)currentProductIssueCountStruct;
+
+            sql:Parameter productIdParam = {sqlType:"integer", value:currentIssueCount.pqd_product_id};
+            sql:Parameter issueTypeIdParam = {sqlType:"integer", value:currentIssueCount.pqd_issue_type_id};
+            sql:Parameter severityIdParam = {sqlType:"integer", value:currentIssueCount.pqd_severity_id};
+            sql:Parameter issuesCountParam = {sqlType:"integer", value:currentIssueCount.pqd_issues_count};
+
+            sql:Parameter[] currentParamsForBatchUpdate = [productIdParam, issueTypeIdParam, severityIdParam, issuesCountParam, dateParam];
+
+            batchParamsForProduct[b] = currentParamsForBatchUpdate;
+
+            b = b + 1;
+
+        }
+
+        int[] count1 = sql:ClientConnector.batchUpdate(sqlCon, INSERT_GITHUB_PRODUCT_ISSUES_HISTORY_QUERY, batchParamsForProduct);
+
+        datatables:close(currentProductIssueCountDt);
+
+        datatable currentAreaIssueCountDt = sql:ClientConnector.select(sqlCon, GET_GITHUB_AREA_CURRENT_ISSUES_QUERY, paramForCurrentIssues);
+
+        sql:Parameter[][] batchParamsForArea = [];
+        int c = 0;
+
+        while(datatables:hasNext(currentAreaIssueCountDt)){
+            any currentAreaIssueCountStruct = datatables:next(currentAreaIssueCountDt);
+            var currentIssueCount, _ = (GithubAreaIssue)currentAreaIssueCountStruct;
+
+            sql:Parameter areaIdParam = {sqlType:"integer", value:currentIssueCount.pqd_area_id};
+            sql:Parameter issueTypeIdParam = {sqlType:"integer", value:currentIssueCount.pqd_issue_type_id};
+            sql:Parameter severityIdParam = {sqlType:"integer", value:currentIssueCount.pqd_severity_id};
+            sql:Parameter issuesCountParam = {sqlType:"integer", value:currentIssueCount.pqd_issues_count};
+
+            sql:Parameter[] currentParamsForBatchUpdate = [areaIdParam, issueTypeIdParam, severityIdParam, issuesCountParam, dateParam];
+
+            batchParamsForArea[c] = currentParamsForBatchUpdate;
+
+            c = c + 1;
+
+        }
+
+        int[] count2 = sql:ClientConnector.batchUpdate(sqlCon, INSERT_GITHUB_AREA_ISSUES_HISTORY_QUERY, batchParamsForArea);
+
+        datatables:close(currentAreaIssueCountDt);
+
+    } aborted{
+        responseJson = {"error" : true, "msg":"Inserting data to history table failed."};
+
+    } committed{
+        responseJson = {"error":false, "msg":"Data successfully stored in history tables"};
+
+    }
+    return responseJson;
 }
 
 function getIndex(json array, string element)(int){
