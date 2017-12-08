@@ -39,7 +39,8 @@
       <table class="ex2">
 
         {{#each releases}}
-          <tr onclick="displaySummaryTable({{this.id}})">
+          <!-- <tr onclick="displaySummaryTable({{this.id}})"> -->
+          <tr class="cardItem" myid='{{this.id}}'>
               <td id='{{this.id}}'  class="btn label btn-x" data-control="userBtn" style="font-size: 10px;background-color:{{this.color}}; padding-top: 0px;padding-bottom: 0px;align-items: left;">
                 <span class="glyphicon glyphicon-bullhorn"></span>
                 <span>{{this.releaseProduct}} -</span>
@@ -85,13 +86,13 @@
           
             <li id="Fixed_Issues" align="left" onclick="showFixedIssues({{projectId}},{{versionId}},{{gitVersionId}},this.id)">
               <span class="btn label btn-success"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
-                <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues {{fixedIssuesCount}}
+                <span class="glyphicon glyphicon-ok-sign"></span> Fixed Issues: {{fixedIssuesCount}}
               </span>
             </li>
           
             <li id="Reported_Issues" align="left" onclick="showReportedIssues({{projectId}},{{versionId}},{{gitVersionId}},this.id)">
               <span class="btn label btn-warning"  style="font-size: 15px;padding-bottom:0px;padding-top: 0px">
-                <span class="glyphicon glyphicon-alert"></span> Reported Issues {{reportedIssuesCount}}
+                <span class="glyphicon glyphicon-alert"></span> Reported Issues: {{reportedIssuesCount}}
               </span>
             </li>
           
@@ -144,7 +145,6 @@
 
 <body>
 
- 
 
 <div style="display:block;" id="myDiv" class="animate-bottom container-fluid">
         
@@ -217,7 +217,7 @@
 
               <!-- Timeline area -->
               <div class=col-sm-9 style="padding-left:2px;width: 82%">
-                <div class="container-fluid" style="background-color:#29313E;color: white">Release Train</div>
+                <div class="container-fluid" style="background-color:#29313E;color: white">Releases</div>
                 <div id="visualization">
                   <div class="todayposition"> 
                       <table class="badge" style="background-color:#29313E;border: 2px solid gray;">

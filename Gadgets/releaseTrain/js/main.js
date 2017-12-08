@@ -1,6 +1,6 @@
   //var url="203.94.95.237";
-  //var url="localhost";
-  var url="digitalops.services.wso2.com";
+  var url="localhost";
+  //var url="digitalops.services.wso2.com";
   var port="9092";
   // create a handlebars template
   var source   = document.getElementById('item-template').innerHTML;
@@ -32,7 +32,7 @@
 
   // get the initial data to the time line
   $.ajax({
-      url:"https://"+url+":"+port+"/base/getAllReleases",
+      url:"https://"+url+":"+port+"/releaseTrainServices/getAllReleases",
       async:false,
       success: function(data){
         allData=data;  
@@ -98,6 +98,7 @@
   var timeline = new vis.Timeline(container);
 
   // by this function call, initial timeline items will be displayed
+
   drawTimeLine(allData,template);
 
   //draw the timeline
