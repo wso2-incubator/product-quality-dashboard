@@ -14,6 +14,8 @@ import ballerina.lang.strings;
 import ballerina.lang.datatables;
 
 
+
+
 http:ClientConnector redmineConn = null;
 http:ClientConnector gitHubConn = null;
 
@@ -778,6 +780,7 @@ function updateIssue (){
 
 function getAllReleases()(json){
 
+
     sql:ClientConnector rmDB = createDBConnection();
 
     sql:Parameter[] params = [];
@@ -804,6 +807,7 @@ function getAllReleases()(json){
     var redmineLoopIndex = 0;
     var unicId=0;
 
+
     while (redmineLoopIndex < redmineReleaseDatesCount) {
 
         json data={};
@@ -822,6 +826,7 @@ function getAllReleases()(json){
 
         var redmineReleaseDetailsLength = lengthof redmineReleaseDetailsJson;
         var redmineReleaseIndex = 0;
+
 
 
         while (redmineReleaseIndex < redmineReleaseDetailsLength) {
@@ -896,6 +901,8 @@ function getAllReleases()(json){
     datatables:close(dtGitHubReleaseDates);
     var gitHubReleaseDatesCount = lengthof gitHubReleaseDatesJson;
     var gitHubLoopIndex = 0;
+
+
     while(gitHubLoopIndex < gitHubReleaseDatesCount) {
 
         json data={};
@@ -911,6 +918,7 @@ function getAllReleases()(json){
 
         var gitHubReleaseDetailsLength = lengthof gitHubReleaseDetailsJson;
         var gitHubReleaseIndex = 0;
+
 
 
         while (gitHubReleaseIndex < gitHubReleaseDetailsLength) {
@@ -1875,4 +1883,51 @@ function getNextReleases(string repoName, string nextPageLink, int pageLimit)(js
 
 }
 
+function getFixedGitIssuesCount(string repoName , string versionName)(json){
 
+    json jsonFinal={};
+
+    string states = "CLOSED";
+    int pageLimit = 1; // maximum page limit is 100.
+
+    json jsonRes = getInitialIssues(repoName, versionName, states, pageLimit);
+    int count = 0;
+
+    if (jsonRes!= null) {
+        count, _ = (int)jsonRes.data.organization.repository.issues.totalCount;
+
+        jsonFinal["count"] = count;
+    }else{
+        jsonFinal["count"] = count;
+    }
+
+
+
+    return jsonFinal;
+
+
+}
+function getReportedGitIssuesCount(string repoName , string versionName)(json){
+
+    json jsonFinal={};
+
+    string states = "OPEN";
+    int pageLimit = 1; // maximum page limit is 100.
+
+    json jsonRes = getInitialIssues(repoName, versionName, states, pageLimit);
+    int count = 0;
+
+    if (jsonRes!= null) {
+        count, _ = (int)jsonRes.data.organization.repository.issues.totalCount;
+
+        jsonFinal["count"] = count;
+    }else{
+        jsonFinal["count"] = count;
+    }
+
+
+
+    return jsonFinal;
+
+
+}

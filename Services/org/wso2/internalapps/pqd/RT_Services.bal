@@ -7,14 +7,14 @@ import ballerina.utils.logger;
 
 
 
-@http:configuration {basePath:"/base",httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks",
+@http:configuration {basePath:"/releaseTrainServices",httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks",
                      keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> releaseTrainService {
 
 
     @http:GET {}
     @http:Path{value:"/"}
-    resource resource1 (message m) {
+    resource test (message m) {
 
 
 
@@ -32,8 +32,8 @@ service<http> releaseTrainService {
 
 
     @http:GET {}
-    @http:Path{value:"/project"}
-    resource resource2 (message m) {
+    @http:Path{value:"/updateRedmineProjects"}
+    resource updateRedmineProjects (message m) {
         updateProject();
         logger:info("/project Rest call triggered");
         http:setStatusCode(m, 202);
@@ -42,8 +42,8 @@ service<http> releaseTrainService {
     }
 
     @http:GET {}
-    @http:Path{value:"/user"}
-    resource resource3 (message m) {
+    @http:Path{value:"/updateRedmineUsers"}
+    resource updateRedmineUsers (message m) {
         updateUser();
         logger:info("/user Rest call triggered");
         http:setStatusCode(m,202);
@@ -53,8 +53,8 @@ service<http> releaseTrainService {
 
 
     @http:GET {}
-    @http:Path{value:"/version"}
-    resource resource4 (message m) {
+    @http:Path{value:"/updateRedmineVersions"}
+    resource updateRedmineVersions (message m) {
         updateVersion();
         logger:info("/version Rest call triggered");
         http:setStatusCode(m,202);
@@ -64,8 +64,8 @@ service<http> releaseTrainService {
 
 
     @http:GET {}
-    @http:Path{value:"/issue"}
-    resource resource5 (message m) {
+    @http:Path{value:"/updateRedmineIssues"}
+    resource updateRedmineIssues (message m) {
         updateIssue();
         logger:info("/issue Rest call triggered");
         http:setStatusCode(m,202);
@@ -77,7 +77,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/getAllReleases"}
-    resource resource6 (message m) {
+    resource getAllReleases (message m) {
         message send={};
         json sendData = getAllReleases();
         logger:info("/getAllReleases Rest call triggered");
@@ -90,7 +90,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/getProductWiseReleases/{productArea}"}
-    resource resource7 (message m,@http:PathParam {value:"productArea"} string productArea) {
+    resource getAllReleasesByProductArea (message m,@http:PathParam {value:"productArea"} string productArea) {
 
         message send={};
         json sendData = getReleasesByProductArea(productArea);
@@ -104,7 +104,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/manager/{productArea}/{startDate}/{endDate}"}
-    resource resource8 (message m, @http:PathParam {value:"productArea"} string productArea,
+    resource getManagerDetails (message m, @http:PathParam {value:"productArea"} string productArea,
                         @http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {
 
         message send={};
@@ -119,7 +119,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/tracker/{trackerId}/{versionId}"}
-    resource resource9 (message m, @http:PathParam {value:"trackerId"} int trackerId, @http:PathParam {value:"versionId"} int versionId) {
+    resource getRedmineTrackers (message m, @http:PathParam {value:"trackerId"} int trackerId, @http:PathParam {value:"versionId"} int versionId) {
 
         message send={};
         json trackerSubjects = getTrackerSubjects(trackerId,versionId);
@@ -132,7 +132,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/getFixedGitIssues/{repoName}"}
-    resource resource10 (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+    resource getGitHubFixedIssues (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
 
         message response={};
 
@@ -145,7 +145,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/getReportedGitIssues/{repoName}"}
-    resource resource11 (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+    resource getGitHubReportedIssues (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
 
         message response={};
 
@@ -158,7 +158,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/getRepoAndVersion/{projectId}/{versionId}"}
-    resource resource12 (message m, @http:PathParam {value:"projectId"} int projectId, @http:PathParam {value:"versionId"} int versionId){
+    resource getGitHubRepoNameAndRedmineVersionName (message m, @http:PathParam {value:"projectId"} int projectId, @http:PathParam {value:"versionId"} int versionId){
 
         message response={};
 
@@ -171,7 +171,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/updateGitHubReleases"}
-    resource resource13 (message m) {
+    resource updateGitHubReleases(message m) {
         updateGitHubReleases();
         logger:info("/updateGitHubReleases Rest call triggered");
         http:setStatusCode(m,202);
@@ -181,7 +181,7 @@ service<http> releaseTrainService {
 
     @http:GET {}
     @http:Path{value:"/getRepoAndGitVersionByGitId/{gitVersionId}"}
-    resource resource14 (message m, @http:PathParam {value:"gitVersionId"} int gitVersionId) {
+    resource getGitHubRepoNameAndVersionName (message m, @http:PathParam {value:"gitVersionId"} int gitVersionId) {
         message response={};
         json sendData = getRepoAndGitVersionByGitId(gitVersionId);
         logger:info("/getRepoAndGitVersionByGitId/{gitVersionId} Rest call triggered");
@@ -191,4 +191,29 @@ service<http> releaseTrainService {
 
     }
 
+    @http:GET {}
+    @http:Path{value:"/getReportedGitIssuesCount/{repoName}"}
+    resource getGitHubReportedIssueCount(message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+
+        message response={};
+
+        json reportedIssuesCount = getReportedGitIssuesCount(repoName, versionName);
+        logger:info("/getRepotedGitIssuesCount/{repoName} Rest call triggered");
+        messages:setJsonPayload(response, reportedIssuesCount);
+        messages:setHeader(response,"Access-Control-Allow-Origin","*");
+        reply response;
+    }
+
+    @http:GET {}
+    @http:Path{value:"/getFixedGitIssuesCount/{repoName}"}
+    resource getGitHubFixedIssueCount (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+
+        message response={};
+
+        json fixedIssuesCount = getFixedGitIssuesCount(repoName, versionName);
+        logger:info("/getFixedGitIssuesCount/{repoName} Rest call triggered");
+        messages:setJsonPayload(response, fixedIssuesCount);
+        messages:setHeader(response,"Access-Control-Allow-Origin","*");
+        reply response;
+    }
 }
