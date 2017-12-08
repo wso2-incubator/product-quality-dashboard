@@ -382,6 +382,7 @@ function queuedDetails (string start, string end) (json) {
 
     logger:info("YET TO START DETAILS SENT");
 
+    logger:debug(jsonResOfQueueDetails);
     //close MYSQL client connector
     dbConnection.close();
 
@@ -404,7 +405,7 @@ function devDetails (string start, string end) (json) {
     var jsonResOfDevDetails, _ = <json>resultOfInProgressPatchDetails;
 
     logger:info("IN PROGRESS DETAILS SENT");
-
+    logger:debug(jsonResOfDevDetails);
     //close MYSQL client connector
     dbConnection.close();
 
@@ -425,7 +426,7 @@ function completeDetails (string start, string end) (json) {
     var jsonResOfCompleteDetails, _ = <json>resultOfAllCompletePatchDetails;
 
     logger:info("COMPLETED DETAILS SENT");
-
+    logger:debug(jsonResOfCompleteDetails);
     //close MYSQL client connector
     dbConnection.close();
 
@@ -1250,7 +1251,7 @@ function selectedProductAllVersionReleaseTrend (string inProduct, string inVersi
     json reportedPatches = {"isEmpty":isEmpty, "versionReleaseTrend":jsonResOfReleaseTrend, "versionCompletedReleaseTrend":jsonResOfCompleteReleaseTrend, "versionPartiallyCompletedReleasedTrend":jsonResOfPartiallyCompleteReleaseTrend};
 
     logger:info(inProduct + " ALL VERSION RELEASE TREND DATA SENT");
-
+    logger:debug(reportedPatches);
     //close MYSQL client connector
     dbConnection.close();
 
@@ -1289,7 +1290,7 @@ function getCategoryDatesForSelectedAllProductVersions (string inProduct, string
     }
 
     logger:info("ALL VERSION CATEGORIES SENT");
-
+    logger:debug(jsonResOfcategory);
     //close MYSQL client connector
     dbConnection.close();
 

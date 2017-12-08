@@ -16,7 +16,7 @@ service<http> pmtserives {
     @http:GET {}
     @http:Path {value:"/loaddashboard/{startDate}/{endDate}"}
 
-    resource loadInitialsCounts (message m, @http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {
+    resource loadInitialPatchCounts (message m, @http:PathParam {value:"startDate"} string startDate, @http:PathParam {value:"endDate"} string endDate) {
         json loadCounts = loadDashboardWithHistory(startDate, endDate);
 
         message response = {};
