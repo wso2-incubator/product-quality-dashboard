@@ -35,7 +35,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/updateRedmineProjects"}
     resource updateRedmineProjects (message m) {
         updateProject();
-        logger:info("/project Rest call triggered");
+        logger:info("/updateRedmineProjects Rest call triggered");
         http:setStatusCode(m, 202);
         messages:setStringPayload(m, "Request Accepted");
         reply m;
@@ -45,7 +45,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/updateRedmineUsers"}
     resource updateRedmineUsers (message m) {
         updateUser();
-        logger:info("/user Rest call triggered");
+        logger:info("/updateRedmineUsers Rest call triggered");
         http:setStatusCode(m,202);
         messages:setStringPayload(m,"Request Accepted");
         reply m;
@@ -56,7 +56,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/updateRedmineVersions"}
     resource updateRedmineVersions (message m) {
         updateVersion();
-        logger:info("/version Rest call triggered");
+        logger:info("/updateRedmineVersions Rest call triggered");
         http:setStatusCode(m,202);
         messages:setStringPayload(m,"Request Accepted");
         reply m;
@@ -67,7 +67,7 @@ service<http> releaseTrainService {
     @http:Path{value:"/updateRedmineIssues"}
     resource updateRedmineIssues (message m) {
         updateIssue();
-        logger:info("/issue Rest call triggered");
+        logger:info("/updateRedmineIssues Rest call triggered");
         http:setStatusCode(m,202);
         messages:setStringPayload(m,"Request Accepted");
         reply m;
@@ -170,6 +170,18 @@ service<http> releaseTrainService {
     }
 
     @http:GET {}
+    @http:Path{value:"/getRepoAndGitVersionByGitId/{gitVersionId}"}
+    resource getGitHubRepoNameAndVersionName (message m, @http:PathParam {value:"gitVersionId"} int gitVersionId) {
+        message response={};
+        json sendData = getRepoAndGitVersionByGitId(gitVersionId);
+        logger:info("/getRepoAndGitVersionByGitId/{gitVersionId} Rest call triggered");
+        messages:setJsonPayload(response, sendData);
+        messages:setHeader(response,"Access-Control-Allow-Origin","*");
+        reply response;
+
+    }
+
+    @http:GET {}
     @http:Path{value:"/updateGitHubReleases"}
     resource updateGitHubReleases(message m) {
         updateGitHubReleases();
@@ -180,15 +192,16 @@ service<http> releaseTrainService {
     }
 
     @http:GET {}
-    @http:Path{value:"/getRepoAndGitVersionByGitId/{gitVersionId}"}
-    resource getGitHubRepoNameAndVersionName (message m, @http:PathParam {value:"gitVersionId"} int gitVersionId) {
+    @http:Path{value:"/getFixedGitIssuesCount/{repoName}"}
+    resource getGitHubFixedIssueCount (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+
         message response={};
-        json sendData = getRepoAndGitVersionByGitId(gitVersionId);
-        logger:info("/getRepoAndGitVersionByGitId/{gitVersionId} Rest call triggered");
-        messages:setJsonPayload(response, sendData);
+
+        json fixedIssuesCount = getFixedGitIssuesCount(repoName, versionName);
+        logger:info("/getFixedGitIssuesCount/{repoName} Rest call triggered");
+        messages:setJsonPayload(response, fixedIssuesCount);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");
         reply response;
-
     }
 
     @http:GET {}
@@ -204,16 +217,4 @@ service<http> releaseTrainService {
         reply response;
     }
 
-    @http:GET {}
-    @http:Path{value:"/getFixedGitIssuesCount/{repoName}"}
-    resource getGitHubFixedIssueCount (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
-
-        message response={};
-
-        json fixedIssuesCount = getFixedGitIssuesCount(repoName, versionName);
-        logger:info("/getFixedGitIssuesCount/{repoName} Rest call triggered");
-        messages:setJsonPayload(response, fixedIssuesCount);
-        messages:setHeader(response,"Access-Control-Allow-Origin","*");
-        reply response;
-    }
 }

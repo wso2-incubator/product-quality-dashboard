@@ -52,7 +52,7 @@ function getConfData (string filePath) (json) {
     return null;
 
 }
-
+json confJson = getConfData("config.json");
 
 function getDatabaseMap (json configData)(map) {
 
@@ -89,20 +89,18 @@ function getDatabaseMap (json configData)(map) {
 
 }
 function createDBConnection()(sql:ClientConnector) {
-    json confJson = getConfData("config.json");
+
     map props = getDatabaseMap(confJson);
     sql:ClientConnector rmDB = create sql:ClientConnector(props);
     return rmDB;
 }
 
 function createRMConnection(){
-    json configData = getConfData("config.json");
     string rmUrl;
-    rmUrl = jsons:getString(configData, "$.REDMINE.RM_URL");
+    rmUrl = jsons:getString(confJson, "$.REDMINE.RM_URL");
     redmineConn = create http:ClientConnector(rmUrl);
 }
 function getRedmineRequest()(message){
-    json confJson = getConfData("config.json");
     string rmApiKey;
     try{
         rmApiKey, _= (string)confJson.REDMINE.RM_API_KEY;
@@ -117,7 +115,6 @@ function getRedmineRequest()(message){
 }
 
 function createtGitHubConnection(){
-    json confJson = getConfData("config.json");
     string gitHubUrl;
 
     try{
@@ -131,7 +128,6 @@ function createtGitHubConnection(){
 
 }
 function getGitHubRequest()(message){
-    json confJson = getConfData("config.json");
     string gitHubToken;
     try{
         gitHubToken, _= (string)confJson.GITHUB.GITHUB_TOKEN;
