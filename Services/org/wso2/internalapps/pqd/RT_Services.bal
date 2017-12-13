@@ -131,12 +131,12 @@ service<http> releaseTrainService {
     }
 
     @http:GET {}
-    @http:Path{value:"/getFixedGitIssues/{repoName}"}
-    resource getGitHubFixedIssues (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+    @http:Path{value:"/getFixedGitIssues/{repoOrganizationName}/{repoName}"}
+    resource getGitHubFixedIssues (message m, @http:PathParam {value:"repoOrganizationName"} string repoOrganizationName, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
 
         message response={};
 
-        json fixedIssues = getFixedGitIssues(repoName, versionName);
+        json fixedIssues = getFixedGitIssues(repoOrganizationName, repoName, versionName);
         logger:info("/getFixedGitIssues/{repoName} Rest call triggered");
         messages:setJsonPayload(response, fixedIssues);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");
@@ -144,12 +144,12 @@ service<http> releaseTrainService {
     }
 
     @http:GET {}
-    @http:Path{value:"/getReportedGitIssues/{repoName}"}
-    resource getGitHubReportedIssues (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+    @http:Path{value:"/getReportedGitIssues/{repoOrganizationName}/{repoName}"}
+    resource getGitHubReportedIssues (message m, @http:PathParam {value:"repoOrganizationName"} string repoOrganizationName, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
 
         message response={};
 
-        json reportedIssues = getReportedGitIssues(repoName, versionName);
+        json reportedIssues = getReportedGitIssues(repoOrganizationName, repoName, versionName);
         logger:info("/getReportedGitIssues/{repoName} Rest call triggered");
         messages:setJsonPayload(response, reportedIssues);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");
@@ -192,12 +192,12 @@ service<http> releaseTrainService {
     }
 
     @http:GET {}
-    @http:Path{value:"/getFixedGitIssuesCount/{repoName}"}
-    resource getGitHubFixedIssueCount (message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+    @http:Path{value:"/getFixedGitIssuesCount/{repoOrganizationName}/{repoName}"}
+    resource getGitHubFixedIssueCount (message m, @http:PathParam {value:"repoOrganizationName"} string repoOrganizationName,@http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
 
         message response={};
 
-        json fixedIssuesCount = getFixedGitIssuesCount(repoName, versionName);
+        json fixedIssuesCount = getFixedGitIssuesCount(repoOrganizationName, repoName, versionName);
         logger:info("/getFixedGitIssuesCount/{repoName} Rest call triggered");
         messages:setJsonPayload(response, fixedIssuesCount);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");
@@ -205,12 +205,12 @@ service<http> releaseTrainService {
     }
 
     @http:GET {}
-    @http:Path{value:"/getReportedGitIssuesCount/{repoName}"}
-    resource getGitHubReportedIssueCount(message m, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
+    @http:Path{value:"/getReportedGitIssuesCount/{repoOrganizationName}/{repoName}"}
+    resource getGitHubReportedIssueCount(message m, @http:PathParam {value:"repoOrganizationName"} string repoOrganizationName, @http:PathParam {value:"repoName"} string repoName, @http:QueryParam {value:"versionName"} string versionName){
 
         message response={};
 
-        json reportedIssuesCount = getReportedGitIssuesCount(repoName, versionName);
+        json reportedIssuesCount = getReportedGitIssuesCount(repoOrganizationName, repoName, versionName);
         logger:info("/getRepotedGitIssuesCount/{repoName} Rest call triggered");
         messages:setJsonPayload(response, reportedIssuesCount);
         messages:setHeader(response,"Access-Control-Allow-Origin","*");

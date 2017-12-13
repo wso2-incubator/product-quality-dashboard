@@ -16,6 +16,8 @@ import ballerina.lang.datatables;
 
 
 
+
+
 http:ClientConnector redmineConn = null;
 http:ClientConnector gitHubConn = null;
 
@@ -1363,7 +1365,7 @@ function getTrackerSubjects(int trackerId, int versionId)(json){
     return trackerSubjects;
 }
 
-function getGitHubPages(string repoName, string versionName, string states, int pageLimit)(int){
+function getGitHubPages(string repoOrganizationName, string repoName, string versionName, string states, int pageLimit)(int){
     if(gitHubConn==null){
         createtGitHubConnection();
     }
@@ -1398,7 +1400,8 @@ function getGitHubPages(string repoName, string versionName, string states, int 
     return finalPages;
 
 }
-function getInitialIssues(string repoName, string versionName, string states, int pageLimit)(json){
+
+function getInitialIssues(string repoOrganizationName, string repoName, string versionName, string states, int pageLimit)(json){
     if(gitHubConn==null){
         createtGitHubConnection();
     }
@@ -1409,7 +1412,7 @@ function getInitialIssues(string repoName, string versionName, string states, in
     json jsonRes ={};
 
     req = getGitHubRequest();
-    json variables = { "loginName": "wso2", "repoName": repoName,  "pageLimit":pageLimit, "issueStates": states, "versionName": versionName};
+    json variables = { "loginName": repoOrganizationName, "repoName": repoName,  "pageLimit":pageLimit, "issueStates": states, "versionName": versionName};
     string query = "query ($loginName:String! $repoName:String! $pageLimit:Int! $issueStates:[IssueState!] $versionName:[String!]){ organization(login: $loginName) { repository(name:$repoName) { name, issues(first: $pageLimit, states:$issueStates, labels:$versionName) { totalCount,pageInfo{ hasNextPage,endCursor }, nodes{ title,url } } } } }";
 
     jsonPost.query = query;
@@ -1427,7 +1430,7 @@ function getInitialIssues(string repoName, string versionName, string states, in
     return jsonRes;
 
 }
-function getNextIssues(string repoName, string versionName, string states, int pageLimit, string nextPageLink)(json){
+function getNextIssues(string repoOrganizationName, string repoName, string versionName, string states, int pageLimit, string nextPageLink)(json){
     if(gitHubConn==null){
         createtGitHubConnection();
     }
@@ -1438,7 +1441,7 @@ function getNextIssues(string repoName, string versionName, string states, int p
     json jsonRes ={};
 
     req = getGitHubRequest();
-    json variables = { "loginName": "wso2", "repoName": repoName,  "pageLimit":pageLimit, "nextPageLink":nextPageLink, "issueStates": states, "versionName": versionName};
+    json variables = { "loginName": repoOrganizationName, "repoName": repoName,  "pageLimit":pageLimit, "nextPageLink":nextPageLink, "issueStates": states, "versionName": versionName};
     string query = "query ($loginName:String! $repoName:String! $nextPageLink:String! $pageLimit:Int! $issueStates:[IssueState!] $versionName:[String!]){ organization(login: $loginName) { repository(name:$repoName) { name, issues(first: $pageLimit, after:$nextPageLink, states:$issueStates, labels:$versionName) { totalCount,pageInfo{ hasNextPage,endCursor }, nodes{ title,url } } } } }";
 
     jsonPost.query = query;
@@ -1449,7 +1452,7 @@ function getNextIssues(string repoName, string versionName, string states, int p
     jsonRes = messages:getJsonPayload(resp);
     return jsonRes;
 }
-function getFixedGitIssues(string repoName , string versionName)(json){
+function getFixedGitIssues(string repoOrganizationName, string repoName , string versionName)(json){
 
     json jsonFinal=[];
 
@@ -1457,7 +1460,7 @@ function getFixedGitIssues(string repoName , string versionName)(json){
     int pageLimit = 100; // maximum page limit is 100.
 
 
-    json jsonRes = getInitialIssues(repoName, versionName, states, pageLimit);
+    json jsonRes = getInitialIssues(repoOrganizationName, repoName, versionName, states, pageLimit);
     int count;
     boolean hasNextPage;
     string nextPageLink;
@@ -1477,7 +1480,7 @@ function getFixedGitIssues(string repoName , string versionName)(json){
 
     int i = 1;
     while(hasNextPage){
-        jsonRes = getNextIssues(repoName, versionName, states, pageLimit, nextPageLink);
+        jsonRes = getNextIssues(repoOrganizationName, repoName, versionName, states, pageLimit, nextPageLink);
         count, _ =(int)jsonRes.data.organization.repository.issues.totalCount;
         hasNextPage, _ =(boolean)jsonRes.data.organization.repository.issues.pageInfo.hasNextPage;
         nextPageLink, _=(string )jsonRes.data.organization.repository.issues.pageInfo.endCursor;
@@ -1494,7 +1497,7 @@ function getFixedGitIssues(string repoName , string versionName)(json){
 
 
 }
-function getReportedGitIssues(string repoName , string versionName)(json){
+function getReportedGitIssues(string repoOrganizationName, string repoName , string versionName)(json){
 
     json jsonFinal=[];
 
@@ -1502,7 +1505,7 @@ function getReportedGitIssues(string repoName , string versionName)(json){
     int pageLimit = 100; // maximum page limit is 100.
 
 
-    json jsonRes = getInitialIssues(repoName, versionName, states, pageLimit);
+    json jsonRes = getInitialIssues(repoOrganizationName, repoName, versionName, states, pageLimit);
     int count;
     boolean hasNextPage;
     string nextPageLink;
@@ -1523,7 +1526,7 @@ function getReportedGitIssues(string repoName , string versionName)(json){
 
     int i = 1;
     while(hasNextPage){
-        jsonRes = getNextIssues(repoName, versionName, states, pageLimit, nextPageLink);
+        jsonRes = getNextIssues(repoOrganizationName, repoName, versionName, states, pageLimit, nextPageLink);
         count, _ =(int)jsonRes.data.organization.repository.issues.totalCount;
         hasNextPage, _ =(boolean)jsonRes.data.organization.repository.issues.pageInfo.hasNextPage;
         nextPageLink, _=(string )jsonRes.data.organization.repository.issues.pageInfo.endCursor;
@@ -1559,7 +1562,6 @@ function getRepoAndVersion(int projectId, int versionId)(json){
 
 
 
-
     datatable dtRedmoneVersionName = rmDB.select(GET_REDMINE_VERSION_NAMES, params2);
     var jsonVersion, _= <json>dtRedmoneVersionName;
     logger:debug(jsonVersion);
@@ -1587,6 +1589,8 @@ function getRepoAndGitVersionByGitId(int gitVersionId)(json) {
     var jsonRepo, _= <json>dtGitHubRepoAndVersioNames;
     logger:debug(jsonRepo);
     datatables:close(dtGitHubRepoAndVersioNames);
+
+
 
     var versionName, _ = (string)jsonRepo[0].gitVersionName;
     int stringLength= strings:length(versionName);
@@ -1627,9 +1631,16 @@ function updateGitHubReleases(){
         int loopIndex = 0;
         while (loopIndex < lengthof repoJson) {
             var repoName, _ = (string)repoJson[loopIndex].GITHUB_REPO_NAME;
+            var repoOrganizationName, _ = (string)repoJson[loopIndex].GITHUB_ORGANIZATION_NAME;
 
             sql:Parameter[] params2 = [];
             sql:Parameter gitHubRepoName = {sqlType:"varchar", value:repoName};
+            sql:Parameter gitHubRepoOrganizationName = {sqlType:"varchar", value:repoOrganizationName};
+
+            logger:info("repoName: "+repoName);
+            logger:info("organization: "+repoOrganizationName);
+            logger:info("-----------------------------------");
+
             params2 = [gitHubRepoName];
             datatable dtGitVersionCount = rmDB.select(GITHUB_VERSION_CHECK, params2);
             var gitVersionCountJson, _ = <json>dtGitVersionCount;
@@ -1651,7 +1662,8 @@ function updateGitHubReleases(){
                 datatables:close(dtGitLastCursor);
                 var lastInsertedLink, _=(string)gitLstCursorJson[0].CURSOR_NAME;
 
-                json gitHubReleasesJson = getGitHubReleases(repoName, lastInsertedLink);
+                json gitHubReleasesJson = getGitHubReleases(repoOrganizationName,repoName, lastInsertedLink);
+
 
                 var repoPageCount = lengthof gitHubReleasesJson;
                 int pageIndex = 0;
@@ -1683,11 +1695,14 @@ function updateGitHubReleases(){
                 }
             } else {
 
-                json gitHubInitialReleasesJson = getinitialGiHubReleases(repoName);
+                json gitHubInitialReleasesJson = getinitialGiHubReleases(repoOrganizationName, repoName);
+
+
 
                 var repoPageCount = lengthof gitHubInitialReleasesJson;
                 int pageIndex = 0;
                 while (pageIndex < repoPageCount) {
+
                     var releaseCount= lengthof gitHubInitialReleasesJson[pageIndex];
                     int releaseIndex = 0;
                     while(releaseIndex < releaseCount) {
@@ -1699,6 +1714,8 @@ function updateGitHubReleases(){
 
 
                         if(gitHubInitialReleasesJson[pageIndex][releaseIndex].node.tag != null) {
+
+
                             cursor, _ = (string)gitHubInitialReleasesJson[pageIndex][releaseIndex].cursor;
                             versionName, _ = (string)gitHubInitialReleasesJson[pageIndex][releaseIndex].node.tag.name;
                             releaseDate, _ =(string)gitHubInitialReleasesJson[pageIndex][releaseIndex].node.publishedAt;
@@ -1744,9 +1761,9 @@ function insertGitHubReleases(string repoName, string versionName, string releas
 
 }
 
-function getinitialGiHubReleases(string repoName)(json){
+function getinitialGiHubReleases(string repoOrganizationName, string repoName)(json){
     int pageLimit = 100;
-    json jsonRes =  getfirstReleases(repoName, pageLimit);
+    json jsonRes =  getfirstReleases(repoOrganizationName, repoName, pageLimit);
 
     json jsonFinal=[];
 
@@ -1773,7 +1790,7 @@ function getinitialGiHubReleases(string repoName)(json){
     while(hasNextPage){
 
 
-        jsonRes = getNextReleases(repoName, nextPageLink, pageLimit);
+        jsonRes = getNextReleases(repoOrganizationName, repoName, nextPageLink, pageLimit);
         edges = jsonRes.data.repository.releases.edges;
         hasNextPage, _ = (boolean)jsonRes.data.repository.releases.pageInfo.hasNextPage;
         nextPageLink, _ = (string)jsonRes.data.repository.releases.pageInfo.endCursor;
@@ -1787,7 +1804,7 @@ function getinitialGiHubReleases(string repoName)(json){
     return jsonFinal;
 
 }
-function getGitHubReleases(string repoName, string lastInsertedLink)(json){
+function getGitHubReleases(string repoOrganizationName, string repoName, string lastInsertedLink)(json){
     int pageLimit = 100;
     json jsonFinal=[];
     int count;
@@ -1799,7 +1816,7 @@ function getGitHubReleases(string repoName, string lastInsertedLink)(json){
     int loopIndex = 0;
     while(hasNextPage){
 
-        jsonRes = getNextReleases(repoName, nextPageLink, pageLimit);
+        jsonRes = getNextReleases(repoOrganizationName, repoName, nextPageLink, pageLimit);
 
         hasNextPage, _ = (boolean)jsonRes.data.repository.releases.pageInfo.hasNextPage;
 
@@ -1823,7 +1840,7 @@ function getGitHubReleases(string repoName, string lastInsertedLink)(json){
     return jsonFinal;
 
 }
-function getfirstReleases(string repoName, int pageLimit)(json){
+function getfirstReleases(string repoOrganizationName, string repoName, int pageLimit)(json){
     if(gitHubConn==null){
         createtGitHubConnection();
     }
@@ -1836,7 +1853,7 @@ function getfirstReleases(string repoName, int pageLimit)(json){
 
     req = getGitHubRequest();
 
-    json variables = {"loginName": "wso2", "repoName": repoName, "pageLimit": pageLimit, "sort": {"field": "CREATED_AT","direction": "ASC"}};
+    json variables = {"loginName": repoOrganizationName, "repoName": repoName, "pageLimit": pageLimit, "sort": {"field": "CREATED_AT","direction": "ASC"}};
     string query="query($loginName:String!,$repoName:String!,$pageLimit:Int!$sort:ReleaseOrder){ repository(owner: $loginName, name: $repoName) { releases(first: $pageLimit,orderBy:$sort) { edges { cursor node { name tag{ name id } publishedAt }} pageInfo { hasNextPage endCursor } totalCount }}}";
 
     jsonPost.query = query;
@@ -1852,7 +1869,7 @@ function getfirstReleases(string repoName, int pageLimit)(json){
 
 
 }
-function getNextReleases(string repoName, string nextPageLink, int pageLimit)(json){
+function getNextReleases(string repoOrganizationName, string repoName, string nextPageLink, int pageLimit)(json){
     if(gitHubConn==null){
         createtGitHubConnection();
     }
@@ -1865,7 +1882,7 @@ function getNextReleases(string repoName, string nextPageLink, int pageLimit)(js
     req = getGitHubRequest();
 
 
-    json variables = {"loginName": "wso2", "repoName": repoName, "pageLimit": pageLimit,"nextPageLink": nextPageLink, "sort": {"field": "CREATED_AT","direction": "ASC"}};
+    json variables = {"loginName": repoOrganizationName, "repoName": repoName, "pageLimit": pageLimit,"nextPageLink": nextPageLink, "sort": {"field": "CREATED_AT","direction": "ASC"}};
     string query="query($loginName:String!,$repoName:String!,$pageLimit:Int!,$nextPageLink:String!,$sort:ReleaseOrder){ repository(owner: $loginName, name: $repoName) { releases(first: $pageLimit,after:$nextPageLink,orderBy:$sort) { edges { cursor node { name tag{ name id } publishedAt }} pageInfo { hasNextPage endCursor } totalCount }}}";
     jsonPost.query = query;
     jsonPost.variables =variables;
@@ -1874,19 +1891,20 @@ function getNextReleases(string repoName, string nextPageLink, int pageLimit)(js
     resp= gitHubConn.post("/graphql", req);
     jsonRes = messages:getJsonPayload(resp);
 
+
     var count, _ =(int)jsonRes.data.repository.releases.totalCount;
     return jsonRes;
 
 }
 
-function getFixedGitIssuesCount(string repoName , string versionName)(json){
+function getFixedGitIssuesCount(string repoOrganizationName, string repoName , string versionName)(json){
 
     json jsonFinal={};
 
     string states = "CLOSED";
     int pageLimit = 1; // maximum page limit is 100.
 
-    json jsonRes = getInitialIssues(repoName, versionName, states, pageLimit);
+    json jsonRes = getInitialIssues(repoOrganizationName, repoName, versionName, states, pageLimit);
     int count = 0;
 
     if (jsonRes!= null) {
@@ -1903,14 +1921,14 @@ function getFixedGitIssuesCount(string repoName , string versionName)(json){
 
 
 }
-function getReportedGitIssuesCount(string repoName , string versionName)(json){
+function getReportedGitIssuesCount(string repoOrganizationName, string repoName , string versionName)(json){
 
     json jsonFinal={};
 
     string states = "OPEN";
     int pageLimit = 1; // maximum page limit is 100.
 
-    json jsonRes = getInitialIssues(repoName, versionName, states, pageLimit);
+    json jsonRes = getInitialIssues(repoOrganizationName, repoName, versionName, states, pageLimit);
     int count = 0;
 
     if (jsonRes!= null) {
