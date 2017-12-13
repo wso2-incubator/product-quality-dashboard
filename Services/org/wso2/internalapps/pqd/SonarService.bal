@@ -77,7 +77,7 @@ struct YearlySonarIssues{
 
 @http:configuration {
     basePath:"/internal/product-quality/v1.0/sonar",
-    httpsPort:9092,
+    httpsPort:9095,
     keyStoreFile:"${ballerina.home}/bre/security/ballerinaKeystore.p12",
     keyStorePassword:"ballerina",
     certPassword:"ballerina",
@@ -104,12 +104,12 @@ service<http> SonarService {
         json sonarPayload = {"Date":customTimeString, "TotalIssues":tot};
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setJsonPayload(sonarPayload);
-         _ = res.send();
+        _ = res.send();
 
     }
     @http:resourceConfig {
-         methods:["GET"],
-         path:"/fetch-data"
+        methods:["GET"],
+        path:"/fetch-data"
     }
     resource saveIssuestoDB (http:Request req, http:Response res){
         http:HttpClient sonarCon=getHttpClientForSonar(configData);
@@ -118,7 +118,7 @@ service<http> SonarService {
         saveIssuesToDatabase(sonarResponse, sonarCon, configData);
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setStringPayload("Data fetching from sonar began at "+currentTime().format("yyyy-MM-dd  HH:mm:ss"));
-         _ = res.send();
+        _ = res.send();
 
     }
 
@@ -130,7 +130,7 @@ service<http> SonarService {
         json data = getAllAreaSonarIssues();
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setJsonPayload(data);
-         _ = res.send();
+        _ = res.send();
 
     }
 
@@ -149,7 +149,7 @@ service<http> SonarService {
         json data = getSelectionResult(category,catId,issueTypeId,severityId);
         res.setJsonPayload(data);
         res.setHeader("Access-Control-Allow-Origin", "*");
-         _ = res.send();
+        _ = res.send();
     }
 
     @http:resourceConfig {
@@ -169,7 +169,7 @@ service<http> SonarService {
         json data = getSelectionHistory(start,end,period,category,selected,issueType,severity);
         res.setJsonPayload(data);
         res.setHeader("Access-Control-Allow-Origin", "*");
-         _ = res.send();
+        _ = res.send();
     }
 }
 
@@ -548,7 +548,7 @@ function getAllAreaSonarIssuesForSeverity (int severity) (json) {
 
     }
     dt.close();
-    
+
     json bugs = {"name":"BUG","id":1, "sonar":BUGS};
     allAreas.sonarIssuetype[lengthof allAreas.sonarIssuetype]=bugs;
     json codesmells = {"name":"CODE SMELL","id":2, "sonar":CODESMELLS};
@@ -663,7 +663,7 @@ function getAllAreaSonarIssuesForType (int issueType) (json) {
 
     }
     dt.close();
-    
+
     json blocker = {"name":"BLOCKER", "id":1 ,"sonar":BLOCKER};
     allAreas.sonarSeverity[lengthof allAreas.sonarSeverity]=blocker;
     json critical = {"name":"CRITICAL", "id":2, "sonar":CRITICAL};
@@ -769,7 +769,7 @@ function getSelectedAreaSonarIssues (int selected) (json) {
     }
     pdt.close();
 
-    
+
     json bugs = {"name":"BUG","id":1, "sonar":BUGS};
     allProducts.sonarIssuetype[lengthof allProducts.sonarIssuetype]=bugs;
     json codesmells = {"name":"CODE SMELL","id":2, "sonar":CODESMELLS};
@@ -1009,7 +1009,7 @@ function getSelectedAreaSonarIssuesForSeverity(int selected,int severity)(json){
     }
     pdt.close();
 
-    
+
     json bugs = {"name":"BUG","id":1, "sonar":BUGS};
     allProducts.sonarIssuetype[lengthof allProducts.sonarIssuetype]=bugs;
     json codesmells = {"name":"CODE SMELL","id":2, "sonar":CODESMELLS};
@@ -1125,7 +1125,7 @@ function getSelectedAreaSonarIssuesForType(int selected, int issueType)(json){
     }
     pdt.close();
 
-    
+
     json blocker = {"name":"BLOCKER", "id":1 ,"sonar":BLOCKER};
     allProducts.sonarSeverity[lengthof allProducts.sonarSeverity]=blocker;
     json critical = {"name":"CRITICAL", "id":2, "sonar":CRITICAL};
@@ -1339,7 +1339,7 @@ function getSelectedProductSonarIssuesForTypeAndSeverity(int selected, int issue
     }
     cdt.close();
 
-    
+
 
     data.data=allComponent;
     sqlEndPoint.close();
@@ -1440,7 +1440,7 @@ function getSelectedProductSonarIssuesForSeverity(int selected, int severity)(js
     }
     cdt.close();
 
-    
+
 
     json bugs = {"name":"BUG","id":1, "sonar":BUGS};
     allComponent.sonarIssuetype[lengthof allComponent.sonarIssuetype]=bugs;
@@ -1545,7 +1545,7 @@ function getSelectedProductSonarIssuesForType(int selected, int issueType)(json)
     cdt.close();
 
 
-    
+
     json blocker = {"name":"BLOCKER", "id":1 ,"sonar":BLOCKER};
     allComponent.sonarSeverity[lengthof allComponent.sonarSeverity]=blocker;
     json critical = {"name":"CRITICAL", "id":2, "sonar":CRITICAL};
@@ -1635,7 +1635,7 @@ function getSelectedComponentSonarIssues(int selected)(json){
     }
     idt.close();
 
-    
+
     json bugs = {"name":"BUG","id":1, "sonar":BUGS};
     allComponent.sonarIssuetype[lengthof allComponent.sonarIssuetype]=bugs;
     json codesmells = {"name":"CODE SMELL","id":2, "sonar":CODESMELLS};
@@ -1784,7 +1784,7 @@ function getSelectedComponentSonarIssuesForSeverity(int selected,int severity)(j
     }
     idt.close();
 
-    
+
     json bugs = {"name":"BUG","id":1, "sonar":BUGS};
     allComponent.sonarIssuetype[lengthof allComponent.sonarIssuetype]=bugs;
     json codesmells = {"name":"CODE SMELL","id":2, "sonar":CODESMELLS};
@@ -1879,7 +1879,7 @@ function getSelectedComponentSonarIssuesForType(int selected,int issueType)(json
     }
     idt.close();
 
-    
+
 
     json blocker = {"name":"BLOCKER", "id":1 ,"sonar":BLOCKER};
     allComponent.sonarSeverity[lengthof allComponent.sonarSeverity]=blocker;
@@ -2118,7 +2118,7 @@ function getDailyHistoryForAllAreaForSeverity (string start, string end, int sev
 
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2168,7 +2168,7 @@ function getDailyHistoryForAllAreaForType (string start, string end, int issueTy
 
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2214,7 +2214,7 @@ function getDailyHistoryForAllAreaForTypeAndSeverity (string start, string end, 
 
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2285,7 +2285,7 @@ function getMonthlyHistoryForAllArea (string start, string end) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2318,7 +2318,7 @@ function getMonthlyHistoryForAllAreaForSeverity (string start, string end, int s
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2368,7 +2368,7 @@ function getMonthlyHistoryForAllAreaForType (string start, string end, int issue
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2414,7 +2414,7 @@ function getMonthlyHistoryForAllAreaForTypeAndSeverity (string start, string end
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2484,7 +2484,7 @@ function getQuarterlyHistoryForAllArea (string start, string end) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2517,7 +2517,7 @@ function getQuarterlyHistoryForAllAreaForSeverity (string start, string end, int
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2567,7 +2567,7 @@ function getQuarterlyHistoryForAllAreaForType (string start, string end, int iss
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2613,7 +2613,7 @@ function getQuarterlyHistoryForAllAreaForTypeAndSeverity (string start, string e
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2683,7 +2683,7 @@ function getYearlyHistoryForAllArea (string start, string end) (json) {
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2716,7 +2716,7 @@ function getYearlyHistoryForAllAreaForSeverity (string start, string end, int se
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2762,11 +2762,11 @@ function getYearlyHistoryForAllAreaForType (string start, string end, int issueT
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2808,11 +2808,11 @@ function getYearlyHistoryForAllAreaForTypeAndSeverity (string start, string end,
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter start_date_para = {sqlType:sql:Type.VARCHAR, value:start};
@@ -2879,11 +2879,11 @@ function getDailyHistoryForSelectedArea (string start, string end, int selected)
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -2914,11 +2914,11 @@ function getDailyHistoryForSelectedAreaForSeverity (string start, string end, in
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -2967,11 +2967,11 @@ function getDailyHistoryForSelectedAreaForType (string start, string end, int se
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3015,11 +3015,11 @@ function getDailyHistoryForSelectedAreaForTypeAndSeverity (string start, string 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3087,11 +3087,11 @@ function getMonthlyHistoryForSelectedArea (string start, string end, int selecte
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3121,11 +3121,11 @@ function getMonthlyHistoryForSelectedAreaForSeverity (string start, string end, 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3172,11 +3172,11 @@ function getMonthlyHistoryForSelectedAreaForType (string start, string end, int 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3219,11 +3219,11 @@ function getMonthlyHistoryForSelectedAreaForTypeAndSeverity (string start, strin
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3290,11 +3290,11 @@ function getQuarterlyHistoryForSelectedArea (string start, string end, int selec
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3324,11 +3324,11 @@ function getQuarterlyHistoryForSelectedAreaForSeverity (string start, string end
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3375,11 +3375,11 @@ function getQuarterlyHistoryForSelectedAreaForType (string start, string end, in
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3422,11 +3422,11 @@ function getQuarterlyHistoryForSelectedAreaForTypeAndSeverity (string start, str
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3493,11 +3493,11 @@ function getYearlyHistoryForSelectedArea (string start, string end, int selected
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3527,11 +3527,11 @@ function getYearlyHistoryForSelectedAreaForSeverity (string start, string end, i
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3578,11 +3578,11 @@ function getYearlyHistoryForSelectedAreaForType (string start, string end, int s
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3625,11 +3625,11 @@ function getYearlyHistoryForSelectedAreaForTypeAndSeverity (string start, string
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3697,11 +3697,11 @@ function getDailyHistoryForSelectedProduct (string start, string end, int select
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3732,11 +3732,11 @@ function getDailyHistoryForSelectedProductForSeverity (string start, string end,
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3784,11 +3784,11 @@ function getDailyHistoryForSelectedProductForType (string start, string end, int
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3832,11 +3832,11 @@ function getDailyHistoryForSelectedProductForTypeAndSeverity (string start, stri
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3904,11 +3904,11 @@ function getMonthlyHistoryForSelectedProduct (string start, string end, int sele
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3938,11 +3938,11 @@ function getMonthlyHistoryForSelectedProductForSeverity (string start, string en
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -3989,11 +3989,11 @@ function getMonthlyHistoryForSelectedProductForType (string start, string end, i
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4036,11 +4036,11 @@ function getMonthlyHistoryForSelectedProductForTypeAndSeverity (string start, st
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4107,11 +4107,11 @@ function getQuarterlyHistoryForSelectedProduct (string start, string end, int se
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4141,11 +4141,11 @@ function getQuarterlyHistoryForSelectedProductForSeverity (string start, string 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4192,11 +4192,11 @@ function getQuarterlyHistoryForSelectedProductForType (string start, string end,
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4239,11 +4239,11 @@ function getQuarterlyHistoryForSelectedProductForTypeAndSeverity (string start, 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4310,11 +4310,11 @@ function getYearlyHistoryForSelectedProduct (string start, string end, int selec
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4344,11 +4344,11 @@ function getYearlyHistoryForSelectedProductForSeverity (string start, string end
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4395,11 +4395,11 @@ function getYearlyHistoryForSelectedProductForType (string start, string end, in
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4442,11 +4442,11 @@ function getYearlyHistoryForSelectedProductForTypeAndSeverity (string start, str
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4514,11 +4514,11 @@ function getDailyHistoryForSelectedComponent (string start, string end, int sele
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4549,11 +4549,11 @@ function getDailyHistoryForSelectedComponentForSeverity (string start, string en
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4601,11 +4601,11 @@ function getDailyHistoryForSelectedComponentForType (string start, string end, i
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4649,11 +4649,11 @@ function getDailyHistoryForSelectedComponentForTypeAndSeverity (string start, st
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4721,11 +4721,11 @@ function getMonthlyHistoryForSelectedComponent (string start, string end, int se
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4755,11 +4755,11 @@ function getMonthlyHistoryForSelectedComponentForSeverity (string start, string 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4806,11 +4806,11 @@ function getMonthlyHistoryForSelectedComponentForType (string start, string end,
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4853,11 +4853,11 @@ function getMonthlyHistoryForSelectedComponentForTypeAndSeverity (string start, 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4924,11 +4924,11 @@ function getQuarterlyHistoryForSelectedComponent (string start, string end, int 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -4958,11 +4958,11 @@ function getQuarterlyHistoryForSelectedComponentForSeverity (string start, strin
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -5009,11 +5009,11 @@ function getQuarterlyHistoryForSelectedComponentForType (string start, string en
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -5056,11 +5056,11 @@ function getQuarterlyHistoryForSelectedComponentForTypeAndSeverity (string start
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -5127,11 +5127,11 @@ function getYearlyHistoryForSelectedComponent (string start, string end, int sel
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -5161,11 +5161,11 @@ function getYearlyHistoryForSelectedComponentForSeverity (string start, string e
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -5212,11 +5212,11 @@ function getYearlyHistoryForSelectedComponentForType (string start, string end, 
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -5259,11 +5259,11 @@ function getYearlyHistoryForSelectedComponentForTypeAndSeverity (string start, s
 
     sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
     bind sqlCon with sqlEndPoint;
-    
+
     json data = {"error":false,"data":[]};
     json allAreas = {"data":[]};
 
-    
+
     sql:Parameter[] params = [];
     TypeCastError err;
     sql:Parameter selected_id_para={sqlType:sql:Type.INTEGER,value:selected};
@@ -5431,12 +5431,12 @@ function saveIssuesToDatabase (json projects, http:HttpClient sonarcon, json con
                 }
 
             }committed {
-                string customEndTimeString = currentTime().format("yyyy-MM-dd  HH:mm:ss");
-                log:printInfo("Data fetching from sonar finished at " + customEndTimeString);
-            }
+            string customEndTimeString = currentTime().format("yyyy-MM-dd  HH:mm:ss");
+            log:printInfo("Data fetching from sonar finished at " + customEndTimeString);
         }
-        sqlEndPoint.close();
     }
+sqlEndPoint.close();
+}
 }
 
 function getSonarIssuesForProject (string project_key, http:HttpClient sonarcon, json configdata) (json) {
@@ -5542,24 +5542,6 @@ function getSonarIssuesForProject (string project_key, http:HttpClient sonarcon,
     total,_=(int)sonarJSONResponse.total;
     returnJson={"Total":total,"bb":bb,"cb":cb,"mab":mab,"mib":mib,"ib":ib,"bc":bc,"cc":cc,"mac":mac,"mic":mic,"ic":ic,"bv":bv,"cv":cv,"mav":mav,"miv":miv,"iv":iv};
     return returnJson;
-}
-
-function insertDataIntodatabase(string sqlQuery, sql:Parameter[] paramsForQuery)(int){
-    endpoint<sql:ClientConnector> sqlEndPoint {
-    }
-    sql:ClientConnector sqlCon = getSQLConnectorForIssuesSonarRelease();
-
-    bind sqlCon with sqlEndPoint;
-
-    log:printDebug("insertDataIntodatabase function got invoked for sqlQuery : " + sqlQuery);
-    int ret=0;
-    try{
-        ret=sqlEndPoint.update(sqlQuery,paramsForQuery);
-    }catch(error err){
-        log:printError(err.msg);
-    }
-    sqlEndPoint.close();
-    return ret;
 }
 
 function getDataFromSonar(http:HttpClient httpCon, string path,json configData)(json){
