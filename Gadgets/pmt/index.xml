@@ -405,7 +405,7 @@
                         <table class="table table-striped" style="font-size:13px !important;">
                             <thead>
                             <th><b>No.</b></th>
-                            <th><b>Support JIRA</b></th>
+                            <th><b>Support JIRA ID</b></th>
                             <th><b>Product Name</b></th>
                             <th><b>Version</b></th>
                             <th><b>Client</b></th>
@@ -434,7 +434,7 @@
                         <table class="table table-striped" style="font-size:12px !important;">
                             <thead>
                             <th><b>No.</b></th>
-                            <th><b>Support JIRA</b></th>
+                            <th><b>Support JIRA ID</b></th>
                             <th><b>Patch Name</b></th>
                             <th><b>Product Name</b></th>
                             <th><b>Version</b></th>

@@ -797,7 +797,7 @@ function loadPatchDetails(type) {
                 for(var x=0;x<count;x++){
                     document.getElementById('popupInner').innerHTML += "<tr>" +
                         "<td>"+(parseInt(x)+1)+"</td>" +
-                        "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA+"</a></td>" +
+                        "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA.split('browse/')[1]+"</a></td>" +
                         "<td>"+data[x].PRODUCT_NAME+"</td>" +
                         "<td>"+data[x].PRODUCT_VERSION+"</td>" +
                         "<td>"+data[x].CLIENT+"</td>" +
@@ -824,7 +824,7 @@ function loadPatchDetails(type) {
                     if(data.WORST_CASE_ESTIMATE.split('+')[0] < end ){
                         document.getElementById('popupInner2').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
                             "<td>"+1+"</td>" +
-                            "<td><a href='"+data.SUPPORT_JIRA+"' target='_blank'>"+data.SUPPORT_JIRA+"</a></td>" +
+                            "<td><a href='"+data.SUPPORT_JIRA+"' target='_blank'>"+data.SUPPORT_JIRA.split('browse/')[1]+"</a></td>" +
                             "<td>"+data.PATCH_NAME+"</td>" +
                             "<td>"+data.PRODUCT_NAME+"</td>" +
                             "<td>"+data.PRODUCT_VERSION+"</td>" +
@@ -836,7 +836,7 @@ function loadPatchDetails(type) {
                     }else{
                         document.getElementById('popupInner2').innerHTML += "<tr>" +
                             "<td>"+1+"</td>" +
-                            "<td><a href='"+data.SUPPORT_JIRA+"' target='_blank'>"+data.SUPPORT_JIRA+"</a></td>" +
+                            "<td><a href='"+data.SUPPORT_JIRA+"' target='_blank'>"+data.SUPPORT_JIRA.split('browse/')[1]+"</a></td>" +
                             "<td>"+data.PATCH_NAME+"</td>" +
                             "<td>"+data.PRODUCT_NAME+"</td>" +
                             "<td>"+data.PRODUCT_VERSION+"</td>" +
@@ -851,7 +851,7 @@ function loadPatchDetails(type) {
                         if(data[x].WORST_CASE_ESTIMATE.split('+')[0] < end ){
                             document.getElementById('popupInner2').innerHTML += "<tr style='background-color:#F2DEDE;color:#A94442;'>" +
                                 "<td>"+(parseInt(x)+1)+"</td>" +
-                                "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA+"</a></td>" +
+                                "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA.split('browse/')[1]+"</a></td>" +
                                 "<td>"+data[x].PATCH_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_VERSION+"</td>" +
@@ -863,7 +863,7 @@ function loadPatchDetails(type) {
                         }else{
                             document.getElementById('popupInner2').innerHTML += "<tr>" +
                                 "<td>"+(parseInt(x)+1)+"</td>" +
-                                "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA+"</a></td>" +
+                                "<td><a href='"+data[x].SUPPORT_JIRA+"' target='_blank'>"+data[x].SUPPORT_JIRA.split('browse/')[1]+"</a></td>" +
                                 "<td>"+data[x].PATCH_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_NAME+"</td>" +
                                 "<td>"+data[x].PRODUCT_VERSION+"</td>" +
@@ -902,7 +902,7 @@ function loadPatchDetails(type) {
 
 
             var el = [
-                completedPatches[x].SUPPORT_JIRA,
+                completedPatches[x].SUPPORT_JIRA.split('browse/')[1],
                 completedPatches[x].PATCH_NAME,
                 completedPatches[x].PRODUCT_NAME,
                 completedPatches[x].PRODUCT_VERSION,
@@ -918,7 +918,7 @@ function loadPatchDetails(type) {
         $('#completedAndPartiallyPatchDetails').DataTable({
             data: dataSet2,
             columns: [
-                { title: "Support JIRA" },
+                { title: "Support JIRA ID" },
                 { title: "Patch Name" },
                 { title: "Product Name" },
                 { title: "Version" },
