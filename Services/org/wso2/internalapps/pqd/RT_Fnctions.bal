@@ -1102,6 +1102,7 @@ function getReleasesByProductArea (string productArea) (json) {
             }
 
             redmineReleaseDetailsJson[redmineReleaseIndex].color = color;
+            redmineReleaseDetailsJson[redmineReleaseIndex].gitVersionId = 0;
 
             sql:Parameter redmineVersionId = {sqlType:"integer", value:versionId};
             sql:Parameter redmineFeatureId = {sqlType:"integer", value:2};//Feature

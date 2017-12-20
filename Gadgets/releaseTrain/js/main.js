@@ -1,6 +1,6 @@
   //var url="203.94.95.237";
-  var url="localhost";
-  //var url="digitalops.services.wso2.com";
+  //var url="localhost";
+  var url="digitalops.services.wso2.com";
   var port="9092";
   // create a handlebars template
   var source   = document.getElementById('item-template').innerHTML;
