@@ -3,7 +3,7 @@ var now = new Date();
 var months = ["January", "February", "March", "April", "May","June", "July", "August", "September", "October", "November","December"];
 var lastMonthsName = [];
 var lastMonthsNumber = [];
-var firstMonthNumber = [];
+var arrayOfYears = [];
 
 
 function getMonth(monthStr){
@@ -16,23 +16,33 @@ function ageGraph() {
         return  new Date(y, m +1, 0).getDate();
     };
 
+    var aYear = now.getFullYear();
+    var aMonth = now.getMonth();
+    for (i=0; i<12; i++) {
+        arrayOfYears[i] = aYear ;
+        aMonth--;
+        if (aMonth < 0) {
+            aMonth = 11;
+            aYear = aYear -1 ;
+        }
+    }
+
+    arrayOfYears.reverse();
+
+
     //get today date and push that date i to arrays
     now.setMonth(now.getMonth());
     lastMonthsName[11]=now.getFullYear()+' '+months[now.getMonth()]+' '+now.getDate();
     if(getMonth(months[now.getMonth()])<10 || now.getDate() <10){
         if(getMonth(months[now.getMonth()])<10 && now.getDate() <10){
-            lastMonthsNumber[11]=now.getFullYear()+'-0'+getMonth(months[now.getMonth()])+'-0'+now.getDate();
-            firstMonthNumber[11]=now.getFullYear()+'-0'+getMonth(months[now.getMonth()])+'-01';
+            lastMonthsNumber[11]=arrayOfYears[11]+'-0'+getMonth(months[now.getMonth()])+'-0'+now.getDate();
         }else if(getMonth(months[now.getMonth()])<10){
-            lastMonthsNumber[11]=now.getFullYear()+'-0'+getMonth(months[now.getMonth()])+'-'+now.getDate();
-            firstMonthNumber[11]=now.getFullYear()+'-0'+getMonth(months[now.getMonth()])+'-01';
+            lastMonthsNumber[11]=arrayOfYears[11] +'-0'+getMonth(months[now.getMonth()])+'-'+now.getDate();
         }else if(now.getDate() <10){
-            lastMonthsNumber[11]=now.getFullYear()+'-'+getMonth(months[now.getMonth()])+'-0'+now.getDate();
-            firstMonthNumber[11]=now.getFullYear()+'-'+getMonth(months[now.getMonth()])+'-01';
+            lastMonthsNumber[11]=arrayOfYears[11] +'-'+getMonth(months[now.getMonth()])+'-0'+now.getDate();
         }
     }else{
-        lastMonthsNumber[11]=now.getFullYear()+'-'+getMonth(months[now.getMonth()])+'-'+now.getDate();
-        firstMonthNumber[11]=now.getFullYear()+'-'+getMonth(months[now.getMonth()])+'-01';
+        lastMonthsNumber[11]=arrayOfYears[11] +'-'+getMonth(months[now.getMonth()])+'-'+now.getDate();
     }
 
     //get last 12 months from current date
@@ -47,41 +57,37 @@ function ageGraph() {
         thisMonth --;
     }
 
+
     //get first and last date of previous 12 months and add those in to arrays
     now.setMonth(lastTwelveMonths[11]);
     for(var i=0; i<=10;i++){
-        lastMonthsName[10-i]=now.getFullYear()+' '+months[lastTwelveMonths[10-i]]+' '+lastday(now.getFullYear(),getMonth(months[lastTwelveMonths[10-i]])-1);
+        lastMonthsName[10-i]=arrayOfYears[10-i] +' '+months[lastTwelveMonths[10-i]]+' '+lastday(now.getFullYear(),getMonth(months[lastTwelveMonths[10-i]])-1);
 
         if(getMonth(months[lastTwelveMonths[10-i]])<10){
-            lastMonthsNumber[10-i]=now.getFullYear()+'-0'+getMonth(months[lastTwelveMonths[10-i]])+'-'+lastday(now.getFullYear(),getMonth(months[lastTwelveMonths[10-i]])-1);
-            firstMonthNumber[10-i]=now.getFullYear()+'-0'+getMonth(months[lastTwelveMonths[10-i]])+'-01';
+            lastMonthsNumber[10-i]=arrayOfYears[10-i]+'-0'+getMonth(months[lastTwelveMonths[10-i]])+'-'+lastday(now.getFullYear(),getMonth(months[lastTwelveMonths[10-i]])-1);
         }else{
-            lastMonthsNumber[10-i]=now.getFullYear()+'-'+getMonth(months[lastTwelveMonths[10-i]])+'-'+lastday(now.getFullYear(),getMonth(months[lastTwelveMonths[10-i]])-1);
-            firstMonthNumber[10-i]=now.getFullYear()+'-'+getMonth(months[lastTwelveMonths[10-i]])+'-01';
+            lastMonthsNumber[10-i]=arrayOfYears[10-i]+'-'+getMonth(months[lastTwelveMonths[10-i]])+'-'+lastday(now.getFullYear(),getMonth(months[lastTwelveMonths[10-i]])-1);
         }
         now.setMonth(lastTwelveMonths[10-i]);
         if(lastTwelveMonths[10-i] === 0){
-            now.setFullYear(now.getFullYear() - 1);
+            now.setFullYear(arrayOfYears[10-i] - 1);
         }
     }
 
 
-    //create a string of firstdate and lastdate to send via ajax
-    var firstMonthDate = "";
+    //create a last date to send via ajax
     var lastMonthDate = "";
     for(var y=0;y<lastMonthsNumber.length;y++){
-        firstMonthDate += firstMonthNumber[y]+'>';
         lastMonthDate += lastMonthsNumber[y]+'>';
     }
-    firstMonthDate = firstMonthDate.substring(0, firstMonthDate.length-1);
     lastMonthDate = lastMonthDate.substring(0, lastMonthDate.length-1);
     var queuedGraphData = [];
 
-    console.log(lastMonthDate);
+    // console.log(lastMonthDate);
     $.ajax({
         type: "GET",
         url: 'https://'+BALLERINA_URL+'/pmt-dashboard-serives/load-queued-age-graph',
-        data: {firstMonthDate:firstMonthDate, lastMonthDate:lastMonthDate },
+        data: {lastMonthDate:lastMonthDate },
         async: false,
         success: function(data){
             queuedGraphData = data;
