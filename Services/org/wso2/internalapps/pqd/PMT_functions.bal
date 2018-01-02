@@ -80,6 +80,21 @@ function setJIRAConnector () {
 
 }
 
+function setHTTPConnector () {
+
+    try {
+        json complexityConfigs = getConfigurationData(CONFIGURATION_PATH);
+        var BASE_URL, _ = (string)complexityConfigs.PATCH_COMPLEXITY.BASE_URL;
+        http_Connector = create http:ClientConnector(BASE_URL);
+
+        logger:info("HTTP CLIENT CONNECTOR INITIALIZED");
+
+    } catch (errors:Error err) {
+        logger:error("ERROR IN INITIALIZING HTTP CLIENT CONNECTOR - " + err.msg);
+    }
+
+}
+
 function loadDashboardWithHistory (string start, string end) (json) {
     logger:info("PMT SERVICES STARTED");
 
@@ -129,6 +144,7 @@ function loadDashboardWithHistory (string start, string end) (json) {
     int securityLength = lengthof jsonResOfSecurityInternal;
     int loop = 0;
     int fetchPatchCount = 0;
+    int statusCode;
 
     //get reactive and proactive patches
     while (loop < securityLength) {
@@ -147,6 +163,7 @@ function loadDashboardWithHistory (string start, string end) (json) {
     int securityStringLength = strings:length(securityInternal_ID);
     string finalSecurityIds;
     json jiraRecords;
+    string bool = "True";
 
     if (securityStringLength > 0) {
         finalSecurityIds = strings:subString(securityInternal_ID, 0, securityStringLength - 1);
@@ -174,6 +191,7 @@ function loadDashboardWithHistory (string start, string end) (json) {
             response = JIRA_Connector.post(JIRA_PATH, request);
 
             jiraRecords = messages:getJsonPayload(response);
+            statusCode = http:getStatusCode(response);
 
         } catch (errors:Error err) {
             logger:error("SUPPORT JIRA CONNECTION ERROR - " + err.msg);
@@ -181,48 +199,53 @@ function loadDashboardWithHistory (string start, string end) (json) {
 
         logger:info("SUPPORT JIRA DATA RECEIVED");
 
-        var jiraFetchCount, _ = (int)jiraRecords.total;
+        if (statusCode == 200) {
+            var jiraFetchCount, _ = (int)jiraRecords.total;
 
-        if (jiraFetchCount == 0) {
-            unCategorizedCount = fetchPatchCount - jiraFetchCount;
-        } else {
-            int issueLength = lengthof jiraRecords.issues;
-            loop = 0;
-            while (loop < securityLength) {
-                int loop2 = 0;
-                var tempCount = 0;
-                while (loop2 < issueLength) {
-                    var id, _ = (string)jiraRecords.issues[loop2].key;
-                    if (idPool[loop] == id) {
-                        tempCount = idCounts[loop];
-                        verifyActualId[loop] = 1;
-                        int loop3 = 0;
-                        int labelInt = lengthof jiraRecords.issues[loop2].fields.labels;
-                        while (loop3 < labelInt) {
-                            var label, _ = (string)jiraRecords.issues[loop2].fields.labels[loop3];
-                            if (label == "ExtFoundVuln" || label == "CustFoundVuln") {
-                                reactiveCount = reactiveCount + tempCount;
-                                break;
-                            } else if (label == "IntFoundVuln") {
-                                proactiveCount = proactiveCount + tempCount;
-                                break;
+            if (jiraFetchCount == 0) {
+                unCategorizedCount = fetchPatchCount - jiraFetchCount;
+            } else {
+                int issueLength = lengthof jiraRecords.issues;
+                loop = 0;
+                while (loop < securityLength) {
+                    int loop2 = 0;
+                    var tempCount = 0;
+                    while (loop2 < issueLength) {
+                        var id, _ = (string)jiraRecords.issues[loop2].key;
+                        if (idPool[loop] == id) {
+                            tempCount = idCounts[loop];
+                            verifyActualId[loop] = 1;
+                            int loop3 = 0;
+                            int labelInt = lengthof jiraRecords.issues[loop2].fields.labels;
+                            while (loop3 < labelInt) {
+                                var label, _ = (string)jiraRecords.issues[loop2].fields.labels[loop3];
+                                if (label == "ExtFoundVuln" || label == "CustFoundVuln") {
+                                    reactiveCount = reactiveCount + tempCount;
+                                    break;
+                                } else if (label == "IntFoundVuln") {
+                                    proactiveCount = proactiveCount + tempCount;
+                                    break;
+                                }
+                                loop3 = loop3 + 1;
                             }
-                            loop3 = loop3 + 1;
                         }
+                        loop2 = loop2 + 1;
                     }
-                    loop2 = loop2 + 1;
+                    loop = loop + 1;
                 }
-                loop = loop + 1;
-            }
 
-            loop = 0;
-            while (loop < securityLength) {
-                if (verifyActualId[loop] == 0) {
-                    unCategorizedCount = unCategorizedCount + idCounts[loop];
+                loop = 0;
+                while (loop < securityLength) {
+                    if (verifyActualId[loop] == 0) {
+                        unCategorizedCount = unCategorizedCount + idCounts[loop];
+                    }
+                    loop = loop + 1;
                 }
-                loop = loop + 1;
             }
+        }else{
+            bool = "False";
         }
+
     }
 
     json loadCounts = {   "yetToStartCount":yetToStartCount(start, end),
@@ -233,7 +256,8 @@ function loadDashboardWithHistory (string start, string end) (json) {
                           "reactiveCount":reactiveCount,
                           "proactiveCount":proactiveCount,
                           "uncategorizedCount":unCategorizedCount,
-                          "menuDetails":drillDownMenu
+                          "menuDetails":drillDownMenu,
+                          "isJIRAConnected":bool
                       };
 
     logger:info("PMT DASHBOARD LOADED SUCCESSFULLY");
@@ -583,7 +607,6 @@ function reportedPatchGraph (string duration, string start, string end) (json) {
             loop = loop + 1;
         }
 
-        weekFirstDate = getFirstDateFromWeekNumber(start, end);
 
     } else if (duration == "quarter") {
         datatable resultOfReportedPatchQuarterly = dbConnection.select(REPORTED_PATCH_QUARTER_BASIS, params);
@@ -650,9 +673,9 @@ function reportedPatchGraph (string duration, string start, string end) (json) {
         } else if (duration == "week") {
             var patchYear, castErr = (int)jsonResOfReportedPatches[loop].YEAR;
             var week, castErr = (int)jsonResOfReportedPatches[loop].TYPE;
-            var weekDate, castErr = (string)weekFirstDate[loop].FIRSTWEEK;
+            var weekDate, castErr = (string)jsonResOfReportedPatches[loop].FIRSTDATE;
             dump.name = weekDate;
-            dump.drilldown = weekDate;
+            dump.drilldown = weekDate+loop;
         } else {
             dump.name = jsonResOfReportedPatches[loop].TYPE;
             dump.drilldown = jsonResOfReportedPatches[loop].TYPE;
@@ -707,9 +730,9 @@ function reportedPatchGraph (string duration, string start, string end) (json) {
         } else if (duration == "week") {
             var patchYear, castErr = (int)jsonResOfReportedPatches[loop].YEAR;
             var week, castErr = (int)jsonResOfReportedPatches[loop].TYPE;
-            var weekDate, castErr = (string)weekFirstDate[loop].FIRSTWEEK;
+            var weekDate, castErr = (string)jsonResOfReportedPatches[loop].FIRSTDATE;
             temp.name = weekDate;
-            temp.id = weekDate;
+            temp.id = weekDate+loop;
         } else {
             temp.name = jsonResOfReportedPatches[loop].TYPE;
             temp.id = jsonResOfReportedPatches[loop].TYPE;
@@ -2714,5 +2737,59 @@ function getReleaseFirstDateFromWeekNumber (string start, string end) (json) {
     dbConnection.close();
 
     return weekFirstDate;
+}
+
+function getPatchComplexity(string start, string end)(json){
+    logger:info("PATCH COMPLEXITY REQUESTED");
+
+    //create MYSQL client connector
+    sql:ClientConnector dbConnection = setDatabaseConfiguration();
+
+    sql:Parameter[] params = [];
+    sql:Parameter valueOfStatusIsOne = {sqlType:"varchar", value:"1"};
+    sql:Parameter valueOfStatusIsZero = {sqlType:"varchar", value:"0"};
+    sql:Parameter valueOfActiveIsNo = {sqlType:"varchar", value:"No"};
+    sql:Parameter startDate = {sqlType:"date", value:start};
+    sql:Parameter endDate = {sqlType:"date", value:end};
+
+    json setOfPatchNames;
+
+    //get in progress and completed PATCH_NAMES
+    params = [startDate, endDate,valueOfActiveIsNo,valueOfStatusIsZero,valueOfActiveIsNo,valueOfStatusIsOne,endDate,endDate,valueOfStatusIsOne,valueOfActiveIsNo,startDate,endDate,startDate,endDate,startDate,endDate];
+    datatable resultOfPatchNamesOfInProgressAndCompleted = dbConnection.select(GET_PATCH_NAMES_FOR_PATCH_COMPLEXITY, params);
+    setOfPatchNames, _= <json>resultOfPatchNamesOfInProgressAndCompleted;
+
+    logger:debug(setOfPatchNames); // not required, issue in ballerina
+
+    //getting data of patch complexity accorifng to patch names from python script that host in wso2 servers
+    logger:info("HTTP CLIENT CONNECTOR STARTED TO GET PATCH COMPLEXITY DATA");
+
+    json patchComplexityData;
+
+    try {
+        if (http_Connector == null) {
+            setHTTPConnector();
+        }
+
+        message request = {};
+        message response = {};
+        messages:setJsonPayload(request, setOfPatchNames);
+
+        response = http_Connector.post(COMPLEXITY_DATA_PATH, request);
+
+        patchComplexityData = messages:getJsonPayload(response);
+
+    } catch (errors:Error err) {
+        logger:error("HTTP CLIENT CONNECTOR - " + err.msg);
+    }
+
+    logger:info("PATCH COMPLEXITY DATA RECEIVED");
+
+    logger:debug(patchComplexityData); // not required, issue in ballerina
+
+    //close MYSQL client connector
+    dbConnection.close();
+
+    return patchComplexityData;
 }
 
