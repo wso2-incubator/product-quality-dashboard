@@ -889,7 +889,7 @@ function getOverallJiraIssueSummary(sql:ClientConnector sqlCon)(json){
     sql:Parameter[] params = [];
 
     try{
-        logger:debug("getting issue count summary per area.");
+        logger:info("getting issue count summary per area.");
         datatable allCountTable = sql:ClientConnector.select(sqlCon, GET_ISSUE_COUNT_FOR_AREA, params);
 
         while (datatables:hasNext(allCountTable)){
@@ -904,7 +904,7 @@ function getOverallJiraIssueSummary(sql:ClientConnector sqlCon)(json){
         }
         datatables:close(allCountTable);
 
-        logger:debug("getting issue count summary per issue type.");
+        logger:info("getting issue count summary per issue type.");
         datatable allProductIssueTypeTable = sql:ClientConnector.select(sqlCon, GET_ISSUE_COUNT_BY_ISSUE_TYPE_FOR_ALL, params);
 
         while (datatables:hasNext(allProductIssueTypeTable)) {
@@ -919,7 +919,7 @@ function getOverallJiraIssueSummary(sql:ClientConnector sqlCon)(json){
         }
         datatables:close(allProductIssueTypeTable);
 
-        logger:debug("getting issue count summary per severity.");
+        logger:info("getting issue count summary per severity.");
         datatable AllProductSeverityCountTable = sql:ClientConnector.select(sqlCon, GET_ISSUE_COUNT_BY_SEVERITY_FOR_ALL, params);
 
         while (datatables:hasNext(AllProductSeverityCountTable)) {
