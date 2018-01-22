@@ -91,7 +91,7 @@ service<http> GithubService {
     @http:GET {}
     @http:Path {value:"/issues/update"}
     resource updateDatabaseWithLiveData(message m){
-        logger:debug("updateDatabaseWithLiveData resource invoked");
+        logger:info("updateDatabaseWithLiveData resource invoked");
 
         message response = {};
 
@@ -116,8 +116,9 @@ service<http> GithubService {
                     string githubRepoName = jsons:getString(componentJson[a], "$.github_repo_name");
                     string githubOrganization = jsons:getString(componentJson[a], "$.github_repo_organization");
                     json issuesJson = getRepoIssues(githubOrganization, githubRepoName);
+
                     sortGithubIssues(batchParams, jsons:getInt(componentJson[a], "$.pqd_component_id"),
-                                     jsons:getString(componentJson[a], "$.pqd_component_name"), issuesJson);
+                    jsons:getString(componentJson[a], "$.pqd_component_name"), issuesJson);
                     logger:debug(lengthof batchParams);
                     logger:info("Data fetched successfully for componentId : " + jsons:getInt(componentJson[a], "$.pqd_component_id"));
                     a = a + 1;
@@ -142,7 +143,8 @@ service<http> GithubService {
     @http:GET {}
     @http:Path {value:"/issues/store"}
     resource storeDataInHistory(message m){
-        logger:debug("storeDataInHistory resource got invoked");
+        logger:info("GITHUB DAILY JOB SYNC STARTED");
+        logger:info("storeDataInHistory resource got invoked");
 
         sql:ClientConnector sqlCon = createIssuesDBcon();
 
@@ -151,7 +153,8 @@ service<http> GithubService {
         messages:setJsonPayload(response, responseJson);
 
         sqlCon.close();
-        logger:debug("storeDataInHistory resource responded successfully");
+        logger:info("storeDataInHistory resource responded successfully");
+        logger:info("GITHUB DAILY JOB SYNC FINISHED");
         reply response;
     }
 
@@ -161,17 +164,20 @@ service<http> GithubService {
 
 
 function getRepoIssues(string organization, string repoName)(json){
-
     //this function gets the repo issues for a particular repo and organisation
-    logger:debug("getRepoIssues function invoked for repo " + repoName + " under organisation " + organization);
+        logger:info("getRepoIssues function invoked for repo " + repoName + " under organisation " + organization);
 
-    message response = httpGetForGithub("/repos/" + organization +"/" + repoName + "/issues");
-    json jsonResponse = messages:getJsonPayload(response);
-    json filterJsonForPullRequest = jsons:getJson(jsonResponse, "$.[?(!@.pull_request)]");
-    json filteredJson = jsons:getJson(filterJsonForPullRequest, "$.[?(@.state=='open')]");
-    logger:debug("repo issues received : " + jsons:toString(jsonResponse));
+        message response = httpGetForGithub("/repos/" + organization +"/" + repoName + "/issues");
+        json jsonResponse = messages:getJsonPayload(response);
+        json filterJsonForPullRequest = jsons:getJson(jsonResponse, "$.[?(!@.pull_request)]");
+        json filteredJson = jsons:getJson(filterJsonForPullRequest, "$.[?(@.state=='open')]");
+        logger:debug("repo issues received : " + jsons:toString(jsonResponse));
+        logger:info("FETCHED TOTAL COUNT OF "+repoName+" is - " +lengthof jsonResponse);
+        logger:info("FETCHED ISSUE COUNT OF "+repoName+" is - " +lengthof filteredJson);
+        int diff = lengthof filterJsonForPullRequest - lengthof filteredJson;
+        logger:info("FETCHED PR COUNT OF "+repoName+" is - " +diff);
 
-    return filteredJson;
+        return filteredJson;
 }
 
 
@@ -225,6 +231,9 @@ function collectDataFromPagination(message response)(message ){
                 http:ClientConnector httpCon = create http:ClientConnector(nextLink);
 
                 currentRequest = {};
+                messages:setHeader(currentRequest, "Authorization", jsons:getString(githubConfigData, "$.GITHUB.GITHUB_TOKEN"));
+                messages:setHeader(currentRequest, "Content-Type", "application/json");
+
                 currentResponse = http:ClientConnector.get(httpCon, "", currentRequest);
 
                 json currentJsonResponse = messages:getJsonPayload(currentResponse);
@@ -293,7 +302,6 @@ function splitLinkHeader(string linkHeader)(json){
 
 }
 
-
 function getConfigData(string filePath)(json){
     //get the config data read from the json
     files:File configFile = {path: filePath};
@@ -327,9 +335,6 @@ function getConfigData(string filePath)(json){
     return configJson;
 
 }
-
-
-
 
 function sortGithubIssues(sql:Parameter[][] batchParams, int componentId, string componentName, json issuesJson){
 

@@ -4,11 +4,16 @@ import ballerina.net.http;
 
 
 http:ClientConnector JIRA_Connector = null;
+
+http:ClientConnector http_Connector = null;
+
 sql:Parameter[] params = [];
 
 const string CONFIGURATION_PATH = "config.json";
 
 const string JIRA_PATH = "/rest/api/2/search";
+
+const string COMPLEXITY_DATA_PATH = "/selected_patch";
 
 const int MILI_SECONDS_PER_DAY = 86400000;
 
@@ -81,10 +86,14 @@ const string REPORTED_PATCH_DAY_BASIS = "SELECT count(day(PATCH_QUEUE.REPORT_DAT
                                         AND PATCH_QUEUE.REPORT_DATE <= ? GROUP BY day(PATCH_QUEUE.REPORT_DATE),MONTH(REPORT_DATE),QUARTER(REPORT_DATE),YEAR(PATCH_QUEUE.REPORT_DATE)
                                         order by YEAR,MONTH,QUARTER,TYPE";
 
-const string REPORTED_PATCH_WEEK_BASIS = "SELECT count(week(PATCH_QUEUE.REPORT_DATE)) as COUNTS,week(REPORT_DATE) as TYPE, YEAR(REPORT_DATE) AS YEAR
-                                        FROM PATCH_QUEUE WHERE (PATCH_QUEUE.ACTIVE=? OR PATCH_QUEUE.ACTIVE=?) AND PATCH_QUEUE.REPORT_DATE >=?
-                                        AND PATCH_QUEUE.REPORT_DATE <= ? GROUP BY week(PATCH_QUEUE.REPORT_DATE),YEAR(PATCH_QUEUE.REPORT_DATE)
-                                        order by YEAR,TYPE";
+const string REPORTED_PATCH_WEEK_BASIS = "SELECT count(week(PATCH_QUEUE.REPORT_DATE)) as COUNTS,week(PATCH_QUEUE.REPORT_DATE) as TYPE,DATE_SUB(DATE_SUB(
+                                          DATE_ADD(MAKEDATE(year(PATCH_QUEUE.REPORT_DATE), 1), INTERVAL week(PATCH_QUEUE.REPORT_DATE) WEEK),
+                                          INTERVAL WEEKDAY(
+                                            DATE_ADD(MAKEDATE(year(PATCH_QUEUE.REPORT_DATE), 1), INTERVAL week(PATCH_QUEUE.REPORT_DATE) WEEK)
+                                          ) -1 DAY), INTERVAL 2 DAY) as FIRSTDATE, YEAR(REPORT_DATE) AS YEAR
+                                          FROM PATCH_QUEUE WHERE (PATCH_QUEUE.ACTIVE=? OR PATCH_QUEUE.ACTIVE=?) AND PATCH_QUEUE.REPORT_DATE >= ?
+                                          AND PATCH_QUEUE.REPORT_DATE <= ? GROUP BY week(PATCH_QUEUE.REPORT_DATE),YEAR(PATCH_QUEUE.REPORT_DATE)
+                                          order by YEAR,TYPE";
 
 const string REPORTED_PATCH_MONTH_BASIS = "SELECT count(month(PATCH_QUEUE.REPORT_DATE)) as COUNTS,month(REPORT_DATE) as TYPE,MONTH(REPORT_DATE) AS MONTH,QUARTER(REPORT_DATE) AS QUARTER, YEAR(REPORT_DATE) AS YEAR
                                         FROM PATCH_QUEUE WHERE (PATCH_QUEUE.ACTIVE=? OR PATCH_QUEUE.ACTIVE=?) AND PATCH_QUEUE.REPORT_DATE >=?
@@ -680,3 +689,12 @@ const string PATCH_DETAILS_OF_EID_EQUAL_TO_ZERO = "SELECT PATCH_ETA.PATCH_NAME,P
                                                     PATCH_ETA ON PATCH_ETA.PATCH_QUEUE_ID = PATCH_QUEUE.ID WHERE PATCH_QUEUE.ID=? ";
 
 
+const string GET_PATCH_NAMES_FOR_PATCH_COMPLEXITY = "select PATCH_ETA.PATCH_NAME from PATCH_QUEUE JOIN PATCH_ETA ON PATCH_ETA.PATCH_QUEUE_ID = PATCH_QUEUE.ID
+                                                    WHERE PATCH_QUEUE.REPORT_DATE>=? AND PATCH_QUEUE.REPORT_DATE<=? AND ((PATCH_QUEUE.ACTIVE = ? AND PATCH_ETA.STATUS=? AND PATCH_ETA.RELEASED_ON IS NULL AND PATCH_ETA.RELEASED_NOT_AUTOMATED_ON IS NULL
+                                                    AND PATCH_ETA.RELEASED_NOT_IN_PUBLIC_SVN_ON IS NULL AND PATCH_ETA.LC_STATE NOT IN ('Broken','Released' ,'ReleasedNotInPublicSVN', 'ReleasedNotAutomated','OnHold','N/A'))
+                                                    OR (PATCH_QUEUE.ACTIVE = ? AND PATCH_ETA.STATUS=? AND PATCH_ETA.LC_STATE NOT IN ('OnHold' , 'Broken', 'N/A') AND (case when date(PATCH_ETA.PRE_QA_STARTED_ON) IS NOT NULL THEN date(PATCH_ETA.PRE_QA_STARTED_ON) ELSE date(PATCH_ETA.DEVELOPMENT_STARTED_ON) END) <  ? AND
+                                                     (case when NOT (date(PATCH_ETA.RELEASED_NOT_IN_PUBLIC_SVN_ON) IS NULL AND date(PATCH_ETA.RELEASED_NOT_AUTOMATED_ON) IS NULL AND date(PATCH_ETA.RELEASED_ON) IS NULL ) then LEAST(IFNULL(date(PATCH_ETA.RELEASED_NOT_IN_PUBLIC_SVN_ON),'9999-12-31'),IFNULL(date(PATCH_ETA.RELEASED_NOT_AUTOMATED_ON),'9999-12-31'),IFNULL(date(PATCH_ETA.RELEASED_ON),'9999-12-31'))>? END)))
+                                                     UNION ALL select PATCH_ETA.PATCH_NAME from PATCH_ETA JOIN PATCH_QUEUE on PATCH_QUEUE.ID=PATCH_ETA.PATCH_QUEUE_ID WHERE PATCH_ETA.STATUS=? AND PATCH_QUEUE.ACTIVE=? AND
+                                                    ((date(PATCH_ETA.RELEASED_ON) >= ? AND date(PATCH_ETA.RELEASED_ON) <= ?) OR (date(PATCH_ETA.RELEASED_NOT_AUTOMATED_ON) >=? AND
+                                                    date(PATCH_ETA.RELEASED_NOT_AUTOMATED_ON) <= ?) OR (date(PATCH_ETA.RELEASED_NOT_IN_PUBLIC_SVN_ON) >= ? AND
+                                                    date(PATCH_ETA.RELEASED_NOT_IN_PUBLIC_SVN_ON) <= ?) ) AND PATCH_ETA.LC_STATE IN ('ReleasedNotInPublicSVN','ReleasedNotAutomated','Released')";
