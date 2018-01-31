@@ -1,0 +1,16 @@
+{
+    "id": "pmt",
+    "title": "PMT",
+    "type": "gadget",
+    "thumbnail": "gadget/pmt/total.png",
+    "category": "Publishers",
+    "data": {
+        "url": "gadget/pmt/index.xml"
+    },
+    "notify": {
+        "publisher": {
+            "type": "message",
+            "description": "This notifies message generated in publisher"
+        }
+    }
+}

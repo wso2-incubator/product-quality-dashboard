@@ -1,0 +1,17 @@
+{
+  "id": "issues_and_sonar_dashboard",
+  "title": "ISSUES AND SONAR",
+  "type": "gadget",
+  "thumbnail": "store://gadget/issues_and_sonar_dashboard/images/index.png",
+  "options": {},
+  "data": {
+    "url": "store://gadget/issues_and_sonar_dashboard/index.xml"
+  },
+  "notify": {
+    
+  },
+
+  "listen":{
+    }
+  
+}

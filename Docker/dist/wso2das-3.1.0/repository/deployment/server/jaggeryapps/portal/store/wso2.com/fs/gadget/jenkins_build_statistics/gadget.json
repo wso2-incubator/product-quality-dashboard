@@ -1,0 +1,16 @@
+{
+    "id": "jenkins_build_statistics",
+    "title": "Jenkins Build Statistics",
+    "type": "gadget",
+    "thumbnail": "gadget/jenkins_build_statistics/logo.png",
+    "category": "Publishers",
+    "data": {
+        "url": "gadget/jenkins_build_statistics/index.xml"
+    },
+    "notify": {
+        "publisher": {
+            "type": "message",
+            "description": "This notifies message generated in publisher"
+        }
+    }
+}

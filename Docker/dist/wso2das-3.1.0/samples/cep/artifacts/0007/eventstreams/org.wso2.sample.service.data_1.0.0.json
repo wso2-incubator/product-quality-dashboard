@@ -1,0 +1,44 @@
+{
+  "name": "org.wso2.sensor.in",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "metaData": [
+    {
+      "name": "timestamp",
+      "type": "LONG"
+    },
+    {
+      "name": "powerSaver",
+      "type": "BOOL"
+    },
+    {
+      "name": "id",
+      "type": "INT"
+    },
+    {
+      "name": "name",
+      "type": "STRING"
+    }
+  ],
+  "correlationData": [
+    {
+      "name": "lg",
+      "type": "DOUBLE"
+    },
+    {
+      "name": "lt",
+      "type": "DOUBLE"
+    }
+  ],
+  "payloadData": [
+    {
+      "name": "humidity",
+      "type": "FLOAT"
+    },
+    {
+      "name": "value",
+      "type": "DOUBLE"
+    }
+  ]
+}

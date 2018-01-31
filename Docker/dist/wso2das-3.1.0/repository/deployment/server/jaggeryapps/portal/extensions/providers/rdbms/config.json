@@ -1,0 +1,123 @@
+{
+    "info": {
+        "id": "rdbms",
+        "name": "Relational Database Source",
+        "image": ""
+    },
+    "config" : [
+        {
+            "fieldLabel" : "Database URL",
+            "fieldName" :"dbUrl",
+            "fieldType" : "string",
+            "defaultValue" : "",
+            "isRequired" : true,
+            "hint": "This is a sample hint",
+            "placeholderText" : "jdbc:mysql://localhost:3306/dbname"
+        },
+        {
+             "fieldLabel" : "Driver Class Name",
+             "fieldName" :"driverClassName",
+             "fieldType" : "string",
+             "defaultValue" : "",
+             "isRequired" : true,
+             "placeholderText" : "com.mysql.jdbc.Driver"
+         },
+        {
+            "fieldLabel" : "Table Name",
+            "fieldName" :"tableName",
+            "fieldType" : "string",
+            "defaultValue" : "",
+            "isRequired" : true
+        },
+        {
+            "fieldLabel" : "Username",
+            "fieldName" :"userName",
+            "fieldType" : "string",
+            "defaultValue" : "",
+            "isRequired" : true
+        },
+        {
+            "fieldLabel" : "Password",
+            "fieldName" :"password",
+            "fieldType" : "password",
+            "defaultValue" : "",
+            "isRequired" : true
+        },
+        {
+            "fieldLabel" : " SQL Query",
+            "fieldName" :"query",
+            "fieldType" : "string",
+            "isRequired" : true
+        }
+
+    ],
+    "databases" :[ 
+        {    
+            "databaseType" :  "h2",
+            "queries" :
+                {
+                    "getSchema" : "SELECT column_name, type_name from information_schema.columns where table_name='",
+                    "limit" : " limit ?", 
+                    "statementEnd" : "';"
+                },
+            "ColumnName" : "COLUMN_NAME",
+            "ColumnType" : "TYPE_NAME"
+        }, 
+        {
+            "databaseType" : "mysql",
+            "queries" :
+                {
+                    "getSchema" : "SELECT column_name, column_type FROM INFORMATION_SCHEMA.columns where table_name='",
+                    "limit" : " limit ?",
+                    "appendTableSchema" : "' and table_schema='",
+                    "statementEnd" : "';"
+                },
+            "ColumnName" : "column_name",
+            "ColumnType" : "column_type"
+        },
+        {
+            "databaseType" : "oracle",
+            "queries" :
+                {
+                    "getSchema" : "SELECT column_name, data_type FROM user_tab_columns where table_name='",
+                    "limit" : " where ROWNUM <= ?",
+                    "statementEnd" : "'"
+                },
+            "ColumnName" : "COLUMN_NAME",
+            "ColumnType" : "DATA_TYPE"
+        },
+        {
+            "databaseType" : "sqlserver",
+            "queries" :
+                {
+                    "getSchema" : "SELECT column_name, data_type FROM INFORMATION_SCHEMA.columns where table_name='",
+                    "top" : " TOP ?",
+                    "statementEnd" : "';"
+                },
+            "ColumnName" : "column_name",
+            "ColumnType" : "data_type"
+        },
+        {
+            "databaseType" : "postgresql",
+            "queries" :
+                {
+                    "getSchema" : "SELECT column_name, data_type FROM INFORMATION_SCHEMA.columns where table_name='",
+                    "limit" : " limit ?",
+                    "statementEnd" : "';"
+                },
+            "ColumnName" : "column_name",
+            "ColumnType" : "data_type"
+        },
+         {
+            "databaseType" : "db2",
+            "queries" :
+                {
+                    "getSchema" : "SELECT COLUMN_NAME, TYPE_NAME FROM SYSIBM.SQLCOLUMNS where table_name='",
+                    "limit" : " FETCH FIRST ? ROWS ONLY",
+                    "statementEnd" : "'"
+                },
+            "ColumnName" : "COLUMN_NAME",
+            "ColumnType" : "TYPE_NAME"
+        }
+    ]
+}
