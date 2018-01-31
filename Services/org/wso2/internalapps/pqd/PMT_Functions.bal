@@ -19,9 +19,9 @@ function getConfigurationData (string FILE_PATH) (json) {
 
     try {
         files:open(configFile, "r");
-        logger:info("CONFIG.JSON READ SUCCESSFULLY");
+        logger:debug("CONFIG.JSON READ SUCCESSFULLY");
     } catch (errors:Error err) {
-        logger:info("ERROR IN READ CONGIG.JSON - "+ err.msg);
+        logger:debug("ERROR IN READ CONFIG.JSON - "+ err.msg);
     }
 
     var content, numberOfBytes = files:read(configFile, 100000);
