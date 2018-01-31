@@ -1,0 +1,52 @@
+@App:name("getJenkinsDataFromBallerina")
+@app:description("Get Jenkins build data as a json from ballerina cronjob daily")
+
+@source(type='http', receiver.url='http://0.0.0.0:8080/get-jenkins-data',
+@map(type = 'json',enclosing.element='$.events',
+@attributes(buildNumber = "buildNumber", product = "product", component = "component", result = "result",duration = 'duration', committedBy = 'committedBy', PRmergedGitID= 'PRmergedGitID', PRmergedName = 'PRmergedName', commitUrl = 'commitUrl', repoOwner = 'repoOwner', repoName = 'repoName', timestamp = 'timestamp', jobUrl = 'jobUrl', culprits = 'culprits', buildStatus = 'buildStatus', failureReason = 'failureReason')))
+define stream GetJenkinsBuildDataFromBallerina (
+buildNumber int,product string,component string,result string,duration int,committedBy string,PRmergedGitID string,PRmergedName string,commitUrl string,repoOwner string,repoName string,timestamp long, jobUrl string,culprits string, buildStatus int, failureReason string);
+
+
+@sink(type='log')
+define stream OrderedJenkinsBuildData(
+buildNumber int,product string,component string,result string,duration int,committedBy string,PRmergedGitID string,PRmergedName string,commitUrl string,repoOwner string,repoName string,timestamp long, jobUrl string,culprits string, buildStatus int, failureReason string);
+
+@IgnoreEventsOlderThanBuffer('true')
+@store(type="rdbms", jdbc.url="jdbc:mysql://localhost:3306/jenkins", username="root", password="root", jdbc.driver.name="com.mysql.jdbc.Driver")
+
+define aggregation buildDataAggregation
+from OrderedJenkinsBuildData
+select sum(buildStatus) as sum,component,count(buildStatus) as count
+group by component
+aggregate by timestamp every seconds...year;
+
+
+@store(type="rdbms", jdbc.url="jdbc:mysql://localhost:3306/jenkins", username="root", password="root", jdbc.driver.name="com.mysql.jdbc.Driver")
+--@PrimaryKey("buildNumber","component")
+@index("timestamp") 
+define table JNKS_BUILD_DETAILS (buildNumber int,product string,component string,result string,duration int,committedBy string,PRmergedGitID string,PRmergedName string,commitUrl string,repoOwner string,repoName string,timestamp long, jobUrl string,culprits string, buildStatus int, failureReason string);
+
+@store(type="rdbms", jdbc.url="jdbc:mysql://localhost:3306/jenkins", username="root", password="root", jdbc.driver.name="com.mysql.jdbc.Driver")
+--@PrimaryKey("buildNumber","component")
+@index("timestamp") 
+define table JNKS_FAILED_BUILD_DETAILS (buildNumber int,product string,component string,result string,duration int,committedBy string,PRmergedGitID string,PRmergedName string,commitUrl string,repoOwner string,repoName string,timestamp long, jobUrl string,culprits string, buildStatus int, failureReason string);
+
+--order by timestamp receiving events
+@info(name='Input stream Order by timestamp')
+from GetJenkinsBuildDataFromBallerina
+select *
+order by timestamp
+insert into OrderedJenkinsBuildData;
+
+--data insert in to all details table
+@info(name='query1')
+from OrderedJenkinsBuildData[ component != 'test' ]  
+update or insert into  JNKS_BUILD_DETAILS
+on JNKS_BUILD_DETAILS.buildNumber == buildNumber and JNKS_BUILD_DETAILS.component == component;
+
+--failed data insert in to fail details table
+@info(name='query2')
+from OrderedJenkinsBuildData[result !='SUCCESS' ]  
+update or insert into  JNKS_FAILED_BUILD_DETAILS
+on JNKS_FAILED_BUILD_DETAILS.buildNumber == buildNumber and JNKS_FAILED_BUILD_DETAILS.component == component;
