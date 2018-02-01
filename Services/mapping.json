@@ -1,0 +1,27 @@
+{
+  "OPP":{
+    "APIM":"API Management (true OAuth)",
+    "IOT":"Mobile/IoT",
+    "Integration":"Integration",
+    "Security":"Security",
+    "Analytics":"Analytics",
+    "Governance":"Governance",
+    "Partnership":"Partnership",
+    "OpenBanking":"Open Banking"
+  },
+  "ACC":{
+    "APIM":"API Management (true OAuth)",
+    "IOT":"Mobile/IoT",
+    "Integration":"Integration",
+    "Security":"Security",
+    "Analytics":"Analytics"
+  },
+  "OPPLINEITEM":{
+    "APIM":"APIM",
+    "IOT":"IOT",
+    "Integration":"Integration",
+    "IAM":"IAM",
+    "Analytics":"Analytics",
+    "Other":"Other"
+  }
+ }
