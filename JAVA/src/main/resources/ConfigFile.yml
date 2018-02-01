@@ -1,0 +1,9 @@
+#TestLink Configurations
+testLinkUrl : https://testlink.wso2.com/lib/api/xmlrpc/v1/xmlrpc.php
+devKey : 226ad5ec4cc8bac9f3b080aba4fe62fc
+
+#Database connection
+dbUrl : jdbc:mysql://192.168.56.212:3306/
+dbName : product_quality_dashboard
+dbUserName: pqdadmin
+dbPassword : pqdadmin123
