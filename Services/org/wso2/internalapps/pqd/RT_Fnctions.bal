@@ -832,25 +832,11 @@ function getAllReleases()(json){
             unicId=unicId + 1;
 
             redmineReleaseDetailsJson[redmineReleaseIndex].id = unicId;//create a unic number
-            var color="";
+            var color, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productColor;
             var area, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productArea;
             var versionId, _=(int)redmineReleaseDetailsJson[redmineReleaseIndex].versionId;
 
-            if (area=="apim"){
-                color="green";
-            }else if(area=="analytics"){
-                color="red";
-            }else if(area=="cloud"){
-                color="blue";
-            }else if(area=="integration"){
-                color="purple";
-            }else if(area=="iot"){
-                color="skyblue";
-            }else if(area=="identity"){
-                color="orange";
-            }else if(area=="other"){
-                color="black";
-            }
+
 
             redmineReleaseDetailsJson[redmineReleaseIndex].color = color;
             redmineReleaseDetailsJson[redmineReleaseIndex].gitVersionId = 0;
@@ -923,26 +909,13 @@ function getAllReleases()(json){
         while (gitHubReleaseIndex < gitHubReleaseDetailsLength) {
             unicId=unicId + 1;
             gitHubReleaseDetailsJson[gitHubReleaseIndex].id = unicId;//create a unic number
+            color, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productColor;
             var area, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productArea;
             var gitReleasedVersionName, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].releaseVersion;
             var redmineProjectId, _ = (int)gitHubReleaseDetailsJson[gitHubReleaseIndex].projectId;
 
 
-            if (area == "apim") {
-                color = "green";
-            } else if (area == "analytics") {
-                color = "red";
-            } else if (area == "cloud") {
-                color = "blue";
-            } else if (area == "integration") {
-                color = "purple";
-            } else if (area == "iot") {
-                color = "skyblue";
-            } else if (area == "identity") {
-                color = "orange";
-            } else if (area == "other") {
-                color = "black";
-            }
+
             gitHubReleaseDetailsJson[gitHubReleaseIndex].color = color;
             gitHubReleaseDetailsJson[gitHubReleaseIndex].start = date;
 
@@ -1082,25 +1055,11 @@ function getReleasesByProductArea (string productArea) (json) {
         while (redmineReleaseIndex < redmineReleaseDetailsLength) {
             unicId=unicId + 1;
             redmineReleaseDetailsJson[redmineReleaseIndex].id = unicId;//create a unic number
-            var color="";
+            var color, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productColor;
             var area, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productArea;
             var versionId, _=(int)redmineReleaseDetailsJson[redmineReleaseIndex].versionId;
 
-            if (area=="apim"){
-                color="green";
-            }else if(area=="analytics"){
-                color="red";
-            }else if(area=="cloud"){
-                color="blue";
-            }else if(area=="integration"){
-                color="purple";
-            }else if(area=="iot"){
-                color="skyblue";
-            }else if(area=="identity"){
-                color="orange";
-            }else if(area=="other"){
-                color="black";
-            }
+
 
             redmineReleaseDetailsJson[redmineReleaseIndex].color = color;
             redmineReleaseDetailsJson[redmineReleaseIndex].gitVersionId = 0;
@@ -1171,26 +1130,13 @@ function getReleasesByProductArea (string productArea) (json) {
             while (gitHubReleaseIndex < gitHubReleaseDetailsLength) {
                 unicId=unicId + 1;
                 gitHubReleaseDetailsJson[gitHubReleaseIndex].id = unicId;//create a unic number
+                color, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productColor;
                 var area, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productArea;
                 var gitReleasedVersionName, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].releaseVersion;
                 var redmineProjectId, _ = (int)gitHubReleaseDetailsJson[gitHubReleaseIndex].projectId;
 
 
-                if (area == "apim") {
-                    color = "green";
-                } else if (area == "analytics") {
-                    color = "red";
-                } else if (area == "cloud") {
-                    color = "blue";
-                } else if (area == "integration") {
-                    color = "purple";
-                } else if (area == "iot") {
-                    color = "skyblue";
-                } else if (area == "identity") {
-                    color = "orange";
-                } else if (area == "other") {
-                    color = "black";
-                }
+
                 gitHubReleaseDetailsJson[gitHubReleaseIndex].color = color;
                 gitHubReleaseDetailsJson[gitHubReleaseIndex].start = date;
 
