@@ -1,0 +1,13 @@
+JDBC_DRIVER : com.mysql.jdbc.Driver
+
+# PQD Database credentials
+DB_URL : jdbc:mysql://192.168.56.212/product_quality_dashboard
+USER : pqdadmin
+PASS : pqdadmin123
+
+#MongoDB credentials
+userName : mongoreaduser
+password : ZhuLwFJW8C39KADugqtm
+mongoServe : 54.169.129.84
+mongoDB : Build_Failure
+

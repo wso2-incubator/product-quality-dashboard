@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config transient="false" date="1473787171346">
+	<site enabled="true" updateable="true" policy="USER-EXCLUDE" url="platform:/base/">
+		<feature id="org.wso2.carbon.analytics.gadget.realtime.provider.template" url="features/org.wso2.carbon.analytics.gadget.realtime.provider.template_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.statistics.server" url="features/org.wso2.carbon.event.statistics.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.messageconsole" url="features/org.wso2.carbon.analytics.messageconsole_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.webservice.server" url="features/org.wso2.carbon.analytics.webservice.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.ndatasource" url="features/org.wso2.carbon.ndatasource_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.security.mgt.server" url="features/org.wso2.carbon.security.mgt.server_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.siddhi.tryit" url="features/org.wso2.carbon.siddhi.tryit_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.tryit" url="features/org.wso2.carbon.tryit_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.tenant.mgt.common" url="features/org.wso2.carbon.tenant.mgt.common_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.as.runtimes.cxf" url="features/org.wso2.carbon.as.runtimes.cxf_4.7.0/" version="4.7.0">
+		</feature>
+		<feature id="org.jaggeryjs.ui" url="features/org.jaggeryjs.ui_0.12.8/" version="0.12.8">
+		</feature>
+		<feature id="org.wso2.carbon.event.processor.ui" url="features/org.wso2.carbon.event.processor.ui_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.jms.server" url="features/org.wso2.carbon.event.input.adapter.jms.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.receiver.binary.server" url="features/org.wso2.carbon.databridge.receiver.binary.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.tracer.server" url="features/org.wso2.carbon.event.tracer.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.application.mgt.server" url="features/org.wso2.carbon.application.mgt.server_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.receiver.ui" url="features/org.wso2.carbon.event.receiver.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.datasource.hbase.server" url="features/org.wso2.carbon.analytics.datasource.hbase.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.gadget.batch.provider.template" url="features/org.wso2.carbon.analytics.gadget.batch.provider.template_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.logger.server" url="features/org.wso2.carbon.event.output.adapter.logger.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.wso2event.server" url="features/org.wso2.carbon.event.output.adapter.wso2event.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.tryit.server" url="features/org.wso2.carbon.tryit.server_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.registry.core.common" url="features/org.wso2.carbon.registry.core.common_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.registry.core.ui" url="features/org.wso2.carbon.registry.core.ui_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.security.mgt.ui" url="features/org.wso2.carbon.security.mgt.ui_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.core" url="features/org.wso2.carbon.core_4.4.9/" version="4.4.9">
+		</feature>
+		<feature id="org.wso2.carbon.event.receiver" url="features/org.wso2.carbon.event.receiver_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.das.styles" url="features/org.wso2.das.styles_3.1.0/" version="3.1.0">
+		</feature>
+		<feature id="org.wso2.carbon.registry.resource.properties.server" url="features/org.wso2.carbon.registry.resource.properties.server_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.ml.jaggery.app" url="features/org.wso2.carbon.ml.jaggery.app_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.messageconsole.server" url="features/org.wso2.carbon.analytics.messageconsole.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.mqtt.server" url="features/org.wso2.carbon.event.input.adapter.mqtt.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.ndatasource.ui" url="features/org.wso2.carbon.ndatasource.ui_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.soap.server" url="features/org.wso2.carbon.event.output.adapter.soap.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.deployment.synchronizer.subversion" url="features/org.wso2.carbon.deployment.synchronizer.subversion_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.stream" url="features/org.wso2.carbon.event.stream_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.registry.core.server" url="features/org.wso2.carbon.registry.core.server_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.kafka.server" url="features/org.wso2.carbon.event.output.adapter.kafka.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.tenant.mgt.common.ui" url="features/org.wso2.carbon.tenant.mgt.common.ui_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.datasource.reader.hadoop.server" url="features/org.wso2.carbon.datasource.reader.hadoop.server_4.3.5/" version="4.3.5">
+		</feature>
+		<feature id="org.wso2.carbon.core.ui" url="features/org.wso2.carbon.core.ui_4.4.9/" version="4.4.9">
+		</feature>
+		<feature id="org.wso2.carbon.event.flow.server" url="features/org.wso2.carbon.event.flow.server_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter" url="features/org.wso2.carbon.event.input.adapter_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.jaggeryapp.template.deployer.server" url="features/org.wso2.carbon.jaggeryapp.template.deployer.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.ndatasource.datasources" url="features/org.wso2.carbon.ndatasource.datasources_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.core.common" url="features/org.wso2.carbon.core.common_4.4.9/" version="4.4.9">
+		</feature>
+		<feature id="org.wso2.carbon.ml.database" url="features/org.wso2.carbon.ml.database_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.tenant.mgt.common.server" url="features/org.wso2.carbon.tenant.mgt.common.server_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.dashboards.migration.tool" url="features/org.wso2.carbon.dashboards.migration.tool_2.0.2/" version="2.0.2">
+		</feature>
+		<feature id="org.wso2.carbon.event.publisher.template.deployer.server" url="features/org.wso2.carbon.event.publisher.template.deployer.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.soap.server" url="features/org.wso2.carbon.event.input.adapter.soap.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.tenant.common" url="features/org.wso2.carbon.tenant.common_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.core.runtime" url="features/org.wso2.carbon.core.runtime_4.4.9/" version="4.4.9">
+		</feature>
+		<feature id="org.wso2.carbon.event.processor.server" url="features/org.wso2.carbon.event.processor.server_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.deployment.synchronizer.server" url="features/org.wso2.carbon.deployment.synchronizer.server_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.user.mgt.server" url="features/org.wso2.carbon.user.mgt.server_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.logging.mgt" url="features/org.wso2.carbon.logging.mgt_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.processor.manager.core" url="features/org.wso2.carbon.event.processor.manager.core_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.ml" url="features/org.wso2.carbon.ml_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.websocket.local.server" url="features/org.wso2.carbon.event.input.adapter.websocket.local.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.server" url="features/org.wso2.carbon.event.server_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.metrics.ui" url="features/org.wso2.carbon.metrics.ui_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.websocket.local.server" url="features/org.wso2.carbon.event.output.adapter.websocket.local.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.api.client" url="features/org.wso2.carbon.analytics.api.client_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.spark.server" url="features/org.wso2.carbon.analytics.spark.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.geo.dashboard" url="features/org.wso2.carbon.geo.dashboard_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.identity.authenticator.saml2.sso.ui" url="features/org.wso2.carbon.identity.authenticator.saml2.sso.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.http.server" url="features/org.wso2.carbon.event.input.adapter.http.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.email.server" url="features/org.wso2.carbon.event.output.adapter.email.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.logging.mgt.server" url="features/org.wso2.carbon.logging.mgt.server_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.datasource.rdbms.server" url="features/org.wso2.carbon.analytics.datasource.rdbms.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.stream.template.deployer.server" url="features/org.wso2.carbon.event.stream.template.deployer.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.registry.core" url="features/org.wso2.carbon.registry.core_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.datasource.cassandra.server" url="features/org.wso2.carbon.analytics.datasource.cassandra.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.filetail.server" url="features/org.wso2.carbon.event.input.adapter.filetail.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.jsservice" url="features/org.wso2.carbon.analytics.jsservice_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.datapublisher" url="features/org.wso2.carbon.databridge.datapublisher_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.websocket.server" url="features/org.wso2.carbon.event.output.adapter.websocket.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.flow" url="features/org.wso2.carbon.event.flow_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.stream.persistence.server" url="features/org.wso2.carbon.analytics.stream.persistence.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.stream.ui" url="features/org.wso2.carbon.event.stream.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.api.server" url="features/org.wso2.carbon.analytics.api.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.jaggeryjs.modules.carbon" url="features/org.jaggeryjs.modules.carbon_1.5.5/" version="1.5.5">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.wso2event.server" url="features/org.wso2.carbon.event.input.adapter.wso2event.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.tracer" url="features/org.wso2.carbon.event.tracer_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.registry.ui.menu" url="features/org.wso2.carbon.registry.ui.menu_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.restapi" url="features/org.wso2.carbon.analytics.restapi_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.statistics.ui" url="features/org.wso2.carbon.event.statistics.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.processor.template.deployer" url="features/org.wso2.carbon.event.processor.template.deployer_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.sms.server" url="features/org.wso2.carbon.event.output.adapter.sms.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.spark.commons" url="features/org.wso2.carbon.spark.commons_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.ciphertool" url="features/org.wso2.ciphertool_1.0.0.wso2v3/" version="1.0.0.wso2v3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.messageconsole.ui" url="features/org.wso2.carbon.analytics.messageconsole.ui_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.common" url="features/org.wso2.carbon.event.common_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.gadget.template.deployer.server" url="features/org.wso2.carbon.gadget.template.deployer.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.core.server" url="features/org.wso2.carbon.databridge.core.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.template.manager.server" url="features/org.wso2.carbon.event.template.manager.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.agent.server" url="features/org.wso2.carbon.databridge.agent.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.registry.resource.properties.ui" url="features/org.wso2.carbon.registry.resource.properties.ui_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.event.processor" url="features/org.wso2.carbon.event.processor_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.common.jmx.agent.server" url="features/org.wso2.carbon.analytics.common.jmx.agent.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.dashboard.template.deployer.server" url="features/org.wso2.carbon.dashboard.template.deployer.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.tracer.ui" url="features/org.wso2.carbon.event.tracer.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.eventsink.template.deployer.server" url="features/org.wso2.carbon.analytics.eventsink.template.deployer.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.identity.core.ui" url="features/org.wso2.carbon.identity.core.ui_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.event.publisher.server" url="features/org.wso2.carbon.event.publisher.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.dashboards.shindig" url="features/org.wso2.carbon.dashboards.shindig_2.0.2/" version="2.0.2">
+		</feature>
+		<feature id="org.wso2.carbon.tenant.common.ui" url="features/org.wso2.carbon.tenant.common.ui_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.common.jmx.agent" url="features/org.wso2.carbon.analytics.common.jmx.agent_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.simulator.ui" url="features/org.wso2.carbon.event.simulator.ui_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.tenant.common.server" url="features/org.wso2.carbon.tenant.common.server_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.das.multitenancy.dashboard.ui" url="features/org.wso2.das.multitenancy.dashboard.ui_3.1.0/" version="3.1.0">
+		</feature>
+		<feature id="org.wso2.carbon.event.receiver.template.deployer.server" url="features/org.wso2.carbon.event.receiver.template.deployer.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.email.server" url="features/org.wso2.carbon.event.input.adapter.email.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.http.server" url="features/org.wso2.carbon.event.output.adapter.http.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.webservice" url="features/org.wso2.carbon.analytics.webservice_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.ntask.core" url="features/org.wso2.carbon.ntask.core_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.server" url="features/org.wso2.carbon.event.input.adapter.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.commons.thrift.server" url="features/org.wso2.carbon.databridge.commons.thrift.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.websocket.server" url="features/org.wso2.carbon.event.input.adapter.websocket.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.activitydashboard.server" url="features/org.wso2.carbon.analytics.activitydashboard.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.mqtt.server" url="features/org.wso2.carbon.event.output.adapter.mqtt.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.streamdefn.filesystem.server" url="features/org.wso2.carbon.databridge.streamdefn.filesystem.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.common.jmx.agent.ui" url="features/org.wso2.carbon.analytics.common.jmx.agent.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.dashboards.portal" url="features/org.wso2.carbon.dashboards.portal_2.0.2/" version="2.0.2">
+		</feature>
+		<feature id="org.wso2.carbon.event.template.manager.ui" url="features/org.wso2.carbon.event.template.manager.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.rdbms.server" url="features/org.wso2.carbon.event.output.adapter.rdbms.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.input.adapter.kafka.server" url="features/org.wso2.carbon.event.input.adapter.kafka.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.security.mgt" url="features/org.wso2.carbon.security.mgt_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.datareceiver" url="features/org.wso2.carbon.databridge.datareceiver_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.application.deployer" url="features/org.wso2.carbon.event.application.deployer_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.ui.server" url="features/org.wso2.carbon.event.output.adapter.ui.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.registry.contentsearch" url="features/org.wso2.carbon.registry.contentsearch_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.ml.core" url="features/org.wso2.carbon.ml.core_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.event.receiver.server" url="features/org.wso2.carbon.event.receiver.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.jms.server" url="features/org.wso2.carbon.event.output.adapter.jms.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.activitydashboard" url="features/org.wso2.carbon.analytics.activitydashboard_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.stream.server" url="features/org.wso2.carbon.event.stream.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.ml.commons" url="features/org.wso2.carbon.ml.commons_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.user.mgt.ui" url="features/org.wso2.carbon.user.mgt.ui_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.identity.core.server" url="features/org.wso2.carbon.identity.core.server_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.commons.binary.server" url="features/org.wso2.carbon.databridge.commons.binary.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.jaggeryjs.modules.i18n" url="features/org.jaggeryjs.modules.i18n_1.5.5/" version="1.5.5">
+		</feature>
+		<feature id="org.wso2.carbon.ml.siddhi.extension" url="features/org.wso2.carbon.ml.siddhi.extension_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.metrics" url="features/org.wso2.carbon.metrics_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.metrics.server" url="features/org.wso2.carbon.metrics.server_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.jaggeryjs" url="features/org.jaggeryjs_0.12.8/" version="0.12.8">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.spark.event" url="features/org.wso2.carbon.analytics.spark.event_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.eventsink.server" url="features/org.wso2.carbon.analytics.eventsink.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.datasource.reader.cassandra.server" url="features/org.wso2.carbon.datasource.reader.cassandra.server_4.3.5/" version="4.3.5">
+		</feature>
+		<feature id="org.wso2.carbon.event.template.manager" url="features/org.wso2.carbon.event.template.manager_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.cassandra.server" url="features/org.wso2.carbon.event.output.adapter.cassandra.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.gadget.chart.template" url="features/org.wso2.carbon.analytics.gadget.chart.template_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.tryit.ui" url="features/org.wso2.carbon.tryit.ui_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.logging.mgt.ui" url="features/org.wso2.carbon.logging.mgt.ui_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.registry.contentsearch.server" url="features/org.wso2.carbon.registry.contentsearch.server_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.identity.authenticator.saml2.sso.server" url="features/org.wso2.carbon.identity.authenticator.saml2.sso.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.api" url="features/org.wso2.carbon.analytics.api_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.gadget.rest.provider.template" url="features/org.wso2.carbon.analytics.gadget.rest.provider.template_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter.server" url="features/org.wso2.carbon.event.output.adapter.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.output.adapter" url="features/org.wso2.carbon.event.output.adapter_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.dashboard.deployment" url="features/org.wso2.carbon.dashboard.deployment_2.0.2/" version="2.0.2">
+		</feature>
+		<feature id="org.wso2.carbon.event.simulator.server" url="features/org.wso2.carbon.event.simulator.server_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.deployment.synchronizer" url="features/org.wso2.carbon.deployment.synchronizer_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.jaggeryjs.modules.sso" url="features/org.jaggeryjs.modules.sso_1.5.5/" version="1.5.5">
+		</feature>
+		<feature id="org.wso2.carbon.event.statistics" url="features/org.wso2.carbon.event.statistics_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.core" url="features/org.wso2.carbon.analytics.core_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.receiver.thrift.server" url="features/org.wso2.carbon.databridge.receiver.thrift.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.registry.resource.properties" url="features/org.wso2.carbon.registry.resource.properties_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.event.processor.manager.commons" url="features/org.wso2.carbon.event.processor.manager.commons_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.registry.search.ui" url="features/org.wso2.carbon.registry.search.ui_4.6.0/" version="4.6.0">
+		</feature>
+		<feature id="org.wso2.carbon.webapp.mgt.server" url="features/org.wso2.carbon.webapp.mgt.server_4.7.0/" version="4.7.0">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.core.server" url="features/org.wso2.carbon.analytics.core.server_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.spark.template.deployer" url="features/org.wso2.carbon.analytics.spark.template.deployer_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.spark.ui" url="features/org.wso2.carbon.analytics.spark.ui_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.activitydashboard.ui" url="features/org.wso2.carbon.analytics.activitydashboard.ui_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.application.mgt.ui" url="features/org.wso2.carbon.application.mgt.ui_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.jaggeryjs.modules.ws" url="features/org.jaggeryjs.modules.ws_1.5.5/" version="1.5.5">
+		</feature>
+		<feature id="org.wso2.carbon.core.server" url="features/org.wso2.carbon.core.server_4.4.9/" version="4.4.9">
+		</feature>
+		<feature id="org.jaggeryjs.modules.process" url="features/org.jaggeryjs.modules.process_1.5.5/" version="1.5.5">
+		</feature>
+		<feature id="org.wso2.carbon.event.simulator" url="features/org.wso2.carbon.event.simulator_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.gadget.template" url="features/org.wso2.carbon.analytics.gadget.template_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.event.flow.ui" url="features/org.wso2.carbon.event.flow.ui_2.1.4/" version="2.1.4">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.dashboard.ui" url="features/org.wso2.carbon.analytics.dashboard.ui_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.user.mgt" url="features/org.wso2.carbon.user.mgt_5.2.0/" version="5.2.0">
+		</feature>
+		<feature id="org.wso2.carbon.application.mgt" url="features/org.wso2.carbon.application.mgt_4.5.4/" version="4.5.4">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.eventsink" url="features/org.wso2.carbon.analytics.eventsink_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.ml.ui" url="features/org.wso2.carbon.ml.ui_1.2.2/" version="1.2.2">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.eventtable" url="features/org.wso2.carbon.analytics.eventtable_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.publisher" url="features/org.wso2.carbon.event.publisher_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.databridge.commons.server" url="features/org.wso2.carbon.databridge.commons.server_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.jaggeryjs.server" url="features/org.jaggeryjs.server_0.12.8/" version="0.12.8">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.spark" url="features/org.wso2.carbon.analytics.spark_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.event.publisher.ui" url="features/org.wso2.carbon.event.publisher.ui_5.1.3/" version="5.1.3">
+		</feature>
+		<feature id="org.wso2.carbon.analytics.datasource" url="features/org.wso2.carbon.analytics.datasource_1.2.7/" version="1.2.7">
+		</feature>
+		<feature id="org.wso2.carbon.ml.rest.api" url="features/org.wso2.carbon.ml.rest.api_1.2.2/" version="1.2.2">
+		</feature>
+	</site>
+</config>

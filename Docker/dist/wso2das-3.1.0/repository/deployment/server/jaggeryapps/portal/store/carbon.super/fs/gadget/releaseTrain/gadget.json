@@ -1,0 +1,13 @@
+{
+    "id": "releaseTrain",
+    "title": "SOFTWARE RELEASE TRAIN",
+    "type": "gadget",
+    "thumbnail": "store://gadget/releaseTrain/index.png",
+    "settings": {
+        "personalize": true
+    },
+    "data": {
+        "url": "store://gadget/releaseTrain/index.xml"
+    },
+    "description": "Software releases"
+}
