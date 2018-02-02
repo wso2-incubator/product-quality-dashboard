@@ -1,7 +1,9 @@
   //var url="203.94.95.237";
+  //var url="10.100.4.2";
   //var url="localhost";
   var url="digitalops.services.wso2.com";
   var port="9092";
+  //var port="9096";
   // create a handlebars template
   var source   = document.getElementById('item-template').innerHTML;
   var template = Handlebars.compile(document.getElementById('item-template').innerHTML);
@@ -30,64 +32,122 @@
   var otherFlag=0; //flag for other
 
 
-  // get the initial data to the time line
-  $.ajax({
-      url:"https://"+url+":"+port+"/releaseTrainServices/getAllReleases",
-      async:false,
-      success: function(data){
-        allData=data;  
-        
-      }
-  });
+  
 
-
+var radioValue;
   //draw the timeline depending on the product area
   $(document).ready(function () {
     $('input[type=radio][name=optradio]').change(function() {
 
-        if ($('input[name=optradio]:checked').val() == 'All') {
+        radioValue = $("input[name='optradio']:checked").val();
+
+        if (radioValue == 'All') {
             
             $('#featureTable').hide();
+            allData =getData("all");
             drawTimeLine(allData,template);
         }
-        else if (this.value == 'API Manager') {
+        else if (radioValue == 'API Manager') {
             $('#featureTable').hide();
             
-            getData(apimFlag,"apim");
+            apimData=getData("apim");
             drawTimeLine(apimData,template);
         }
-        else if (this.value == 'Analytics') {
+        else if (radioValue == 'Analytics') {
+
             $('#featureTable').hide();
-            getData(analyticsFlag,"analytics");
+            analyticsData=getData("analytics");
             drawTimeLine(analyticsData,template);
         }
-        else if (this.value == 'Cloud') {
+        else if (radioValue == 'Cloud') {
+
             $('#featureTable').hide();
-            getData(cloudFlag,"cloud");
+            cloudData=getData("cloud");
             drawTimeLine(cloudData,template);
         }
-        else if (this.value == 'Integration') {
+        else if (radioValue == 'Integration') {
+
             $('#featureTable').hide();
-            getData(integrationFlag,"integration");
+            integrationData=getData("integration");
             drawTimeLine(integrationData,template);
         }
-        else if (this.value == 'IOT') {
+        else if (radioValue == 'IOT') {
+
             $('#featureTable').hide();
-            getData(iotFlag,"iot");
+            iotData =getData("iot");
             drawTimeLine(iotData,template);
-        }else if (this.value == 'IS') {
+        }else if (radioValue == 'IS') {
+
             $('#featureTable').hide();
-            getData(isFlag,"identity");
+            isData =getData("identity");
             drawTimeLine(isData,template);
-        }else if (this.value == 'Other') {
+        }else if (radioValue == 'Other') {
+
             $('#featureTable').hide();
-            getData(otherFlag,"other");
+            otherData=getData("other");
             drawTimeLine(otherData,template);
 
         }
     });
   });
 
+  function loadData(){
+
+
+
+        radioValue = $("input[name='optradio']:checked").val();
+
+        if (radioValue == 'All') {
+            
+            $('#featureTable').hide();
+            allData =getData("all");
+            console.log(allData);
+
+            drawTimeLine(allData,template);
+        }
+        else if (radioValue == 'API Manager') {
+            $('#featureTable').hide();
+            
+            apimData=getData("apim");
+            drawTimeLine(apimData,template);
+        }
+        else if (radioValue == 'Analytics') {
+
+            $('#featureTable').hide();
+            analyticsData=getData("analytics");
+            drawTimeLine(analyticsData,template);
+        }
+        else if (radioValue == 'Cloud') {
+
+            $('#featureTable').hide();
+            cloudData=getData("cloud");
+            drawTimeLine(cloudData,template);
+        }
+        else if (radioValue == 'Integration') {
+
+            $('#featureTable').hide();
+            integrationData=getData("integration");
+            drawTimeLine(integrationData,template);
+        }
+        else if (radioValue == 'IOT') {
+
+            $('#featureTable').hide();
+            iotData =getData("iot");
+            drawTimeLine(iotData,template);
+        }else if (radioValue == 'IS') {
+
+            $('#featureTable').hide();
+            isData =getData("identity");
+            drawTimeLine(isData,template);
+        }else if (radioValue == 'Other') {
+
+            $('#featureTable').hide();
+            otherData=getData("other");
+            drawTimeLine(otherData,template);
+
+        }
+
+  }
 
   // hide the summary and feature table
   $('#storySummary').hide();
@@ -97,10 +157,7 @@
   // Create a Timeline
   var timeline = new vis.Timeline(container);
 
-  // by this function call, initial timeline items will be displayed
-
-  drawTimeLine(allData,template);
-
+  
   //draw the timeline
   function drawTimeLine(data,template){
       var now = moment().minutes(0).seconds(0).milliseconds(0);
@@ -112,6 +169,7 @@
         zoomable:false,
         timeAxis: {scale: 'day', step:1 },
         height:"550px",
+        //orientation: {axis: 'top',item:'top'}
         //orientation: {axis: 'both'}
 
       };
@@ -120,37 +178,50 @@
       var start= now.clone().add(-10, 'days');
       var end  =now.clone().add(10, 'days');
 
+      console.log(start);
+      console.log(end);
+      console.log(data);
       //this for loop for focus the timeline to a release. other wise time line will be empty.
-      for(var i=data.length-1;i>=0;i--){
+
+      if (data.length>0){
+        for(var i=data.length-1;i>=0;i--){
+          
+              
+              var currentLoopDate=new Date(data[i].start);
+              console.log(currentLoopDate);
         
-            
-            var currentLoopDate=new Date(data[i].start);
 
-            if(start<=currentLoopDate  &&  currentLoopDate<= end){
-              options1= jQuery.extend(options, {start:start,end:end});
-              break;
-            }else if (end<currentLoopDate){
+              if(start<=currentLoopDate  &&  currentLoopDate<= end){
+                options1= jQuery.extend(options, {start:start,end:end});
+                break;
+              }else if (end<currentLoopDate){
 
-              flagDate=currentLoopDate;
+                flagDate=currentLoopDate;
 
-            }else if (currentLoopDate<start){
-                
-                if(flagDate==null){
- 
-                  start=moment(data[i].start).add(-10, 'days');
-                  end=moment(data[i].start).add(10, 'days');
-                  options1= jQuery.extend(options, {start:start,end:end});
-                  break;
-                }else{
+              }else if (currentLoopDate<start){
                   
-                  start=moment(flagDate).add(-10, 'days');
-                  end=moment(flagDate).add(10, 'days');
-                  options1= jQuery.extend(options, {start:start,end:end});
-                  break;
-                }
-            
-            }
-      }
+                  if(flagDate==null){
+   
+                    start=moment(data[i].start).add(-10, 'days');
+                    end=moment(data[i].start).add(10, 'days');
+                    options1= jQuery.extend(options, {start:start,end:end});
+                    break;
+                  }else{
+                    
+                    start=moment(flagDate).add(-10, 'days');
+                    end=moment(flagDate).add(10, 'days');
+                    options1= jQuery.extend(options, {start:start,end:end});
+                    break;
+                  }
+              
+              }
+        }
+      }else{
+        options1= jQuery.extend(options, {start:start,end:end});
+      } 
+
+      console.log(start);
+      console.log(end);
 
       
       // by clicking on today button time line will redraw the data.
@@ -164,6 +235,7 @@
           zoomable:false,
           timeAxis: {scale: 'day', step:1 },
           height:"550px",
+          //orientation: {axis: 'top',item:'top'}
           //orientation: {axis: 'both'}
 
         };
@@ -174,7 +246,8 @@
       
       // Create a DataSet (allows two way data-binding)
       var items = new vis.DataSet(data);
-
+      console.log("items");
+      console.log(data);
       
       timeline.setOptions(options);
       timeline.setItems(items);    

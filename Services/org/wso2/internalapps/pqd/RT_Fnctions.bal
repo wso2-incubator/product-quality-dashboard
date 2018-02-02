@@ -18,6 +18,7 @@ import ballerina.lang.datatables;
 
 
 
+
 http:ClientConnector redmineConn = null;
 http:ClientConnector gitHubConn = null;
 
@@ -831,25 +832,11 @@ function getAllReleases()(json){
             unicId=unicId + 1;
 
             redmineReleaseDetailsJson[redmineReleaseIndex].id = unicId;//create a unic number
-            var color="";
+            var color, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productColor;
             var area, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productArea;
             var versionId, _=(int)redmineReleaseDetailsJson[redmineReleaseIndex].versionId;
 
-            if (area=="apim"){
-                color="green";
-            }else if(area=="analytics"){
-                color="red";
-            }else if(area=="cloud"){
-                color="blue";
-            }else if(area=="integration"){
-                color="purple";
-            }else if(area=="iot"){
-                color="skyblue";
-            }else if(area=="identity"){
-                color="orange";
-            }else if(area=="other"){
-                color="black";
-            }
+
 
             redmineReleaseDetailsJson[redmineReleaseIndex].color = color;
             redmineReleaseDetailsJson[redmineReleaseIndex].gitVersionId = 0;
@@ -922,26 +909,13 @@ function getAllReleases()(json){
         while (gitHubReleaseIndex < gitHubReleaseDetailsLength) {
             unicId=unicId + 1;
             gitHubReleaseDetailsJson[gitHubReleaseIndex].id = unicId;//create a unic number
+            color, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productColor;
             var area, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productArea;
             var gitReleasedVersionName, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].releaseVersion;
             var redmineProjectId, _ = (int)gitHubReleaseDetailsJson[gitHubReleaseIndex].projectId;
 
 
-            if (area == "apim") {
-                color = "green";
-            } else if (area == "analytics") {
-                color = "red";
-            } else if (area == "cloud") {
-                color = "blue";
-            } else if (area == "integration") {
-                color = "purple";
-            } else if (area == "iot") {
-                color = "skyblue";
-            } else if (area == "identity") {
-                color = "orange";
-            } else if (area == "other") {
-                color = "black";
-            }
+
             gitHubReleaseDetailsJson[gitHubReleaseIndex].color = color;
             gitHubReleaseDetailsJson[gitHubReleaseIndex].start = date;
 
@@ -1081,27 +1055,14 @@ function getReleasesByProductArea (string productArea) (json) {
         while (redmineReleaseIndex < redmineReleaseDetailsLength) {
             unicId=unicId + 1;
             redmineReleaseDetailsJson[redmineReleaseIndex].id = unicId;//create a unic number
-            var color="";
+            var color, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productColor;
             var area, _=(string)redmineReleaseDetailsJson[redmineReleaseIndex].productArea;
             var versionId, _=(int)redmineReleaseDetailsJson[redmineReleaseIndex].versionId;
 
-            if (area=="apim"){
-                color="green";
-            }else if(area=="analytics"){
-                color="red";
-            }else if(area=="cloud"){
-                color="blue";
-            }else if(area=="integration"){
-                color="purple";
-            }else if(area=="iot"){
-                color="skyblue";
-            }else if(area=="identity"){
-                color="orange";
-            }else if(area=="other"){
-                color="black";
-            }
+
 
             redmineReleaseDetailsJson[redmineReleaseIndex].color = color;
+            redmineReleaseDetailsJson[redmineReleaseIndex].gitVersionId = 0;
 
             sql:Parameter redmineVersionId = {sqlType:"integer", value:versionId};
             sql:Parameter redmineFeatureId = {sqlType:"integer", value:2};//Feature
@@ -1169,26 +1130,13 @@ function getReleasesByProductArea (string productArea) (json) {
             while (gitHubReleaseIndex < gitHubReleaseDetailsLength) {
                 unicId=unicId + 1;
                 gitHubReleaseDetailsJson[gitHubReleaseIndex].id = unicId;//create a unic number
+                color, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productColor;
                 var area, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].productArea;
                 var gitReleasedVersionName, _ = (string)gitHubReleaseDetailsJson[gitHubReleaseIndex].releaseVersion;
                 var redmineProjectId, _ = (int)gitHubReleaseDetailsJson[gitHubReleaseIndex].projectId;
 
 
-                if (area == "apim") {
-                    color = "green";
-                } else if (area == "analytics") {
-                    color = "red";
-                } else if (area == "cloud") {
-                    color = "blue";
-                } else if (area == "integration") {
-                    color = "purple";
-                } else if (area == "iot") {
-                    color = "skyblue";
-                } else if (area == "identity") {
-                    color = "orange";
-                } else if (area == "other") {
-                    color = "black";
-                }
+
                 gitHubReleaseDetailsJson[gitHubReleaseIndex].color = color;
                 gitHubReleaseDetailsJson[gitHubReleaseIndex].start = date;
 
@@ -1677,13 +1625,33 @@ function updateGitHubReleases(){
                         var releaseDate ="";
 
 
+                        if(gitHubReleasesJson[pageIndex][releaseIndex].node != null) {
 
-                        if(gitHubReleasesJson[pageIndex][releaseIndex].node.tag != null) {
-                            cursor, _ = (string)gitHubReleasesJson[pageIndex][releaseIndex].cursor;
-                            versionName, _ = (string)gitHubReleasesJson[pageIndex][releaseIndex].node.tag.name;
-                            releaseDate, _ =(string)gitHubReleasesJson[pageIndex][releaseIndex].node.publishedAt;
-                            insertGitHubReleases(repoName,versionName,releaseDate,cursor);
-                            logger:info("NEW RECORD INSERTED.");
+
+                            if (gitHubReleasesJson[pageIndex][releaseIndex].node.tag != null) {
+                                cursor, _ = (string)gitHubReleasesJson[pageIndex][releaseIndex].cursor;
+                                versionName, _ = (string)gitHubReleasesJson[pageIndex][releaseIndex].node.tag.name;
+                                releaseDate, _ = (string)gitHubReleasesJson[pageIndex][releaseIndex].node.publishedAt;
+
+
+                                time:Time releaseDateAndTime = time:parse(releaseDate, "yyyy-MM-dd'T'HH:mm:ssz");
+                                time:Time localReleaseDateAndTime = time:toTimezone(releaseDateAndTime, "Asia/Colombo");
+                                string localReleaseDateAndTimeString = time:toString(localReleaseDateAndTime);
+
+
+                                sql:Parameter[] paramsInsert = [];
+                                sql:Parameter gitHubVersionName = {sqlType:"varchar", value:versionName};
+                                sql:Parameter gitHubReleaseDate = {sqlType:"varchar", value:localReleaseDateAndTimeString};
+                                sql:Parameter gitHubReleaseCursor = {sqlType:"varchar", value:cursor};
+                                paramsInsert = [gitHubRepoName, gitHubVersionName, gitHubReleaseDate, gitHubReleaseCursor];
+
+                                int insertResult = rmDB.update(GITHUB_RELEASES_INSERT, paramsInsert);
+
+                                //insertGitHubReleases(repoName, versionName, releaseDate, cursor); this function is not use.
+
+                                logger:info("NEW RECORD INSERTED.");
+
+                            }
 
                         }
 
@@ -1711,17 +1679,33 @@ function updateGitHubReleases(){
                         var versionName="";
                         var releaseDate ="";
 
+                        if(gitHubInitialReleasesJson[pageIndex][releaseIndex].node != null) {
+
+                            if(gitHubInitialReleasesJson[pageIndex][releaseIndex].node.tag != null) {
 
 
-                        if(gitHubInitialReleasesJson[pageIndex][releaseIndex].node.tag != null) {
+                                cursor, _ = (string)gitHubInitialReleasesJson[pageIndex][releaseIndex].cursor;
+                                versionName, _ = (string)gitHubInitialReleasesJson[pageIndex][releaseIndex].node.tag.name;
+                                releaseDate, _ =(string)gitHubInitialReleasesJson[pageIndex][releaseIndex].node.publishedAt;
+
+                                time:Time releaseDateAndTime = time:parse(releaseDate, "yyyy-MM-dd'T'HH:mm:ssz");
+                                time:Time localReleaseDateAndTime = time:toTimezone(releaseDateAndTime, "Asia/Colombo");
+                                string localReleaseDateAndTimeString = time:toString(localReleaseDateAndTime);
 
 
-                            cursor, _ = (string)gitHubInitialReleasesJson[pageIndex][releaseIndex].cursor;
-                            versionName, _ = (string)gitHubInitialReleasesJson[pageIndex][releaseIndex].node.tag.name;
-                            releaseDate, _ =(string)gitHubInitialReleasesJson[pageIndex][releaseIndex].node.publishedAt;
-                            insertGitHubReleases(repoName,versionName,releaseDate,cursor);
-                            logger:info("NEW RECORD INSERTED.");
+                                sql:Parameter[] paramsInsert = [];
+                                sql:Parameter gitHubVersionName = {sqlType:"varchar", value:versionName};
+                                sql:Parameter gitHubReleaseDate = {sqlType:"varchar", value:localReleaseDateAndTimeString};
+                                sql:Parameter gitHubReleaseCursor = {sqlType:"varchar", value:cursor};
+                                paramsInsert = [gitHubRepoName, gitHubVersionName, gitHubReleaseDate, gitHubReleaseCursor];
 
+                                int insertResult = rmDB.update(GITHUB_RELEASES_INSERT, paramsInsert);
+
+
+                                //insertGitHubReleases(repoName,versionName,releaseDate,cursor); This function is not use
+                                logger:info("NEW RECORD INSERTED.");
+
+                            }
                         }
 
                         releaseIndex = releaseIndex + 1;
@@ -1742,11 +1726,14 @@ function updateGitHubReleases(){
     }}
 function insertGitHubReleases(string repoName, string versionName, string releaseDate, string cursor){
 
+    //This function is not use
+
     sql:ClientConnector rmDB = createDBConnection();
 
     time:Time releaseDateAndTime = time:parse(releaseDate, "yyyy-MM-dd'T'HH:mm:ssz");
     time:Time localReleaseDateAndTime = time:toTimezone(releaseDateAndTime, "Asia/Colombo");
     string localReleaseDateAndTimeString = time:toString(localReleaseDateAndTime);
+
 
 
     sql:Parameter[] params1 = [];
@@ -1757,6 +1744,7 @@ function insertGitHubReleases(string repoName, string versionName, string releas
     params1 = [gitHubRepoName, gitHubVersionName, gitHubReleaseDate, gitHubReleaseCursor];
 
     int insertResult = rmDB.update(GITHUB_RELEASES_INSERT, params1);
+
     rmDB.close();
 
 }

@@ -1,0 +1,14 @@
+{
+    "id": "salesForceWonsAndLosts",
+    "title": "SalesForce Opportunities Won/Lost",
+    "type": "gadget",
+    "thumbnail": "store://gadget/salesForceWonsAndLosts/index.png",
+    "settings": {
+        "personalize": true
+    },
+    "data": {
+        "url": "store://gadget/salesForceWonsAndLosts/index.xml"
+    },
+    "description": "This displays Opportunities Won/Lost in WSO2",
+    
+}

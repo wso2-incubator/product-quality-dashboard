@@ -6,7 +6,6 @@ import ballerina.lang.messages;
 import ballerina.utils.logger;
 
 
-
 @http:configuration {basePath:"/releaseTrainServices",httpsPort: 9092, keyStoreFile: "${ballerina.home}/bre/security/wso2carbon.jks",
                      keyStorePass: "wso2carbon", certPass: "wso2carbon"}
 service<http> releaseTrainService {

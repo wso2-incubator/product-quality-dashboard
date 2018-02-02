@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="WSO2 New Logos" description="This displays New Logos in WSO2">
+        <Require feature="dynamic-height"/>
+        <Require feature="setprefs"/>
+        <Require feature="pubsub-2"/>
+    </ModulePrefs>
+    <Content type="html" view="home">
+        <![CDATA[
+<html lang="en">
+<head>
+  <title>New Logos</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <style type="text/css">
+    #container {
+    min-width: 310px;
+    max-width: 800px;
+    height: 400px;
+    margin: 0 auto
+    }
+  </style>
+
+
+</head>
+<body>
+
+  
+<div class="container" >
+ 
+    <div class="row" style="padding-left: 5%">
+        <!-- <div class="col-sm-3" >
+
+            <select id="category" class="form-control changeGraph" >
+              <option value="overall">Overall</option>
+              <option value="byproduct">ByProduct</option>
+            </select>
+        </div> -->
+
+        <div class="col-sm-3" >
+            <select id="year1" class="form-control changeGraph" >
+
+            </select>
+            <br>
+            <select id="year2" class="form-control changeGraph" >
+
+            </select>
+        </div>
+
+        <div class="col-sm-3" >
+           <select id="type" class="form-control changeGraph" >
+	            <option value="byyear">By Year</option>
+	            <option value="byquater" selected>By Quarter</option>
+              <option value="bymonth">By Month</option>
+              <!-- <option value="byweek">Byweek</option> -->
+            </select>
+
+        </div>
+
+        <div class="col-sm-3" >
+            <select id="product" class="form-control changeGraph" >
+              <option value="overall" > --All products--</option>
+              
+           </select>
+        </div> 
+    </div>
+
+    <div class="row">
+        <div id="container" style="min-width: 100%; height:80vh; margin: 0 auto"></div>
+
+    </div>
+
+
+   </form> 
+</div>
+
+<!-- ajax jquery and bootsrap javascripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- highchart javascripts -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<!-- custom javascript-->
+<script type="text/javascript" src="js/newLogosMain.js"></script>
+
+</body>
+</html>
+      ]]>
+  </Content>
+</Module>
