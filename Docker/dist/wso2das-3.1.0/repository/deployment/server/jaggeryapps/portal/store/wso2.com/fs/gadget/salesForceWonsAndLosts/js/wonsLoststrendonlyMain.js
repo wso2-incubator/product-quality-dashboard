@@ -117,14 +117,14 @@ function createChart(){
 
         }
 
-        var jsonPost = {"TOKEN":"7FjLWmCKdvD8cs>jd])_Jw4N3_XaEZkk25r&*NM)ewqz:BkFfLf-(8"};
+        
         
         var json ={}
         $.ajax({
 
             
             type: "POST",
-            data: JSON.stringify(jsonPost),
+            data: JSON.stringify({"TOKEN":"7FjLWmCKdvD8cs>jd])_Jw4N3_XaEZkk25r&*NM)ewqz:BkFfLf-(8"}),
             dataType: 'json',
             url:link,
             async:false,
@@ -157,7 +157,7 @@ function createChart(){
                 },
 
                 subtitle: {
-                    text: 'Wons/Losts'
+                    text: 'Opportunities Won/Lost'
                 },
 
                 yAxis: {

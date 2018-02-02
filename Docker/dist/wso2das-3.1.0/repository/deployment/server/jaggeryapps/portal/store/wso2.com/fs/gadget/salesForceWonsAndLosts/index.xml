@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-    <ModulePrefs title="WSO2 Wons and Losts" description="This displays Wons and Losts in WSO2">
+    <ModulePrefs title="WSO2 Opportunities Won/Lost" description="This displays Opportunities Won/Lost in WSO2">
         <Require feature="dynamic-height"/>
         <Require feature="setprefs"/>
         <Require feature="pubsub-2"/>
@@ -9,7 +9,7 @@
         <![CDATA[
 <html lang="en">
 <head>
-  <title>Product Wise Wons/Losts</title>
+  <title>Product Wise Opportunities Won/Lost</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -35,9 +35,6 @@
 </head>
 <body>
 
-<div class="jumbotron text-center">
-  <h1>Product Wise Wons/Losts</h1>
-</div>
   
 <div class="container" >
  
@@ -62,9 +59,9 @@
            
         <div class="col-sm-3" >
            <select id="type" class="form-control changeGraph" >
-	            <option value="byyear">Byyear</option>
-	            <option value="byquarter" selected>Byquarter</option>
-              <option value="bymonth">Bymonth</option>
+	            <option value="byyear">By Year</option>
+	            <option value="byquarter" selected>By Quarter</option>
+              <option value="bymonth">By Month</option>
               <!-- <option value="byweek">Byweek</option> -->
             </select>
         </div>    

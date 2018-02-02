@@ -29,7 +29,6 @@ function globalSubmit(){
     var allProducts = loadDataFromServices(startDate,endDate);
     loadBuildData(allProducts);
     loadFailureFrequencyChart(allProducts);
-    createFailureReasonPieChart(allProducts.failureReasons, allProducts.failureReasonsDrilldown);
 }
 
 function loadDataFromServices(start,end){

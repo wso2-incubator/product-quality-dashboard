@@ -9,14 +9,14 @@
 
 	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
-	<link href="/portal/store/carbon.super/fs/gadget/pmt/css/daterangepicker.css" rel="stylesheet">
-    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/paper-dashboard.css" rel="stylesheet">
-    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/animate.min.css" rel="stylesheet">
-    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/demo.css" rel="stylesheet">
+	<link href="/portal/store/wso2.com/fs/gadget/pmt/css/daterangepicker.css" rel="stylesheet">
+    <link href="/portal/store/wso2.com/fs/gadget/pmt/css/paper-dashboard.css" rel="stylesheet">
+    <link href="/portal/store/wso2.com/fs/gadget/pmt/css/animate.min.css" rel="stylesheet">
+    <link href="/portal/store/wso2.com/fs/gadget/pmt/css/demo.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
  	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
-    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/themify-icons.css" rel="stylesheet">
+    <link href="/portal/store/wso2.com/fs/gadget/pmt/css/themify-icons.css" rel="stylesheet">
 
    <style type="text/css">
         .demo { position: relative; }

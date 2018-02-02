@@ -724,7 +724,7 @@ function loadPatchDetailsToTable(patchDetails){
             { title: "Dev Started" },
             { title: "QA Started" },
             { title: "Released NIPS" },
-            { title: "Released NS" },
+            { title: "Released NA" },
             { title: "Released On" },
             { title: "Broken On" },
             { title: "Regression On" },

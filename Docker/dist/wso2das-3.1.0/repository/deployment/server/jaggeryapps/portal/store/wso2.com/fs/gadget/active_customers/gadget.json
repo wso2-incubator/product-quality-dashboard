@@ -1,0 +1,14 @@
+{
+    "id": "active_customers",
+    "title": "SalesForce Active Customers",
+    "type": "gadget",
+    "thumbnail": "store://gadget/active_customers/index.png",
+    "settings": {
+        "personalize": true
+    },
+    "data": {
+        "url": "store://gadget/active_customers/index.xml"
+    },
+    "description": "This displays active customers in WSO2",
+    
+}

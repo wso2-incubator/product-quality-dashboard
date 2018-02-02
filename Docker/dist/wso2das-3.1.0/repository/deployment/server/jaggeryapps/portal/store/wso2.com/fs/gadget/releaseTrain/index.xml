@@ -27,7 +27,7 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />
    
   <!-- Include Date Range Picker css-->
-  <link href="/portal/store/carbon.super/fs/gadget/pmt/css/daterangepicker.css" rel="stylesheet">
+  <link href="/portal/store/wso2.com/fs/gadget/pmt/css/daterangepicker.css" rel="stylesheet">
   <!-- <link href="css/daterangepicker.css" rel="stylesheet"> -->
 
   <!-- wso2 loader css-->

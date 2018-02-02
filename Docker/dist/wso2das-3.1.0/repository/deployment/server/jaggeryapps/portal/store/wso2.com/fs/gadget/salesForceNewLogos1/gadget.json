@@ -1,0 +1,14 @@
+{
+    "id": "salesForceNewLogos1",
+    "title": "SalesForce New Logos",
+    "type": "gadget",
+    "thumbnail": "store://gadget/salesForceNewLogos1/index.png",
+    "settings": {
+        "personalize": true
+    },
+    "data": {
+        "url": "store://gadget/salesForceNewLogos1/index.xml"
+    },
+    "description": "This displays New Logos in WSO2",
+    
+}

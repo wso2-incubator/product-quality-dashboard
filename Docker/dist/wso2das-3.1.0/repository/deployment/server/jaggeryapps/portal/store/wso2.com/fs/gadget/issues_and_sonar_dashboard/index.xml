@@ -20,10 +20,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/css/daterangepicker.css" rel="stylesheet"/>
+    <link href="/portal/store/wso2.com/fs/gadget/issues_and_sonar_dashboard/css/daterangepicker.css" rel="stylesheet"/>
     <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href='css/font-awesome/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
-    <link href="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/css/custom.css" rel="stylesheet"/>
+    <link href="/portal/store/wso2.com/fs/gadget/issues_and_sonar_dashboard/css/custom.css" rel="stylesheet"/>
 </head>
 
 <body>
@@ -98,7 +98,7 @@
                                                     </div>
                                                     <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:36px;">
                                                         <button  type="button" class="btn btn-default" onclick="resetIssueCharts()" id="resetIssueChartsId" style="font-size:1.1vw;display:none;" data-placement="bottom" title="Reset Filters">
-                                                           <img src="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
+                                                           <img src="/portal/store/wso2.com/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -220,7 +220,7 @@
                                                     </div>
                                                     <div class="col-xs-2 col-md-2" style="text-align:center;margin-top:36px">
                                                         <button type="button" class="btn btn-default" onclick="resetSonarCharts()" id="resetSonarChartsId" style="font-size:1.1vw;display:none;" data-placement="bottom" title="Reset Filters">
-                                                            <img src="/portal/store/carbon.super/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
+                                                            <img src="/portal/store/wso2.com/fs/gadget/issues_and_sonar_dashboard/images/reset.png"></img>
                                                         </button>
                                                     </div>
                                                 </div>
