@@ -1,6 +1,6 @@
 {
     "id": "salesForceWonsAndLosts",
-    "title": "SalesForce Wons And Losts",
+    "title": "SalesForce Opportunities Won/Lost",
     "type": "gadget",
     "thumbnail": "store://gadget/salesForceWonsAndLosts/index.png",
     "settings": {
@@ -9,6 +9,6 @@
     "data": {
         "url": "store://gadget/salesForceWonsAndLosts/index.xml"
     },
-    "description": "This displays wons and losts in WSO2",
+    "description": "This displays Opportunities Won/Lost in WSO2",
     
 }

@@ -51,9 +51,9 @@
 
         <div class="col-sm-3" >
            <select id="type" class="form-control changeGraph" >
-	            <option value="byyear">Byyear</option>
-	            <option value="byquater" selected>Byquater</option>
-              <option value="bymonth">Bymonth</option>
+	            <option value="byyear">By Year</option>
+	            <option value="byquater" selected>By Quarter</option>
+              <option value="bymonth">By Month</option>
               <!-- <option value="byweek">Byweek</option> -->
             </select>
 

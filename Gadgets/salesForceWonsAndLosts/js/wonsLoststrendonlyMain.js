@@ -157,7 +157,7 @@ function createChart(){
                 },
 
                 subtitle: {
-                    text: 'Wons/Losts'
+                    text: 'Opportunities Won/Lost'
                 },
 
                 yAxis: {
