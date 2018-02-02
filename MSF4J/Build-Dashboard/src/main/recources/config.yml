@@ -1,0 +1,7 @@
+#JDBC driver name and database URL
+JDBC_DRIVER : com.mysql.jdbc.Driver
+
+# Build Dashboard Database credentials
+DB_URL : jdbc:mysql://localhost:3306/jenkins
+USER : root
+PASSWORD : root

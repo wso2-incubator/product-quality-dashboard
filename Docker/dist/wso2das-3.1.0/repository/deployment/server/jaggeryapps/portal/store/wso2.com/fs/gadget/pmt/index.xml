@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="PMT" height="300" description="PMT Analytics">
+        <Require feature="dynamic-height"/>
+    </ModulePrefs>
+    <Content type="html">
+        <![CDATA[
+      <head>
+
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
+	<link href="/portal/store/carbon.super/fs/gadget/pmt/css/daterangepicker.css" rel="stylesheet">
+    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/paper-dashboard.css" rel="stylesheet">
+    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/animate.min.css" rel="stylesheet">
+    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/demo.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
+ 	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
+    <link href="/portal/store/carbon.super/fs/gadget/pmt/css/themify-icons.css" rel="stylesheet">
+
+   <style type="text/css">
+        .demo { position: relative; }
+        .demo i {
+            position: absolute; bottom: 10px; right: 24px; top: auto; cursor: pointer;
+        }
+        .column-2{
+            width:30px;
+        }
+        .column-12{
+            display:none;
+        }
+        <!-- a { color: black !important; } -->
+        tr.row_selected td{background-color:#d6d6d6 !important;}
+    </style>
+<body>
+<div class="container-fluid" id="contents" style="background-color:#f4f3ef;">
+    <div id="globalDate" class="row">
+            <div class="col-xs-6 col-xs-offset-3" style="position: fixed; z-index:2000;">
+            <div class="row card" style="padding:5px 0;">
+                <div class="col-xs-5">
+                    <p style="text-align: right; margin-top:10px; font-size:1vw;">Select a Date Range:</p>
+                </div>
+                <div class="col-xs-5 demo">
+                    <!--<i class="config-demo glyphicon glyphicon-calendar fa fa-calendar"></i>-->
+                    <input id="date-picker" type="text" class="config-demo form-control" style="border:1px solid #bcb7b3; background-color: #FFFFFF; width:100%; font-size:1vw;">
+                </div>
+                <div class="col-xs-2">
+
+                </div>
+            </div>
+        </div>
+        </div>
+    <div id="loadCounts" class="row" style="margin-top:65px;">
+        <div class="col-lg-3 col-sm-6">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-xs-4">
+                                    <div class="icon-big icon-warning text-center" style="color:#fc7c3c; font-size:55px; margin-top:10px;">
+                                        <i class="ti-package" ></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-8">
+                                    <div class="numbers">
+                                        <p style="font-size:1vw;">Reactive Fixes <span id="reactive" style="font-size:23px; margin-left:15px;"></span></p>
+                                        <p style="font-size:1vw;margin-top:7px;">Proactive Fixes<span id="proactive" style="font-size:23px; margin-left:15px;"></span></p>
+                                        <hr>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="numbers">
+                                        <p style="font-size:1vw; margin-top:-15px;">Uncategorized Fixes<span id="unCategory" style="font-size:23px; margin-left:15px;"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        <div class="col-lg-3 col-sm-6">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-xs-5">
+                                    <div class="icon-big icon-warning text-center">
+                                        <i class="ti-alert"></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-7">
+                                    <div class="numbers">
+                                        <p style="font-size:1vw;">Yet to Start Patches</p>
+                                        <p id="queuedPatchCount" class="dashboard-top"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <a onclick="loadPatchDetails('queue')" style=" cursor: hand;">
+                                <div class="footer">
+                                    <hr/>
+                                    <div class="stats">
+                                        <i class="ti-eye"></i> View Details
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+        <div class="col-lg-3 col-sm-6">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-xs-5">
+                                    <div class="icon-big icon-info text-center">
+                                        <i class="ti-settings"></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-7">
+                                    <div class="numbers">
+                                        <p style="font-size:1vw;">In Progress Patches</p>
+                                        <span>
+                                            <p id="overETAcount" class="dashboard-top" style="float:right;color:#DC143C; font-size:20px; margin-top:11px; margin-left:3px;"></p>
+                                            <p id="inProcessPatchCount" class="dashboard-top" style="float:right;"></p>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <a onclick="loadPatchDetails('dev')" style="cursor: pointer; cursor: hand;">
+                                <div class="footer">
+                                    <hr/>
+                                    <div class="stats">
+                                        <i class="ti-eye"></i> View Details
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+        <div class="col-lg-3 col-sm-6">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <div class="icon-big icon-success text-center">
+                                        <i class="ti-check" style="float: right;"></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-9">
+                                    <div class="numbers">
+                                        <p style="font-size:1vw;margin-top:7px;">Completed Patches<span id="completePatchCount" style="font-size:23px; margin-left:15px;"></span></p>
+                                        <p style="font-size:1vw;margin-top:7px;">Partially Completed<span id="partiallyCompletePatchCount" style="font-size:23px; margin-left:15px;"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <a onclick="loadPatchDetails('complete')" style="cursor: pointer; cursor: hand;">
+                                <div class="footer">
+                                    <hr/>
+                                    <div class="stats">
+                                        <i class="ti-eye"></i> View Details
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div id="fullDiv" class="card card-map" style="background-color:#FFFFFF; height:770px;">
+                        <div class="header pull-right">
+                            <h4 class="title" style="font-size:1.5vw; margin-top:-5px;">Patch Management Tracker</h4>
+                        </div>
+                        <div class="col-xs-12" style="margin-top:-30px;">
+                            <div>
+                                <!-- Nav tabs -->
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab" style="font-size:0.7vw;">Reported Patches</a></li>
+                                    <li role="presentation"><a href="#age" aria-controls="profile" role="tab" data-toggle="tab" style="font-size:0.7vw;">Queue Age Graph</a></li>
+                                    <li role="presentation"><a href="#lc" aria-controls="profile" role="tab" data-toggle="tab" style="font-size:0.7vw;">Patch Life Cycle</a></li>
+                                </ul>
+
+                                <!-- Tab panes -->
+                                <div class="tab-content">
+                                    <div role="tabpanel" class="tab-pane active" id="home">
+                                        <div class="row">
+                                            <div class="col-xs-3" style="margin-top:20px;">
+                                                <input id="iconified" class="form-control empty" type="text" placeholder="&#128269; Search Product" onkeyup="filter(this,'theList')" style="background-color:#f4f4f4; height:33px;" />
+                                                <div class="row" style="margin-top:10px;">
+                                                    <div class="col-xs-4" >
+                                                        <div class="row">
+                                                            <div class="col-xs-2"><div style="background-color:#F4A94E; height:15px; width:15px;"></div></div>
+                                                            <div class="col-xs-10"><p style="margin-left:18px; margin-top:-15px;font-size:0.8vw;">Queued</p></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <div class="row">
+                                                            <div class="col-xs-2"><div style="background-color:#4BC2DE; height:15px; width:15px;"></div></div>
+                                                            <div class="col-xs-10"><p style="margin-left:18px; margin-top:-15px;font-size:0.8vw;">Developing</p></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <div class="row">
+                                                            <div class="col-xs-2"><div style="background-color:#DC143C; height:15px; width:15px;"></div></div>
+                                                            <div class="col-xs-10"><p style="font-size:0.8vw; margin-left:18px; margin-top:-15px;">Over ETA</p></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div  id="product" class="list-group" style="height:580px !important;overflow:hidden; overflow-y:scroll; margin-top:10px;"></div>
+                                            </div>
+                                            <div class="col-xs-9">
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <div id="prodcutDetails" style="height:800px;display:none;">
+                                                            <div class="header" style="margin-top:-30px;">
+                                                                <button class="pull-right" onclick="closeDiv()" style="background-color:transparent;border:none; margin-top:30px;">Close <i class="ti-close"></i></button>
+                                                                <h4 id="productName" style="float:left;">Selected Product Details</h4>
+
+                                                                <div class="alert alert-danger alert-with-icon pull-left" style="background-color:#494847;color:#FFFFFF;margin-left:20px; margin-top:22px !important;">
+                                                                    <span data-notify="icon" class="fa fa-bug" style="margin-top:-12px;font-size:1.5vw;"></span>
+                                                                    <span style="font-size:0.9vw;"><b id="bugCount">25</b> are Bugs</span>
+                                                                </div>
+                                                            </div>
+                                                            <hr style="display:none !important;">
+                                                            <hr style="clear:both;">
+                                                            <div class="row">
+                                                                <div class="col-xs-3">
+                                                                    <center>
+                                                                        <div class="alert alert-warning alert-with-icon">
+                                                                            <span data-notify="icon" class="ti-bell" style="font-size:2vw;"></span>
+                                                                            <span data-notify="message" style="font-size:1vw;"><b id="pQueued">45</b> in Queue</span>
+                                                                        </div>
+                                                                    </center>
+                                                                </div>
+                                                                <div class="col-xs-3">
+                                                                    <center>
+                                                                        <div class="alert alert-info alert-with-icon">
+                                                                            <span data-notify="icon" class="ti-settings" style="font-size:2vw;"></span>
+                                                                            <span data-notify="message" style="font-size:1vw;"><b id="pProcess">145</b> in Developing</span>
+                                                                        </div>
+                                                                    </center>
+                                                                </div>
+                                                                <div class="col-xs-3">
+                                                                    <center>
+                                                                        <div class="alert alert-success alert-with-icon">
+                                                                            <span data-notify="icon" class="ti-check" style="font-size:2vw;"></span>
+                                                                            <span data-notify="message" style="font-size:1vw;"><b id="pComplete">25</b> Completed</span>
+                                                                        </div>
+                                                                    </center>
+                                                                </div>
+                                                                <div class="col-xs-3">
+                                                                    <center>
+                                                                        <div class="alert alert-danger alert-with-icon" style="background-color:#fc7f41;color:#FFFFFF;">
+                                                                            <span data-notify="icon" class="ti-info" style="font-size:2vw;"></span>
+                                                                            <span style="font-size:1vw;"><b id="partiallyCount"></b> Partially Completed</span>
+                                                                        </div>
+                                                                    </center>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-xs-12">
+                                                                    <div class="row">
+                                                                        <div class="btn-group pull-right" role="group" style="margin-top:10px; margin-right:20px;">
+                                                                            <!--<button id="day2" type="button" class="btn btn-default" onclick="changeDurationTrend('day')">Day</button>-->
+                                                                            <button id="week2" type="button" class="btn btn-default" onclick="changeDurationTrend('week')">Week</button>
+                                                                            <button id="month2" type="button" class="btn btn-default" onclick="changeDurationTrend('month')">Month</button>
+                                                                            <button id="quarter2" type="button" class="btn btn-default" onclick="changeDurationTrend('quarter')">Quarter</button>
+                                                                            <button id="year2" type="button" class="btn btn-default" onclick="changeDurationTrend('year')">Year</button>
+                                                                        </div>
+                                                                        <div class="col-xs-10"></div>
+                                                                    </div>
+                                                                    <div id="container" style="height:450px;"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <div class="btn-group pull-right" role="group" style="margin-top:10px; margin-bottom:30px;">
+                                                            <div class="btn-group" role="group">
+                                                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Graph Type">
+                                                                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                                                                        <span class="caret"></span>
+                                                                    </a>
+                                                                </button>
+                                                                <ul class="dropdown-menu">
+                                                                    <li><a href="#" onclick="changePattern('line')">Line Chart</a></li>
+                                                                    <li><a href="#" onclick="changePattern('column')">Column Chart</a></li>
+                                                                    <li><a href="#" onclick="changePattern('bar')">Bar Chart</a></li>
+                                                                    <li><a href="#" onclick="changePattern('pie')">Pie Chart</a></li>
+                                                                </ul>
+                                                            </div>
+                                                            <button id="day" type="button" class="btn btn-default" onclick="changeDuration('day')"><a href="#" data-toggle="tooltip" data-placement="bottom" title="Group by Day">Day</a></button>
+                                                            <button id="week" type="button" class="btn btn-default" onclick="changeDuration('week')"><a href="#" data-toggle="tooltip" data-placement="bottom" title="Group by Week">Week</a></button>
+                                                            <button id="month" type="button" class="btn btn-default" onclick="changeDuration('month')"><a href="#" data-toggle="tooltip" data-placement="bottom" title="Group by Month">Month</a></button>
+                                                            <button id="quarter" type="button" class="btn btn-default" onclick="changeDuration('quarter')"><a href="#" data-toggle="tooltip" data-placement="bottom" title="Group by Quarter">Quarter</a></button>
+                                                            <button id="year" type="button" class="btn btn-default" onclick="changeDuration('year')"><a href="#" data-toggle="tooltip" data-placement="bottom" title="Group by Year">Year</a></button>
+                                                        </div>
+                                                        <div id="graphDiv" style="min-width: 310px; height: 430px; margin: 0 auto;"></div>
+                                                        <p id="weekPatchReport" style="margin-top:60px; text-align: center; z-index:2000; position: relative; font-size:12px; color:#595858; display:none;">Start date of the week</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane with-3d-shadow with-transitions" id="age">
+                                        <p style="color:#a94442; font-size:0.7vw; margin-left:10px; margin-top:20px;z-index:10000;position: relative;"></p>
+                                        <div id="ageContainer" style="min-width: 310px; height: 500px; margin: 0 auto; margin-top:-20px;z-index:1000;"></div>
+                                        <div class="row" id="stackTab" style="margin-top:40px;display: none;">
+                                            <hr>
+                                            <div class="col-xs-12" style="margin-top:40px;">
+                                                <div class="header areaDrilldown" style="margin-top:-30px;">
+                                                    <button class="pull-right" onclick="closeDiv()" style="background-color:transparent;border:none; margin-top:30px;">Close <i class="ti-close"></i></button>
+                                                </div>
+                                                <div id="stackBar" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane with-3d-shadow with-transitions" id="lc">
+                                        <div class="row" style="margin-top:2px;">
+                                            <div class="col-xs-12">
+                                                <p style="color:#a94442; font-size:0.7vw; margin-left:10px; margin-top:20px;z-index:10000;position: relative;"></p>
+                                                <div id="lifeCycle" style="min-width: 310px; min-height:500px; margin: -20px auto"></div>
+                                                <hr>
+                                                <div class="header">
+                                                    <h4 class="title"><u>Product wise Patch Life Cycle and Details from <span id="lcDetailDate"></span></u></h4>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12" >
+                                                       <select id="lcProduct" onchange='selectProductByMenu(this.value)' style="margin-top:20px;margin-left:20px;">
+                                                       </select>
+                                                        <button class="pull-right" style="margin-top:25px; display: none;" id="resetButton" onclick="selectProductByMenu('all')">Reset to Default</button>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <center>
+                                                            <p id="noteOfStateGraph" style="font-size:12px; margin-bottom:-10px;">Click on the each state to see state Details</p>
+                                                            <div id="stateGraph" style="width:auto; min-height: 350px; margin: 20px auto;"></div>
+                                                        </center>
+                                                        <div id="currentStateLegend" class="pull-right" style="display:none;">
+                                                            <div class="row">
+                                                                <div class="col-xs-2"><div style="background-color:#FF0000; height:15px; width:15px;"></div></div>
+                                                                <div class="col-xs-10"><p style="margin-left:-10px;margin-top:-2px;font-size:1vw;">State as of Today</p></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <div id="patchLifeCycleDetailTable" class="row" style=" margin-top:-10px;">
+                                                            <div class="col-xs-12">
+                                                                <div class="header">
+                                                                    <h4 class="title" style="margin-bottom:30px;"><u>Details of Patches <span id="selectedState"></span></u></h4>
+                                                                    <button class="pull-right" style="margin-bottom:10px; display: none;" id="resetButtonStates" onclick="selectProductByMenu('all')">Reset to all States</button>
+                                                                </div>
+                                                                <p style="font-size:12px; text-align:center; margin-bottom:-10px;">Click on the each patch to see patch life cycle details</p>
+                                                                <table id="patchDetailsLC" class="table table-striped table-hover table-bordered" style="margin-top:60px; font-size:12px;cursor: pointer; cursor: hand;">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                        <th>some data</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+        </div>
+    </div>
+
+    <div class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="z-index:3000;">
+        <div class="modal-dialog modal-lg" role="document" style="width:90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="content table-responsive table-full-width">
+                        <table class="table table-striped" style="font-size:13px !important;">
+                            <thead>
+                            <th><b>No.</b></th>
+                            <th><b>Support JIRA ID</b></th>
+                            <th><b>Product Name</b></th>
+                            <th><b>Version</b></th>
+                            <th><b>Client</b></th>
+                            <th><b>Reporter</b></th>
+                            <th><b>Team Lead</b></th>
+                            <th><b>Report Date</b></th>
+                            </thead>
+                            <tbody id="popupInner">
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade bs-example-modal-lg" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="z-index:3000;">
+        <div class="modal-dialog modal-lg" role="document" style="width:90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel2"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="content table-responsive table-full-width">
+                        <table class="table table-striped" style="font-size:12px !important;">
+                            <thead>
+                            <th><b>No.</b></th>
+                            <th><b>Support JIRA ID</b></th>
+                            <th><b>Patch Name</b></th>
+                            <th><b>Product Name</b></th>
+                            <th><b>Version</b></th>
+                            <th><b>Client</b></th>
+                            <th><b>Developed By</b></th>
+                            <th><b>Team Lead</b></th>
+                            <th><b>Report Date</b></th>
+                            </thead>
+                            <tbody id="popupInner2">
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade bs-example-modal-lg" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="z-index:3000;">
+        <div class="modal-dialog modal-lg" role="document" style="width:90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel3"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="content table-responsive table-full-width">
+                        <table id="completedAndPartiallyPatchDetails" class="table table-striped" style="font-size:12px !important;">
+                            <thead>
+                                <th>some data</th>
+                                <th>some data</th>
+                                <th>some data</th>
+                                <th>some data</th>
+                                <th>some data</th>
+                                <th>some data</th>
+                                <th>some data</th>
+                                <th>some data</th>
+                            </thead>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/moment.js"></script>
+<script src="js/hicharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/drilldown.js"></script>
+<script type="text/javascript" src="js/daterangepicker.js"></script>
+
+
+<script type="text/javascript" src="js/require.js"></script>
+<script src="js/lifeCycle.js"></script>
+<script src="js/ageGraph.js"></script>
+<script src="js/productWiseAnalysis.js"></script>
+<script src="js/loadDashboardCounts.js"></script>
+<script src="js/ageGraph.js"></script>
+<script src="js/searchProduct.js"></script>
+<script>
+     $('.config-demo').on('apply.daterangepicker', function(ev, picker) {
+        globalSubmit()
+    });
+
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip({
+            trigger : 'hover'
+        });
+    });
+</script>
+</body>
+
+        ]]>
+    </Content>
+</Module>

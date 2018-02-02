@@ -1,0 +1,22 @@
+{
+    "context" : "/ml",
+    "hostname" : "localhost",
+    "httpsport" : "9443",
+    "request_url":"READ_FROM_REQUEST",
+    "tagWiseMode" :"false",
+    "tagGroupKey" :"-group",
+    "ssoConfiguration" : {
+        "enabled" : "false",
+        "issuer" : "ML",
+        "identityProviderURL" : "https://localhost:9443/samlsso",
+        "keyStorePassword" : "",
+        "identityAlias" : "",
+        "responseSigningEnabled":"true",
+        "keyStoreName" :""
+    },
+    "forum" : {
+        "topicsPerPage" : "5",
+        "repliesPerPage" : "5",
+        "resourceIdentifier" : "common"
+    }
+}

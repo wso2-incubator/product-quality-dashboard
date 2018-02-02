@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<eventReceiver name="httpReceiver" statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventreceiver">
+    <from eventAdapterType="http">
+        <property name="transports">all</property>
+    </from>
+
+    <mapping customMapping="enable" type="json">
+        <property>
+            <from jsonPath="$.sensorData.timestamp"/>
+            <to default="19900813" name="meta_timestamp" type="long"/>
+        </property>
+        <property>
+            <from jsonPath="$.sensorData.powerSaved"/>
+            <to default="false" name="meta_isPowerSaverEnabled" type="bool"/>
+        </property>
+        <property>
+            <from jsonPath="$.sensorData.id"/>
+            <to default="001" name="meta_sensorId" type="int"/>
+        </property>
+        <property>
+            <from jsonPath="$.sensorData.name"/>
+            <to default="weather" name="meta_sensorName" type="string"/>
+        </property>
+        <property>
+            <from jsonPath="$.sensorData.long"/>
+            <to default="7.23423423" name="correlation_longitude" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="$.sensorData.lat"/>
+            <to default="70.2342342" name="correlation_latitude" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="$.sensorData.humidity"/>
+            <to default="20.56" name="humidity" type="float"/>
+        </property>
+        <property>
+            <from jsonPath="$.sensorData.temp"/>
+            <to default="90.56" name="sensorValue" type="double"/>
+        </property>
+    </mapping>
+    <to streamName="org.wso2.event.sensor.stream" version="1.0.0"/>
+</eventReceiver>

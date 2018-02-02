@@ -1,0 +1,64 @@
+body {
+    overflow:hidden;
+    font-size:0.8vw !important;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+
+.sidebarInside{
+    max-height:500px !important;
+    overflow:hidden;
+    overflow-y:auto;
+    font-size:0.8vw !important;
+}
+
+.left {
+    height:100vh;
+    max-height: 100vh;
+    overflow-y : scroll;
+}
+.right-scrolling-body {
+    margin-top:0px;
+    margin-bottom:10px;
+    height: 830px;
+    overflow-y: scroll;
+    position: relative;
+    font-size:0.8vw !important;
+}
+
+.mam-light-issues{
+    color:#fff!important;
+    background-color:#FF9933!important;
+}
+
+.mam-light-sonar{
+    color:#fff!important;
+    background-color:#206898!important
+}
+
+.mam-container{
+    padding:0.01em 16px
+}
+
+.mam-card{
+    box-shadow:0 2px 5px 0 rgba(0,0,0,0.2),0 2px 10px 0 rgba(0,0,0,0.19);
+    background-color:#FFFFFF
+}
+.btn-product{
+    color:#000000;
+}
+.btn-product-active{
+    background:#a1bdcc;
+    font-weight:bold;
+}
+.btn-product-inactive{
+    background:#d9edf7;
+}
+.fixedIssesDiv{
+   background-color:#FFF7F2;
+}
+.fixedSonarDiv{
+    background-color:#F2F7FF;
+}
+.demo i {
+    position: relative; bottom: 10px; right: 24px; top: auto; cursor: pointer;
+}

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ ~ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ ~
+ ~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~ you may not use this file except in compliance with the License.
+ ~ You may obtain a copy of the License at
+ ~
+ ~      http://www.apache.org/licenses/LICENSE-2.0
+ ~
+ ~ Unless required by applicable law or agreed to in writing, software
+ ~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~ See the License for the specific language governing permissions and
+ ~ limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.wso2.carbon.dashboards</groupId>
+        <artifactId>carbon-dashboards</artifactId>
+        <version>2.0.2</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>shindig-server</artifactId>
+    <packaging>war</packaging>
+    <name>Apache Shindig - WSO2 Server</name>
+    <url>http://wso2.org</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.shindig</groupId>
+            <artifactId>shindig-server</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.dashboards</groupId>
+            <artifactId>shindig-wso2-features</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.dashboards</groupId>
+            <artifactId>shindig-wso2-extensions</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <packagingExcludes>WEB-INF/lib/slf4j-*.jar</packagingExcludes>
+                    <webXml>src/main/resources/web.xml</webXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <property name="tempdir" value="target/temp" />
+                                <unzip dest="${tempdir}/shindig">
+                                    <fileset dir="target/">
+                                        <include name="shindig-server-${carbon.dashboards.version}.war" />
+                                    </fileset>
+                                </unzip>
+                                <unzip dest="${tempdir}/shindig/WEB-INF/lib/shindig-extras-${shindig.version}">
+                                    <fileset dir="${tempdir}/shindig/WEB-INF/lib">
+                                        <include name="shindig-extras-${shindig.version}.jar" />
+                                    </fileset>
+                                </unzip>
+                                <delete file="target/shindig-server-${carbon.dashboards.version}.war" />
+                                <delete file="${tempdir}/shindig/WEB-INF/lib/shindig-extras-${shindig.version}.jar" />
+                                <delete file="${tempdir}/shindig/WEB-INF/lib/shindig-extras-${shindig.version}/features-extras/features.txt" />
+                                <copy todir="${tempdir}/shindig/WEB-INF/lib/shindig-extras-${shindig.version}/features-extras/" overwrite="false">
+                                    <fileset dir="src/main/resources/">
+                                        <include name="features.txt" />
+                                    </fileset>
+                                </copy>
+                                <copy todir="${tempdir}/shindig/">
+                                    <fileset dir="src/main/resources" includes="error-pages/**">
+                                    </fileset>
+                                </copy>
+                                <zip destfile="${tempdir}/shindig/WEB-INF/lib/shindig-extras-${shindig.version}.jar" basedir="${tempdir}/shindig/WEB-INF/lib/shindig-extras-${shindig.version}" />
+                                <delete dir="${tempdir}/shindig/WEB-INF/lib/shindig-extras-${shindig.version}" />
+                                <zip destfile="target/shindig-server-${carbon.dashboards.version}.war" basedir="${tempdir}/shindig" />
+                                <delete dir="${tempdir}" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

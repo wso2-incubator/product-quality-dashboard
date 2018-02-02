@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+    <ModulePrefs title="WSO2 Active Customers" description="This displays active customers in WSO2">
+        <Require feature="dynamic-height"/>
+        <Require feature="setprefs"/>
+        <Require feature="pubsub-2"/>
+    </ModulePrefs>
+    <Content type="html" view="home">
+        <![CDATA[
+<head>
+  <title>Active Customers</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  
+  <!-- Latest compiled and minified CSS for selectpicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+
+</head>
+
+<body>
+ <div class="container-fluid">
+ 
+	<div class="container-fluid row ">
+
+	  <select id="product" class="selectpicker" >
+		<option value="All">All Products</option>
+		<option value="APIM">API Management</option>
+		<option value="Analytics">Analytics</option>
+		<option value="IAM">Identity and Access Managment</option>
+		<option value="Integration">Integration</option>
+		<option value="IoT">IoT</option>
+		<option value="Other">Other</option>
+		
+	  </select>
+
+  
+	  <button class="btn">
+	  Number of customers: <span class="badge badge-secondary" id="count">0</span>
+	  </button>
+	</div>
+
+	<br>
+  <div style="height:670px;overflow-y:auto;">
+    <table class="table table-bordered table-striped table-hover ">
+      <thead id ="hd" style="background-color: #1BA5B8;color: white">
+          
+      </thead>
+
+      <tbody id="tb"> 
+
+      </tbody>
+
+    </table>
+  </div>
+
+<div>
+
+<!-- ajax jquery and bootsrap javascripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript for select picker -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
+<!-- custom javascript-->
+<script type="text/javascript" src="js/activeCustomersMain.js"></script>
+
+
+
+</body>
+
+      ]]>
+  </Content>
+</Module>
