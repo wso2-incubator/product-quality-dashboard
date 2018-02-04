@@ -66,11 +66,13 @@ function getData(product){
                   
                   if(product!="All"){
 
-                    document.getElementById("tb").innerHTML+="<tr><th>#</th><th>Customer Name</th><th>Product</th><th>ARR in $</th></tr>"
+                    document.getElementById("tb").innerHTML+="<tr><th>#</th><th>Customer Name</th><th>Product</th><th>ARR</th></tr>"
                     
                     for (i = 0; i < data[0].length; i++) {
 
-                      var arr= addCommas(data[0][i].Arr);
+                      var number = parseInt(data[0][i].Arr);
+		      var options1 = { style: "currency", currency: "USD" };  
+		      var arr = number.toLocaleString("en-US",options1);
                             
                       document.getElementById("tb").innerHTML+="<tr><td>"+(i+1)+"</td><td>"+data[0][i].Name+"</td><td>"+data[0][i].Area+"</td><td>"+arr+"</td></tr>"
 
@@ -78,11 +80,13 @@ function getData(product){
 
                   }else{
 
-                    document.getElementById("tb").innerHTML+="<tr><th>#</th><th>Customer Name</th><th>ARR in $</th></tr>"
+                    document.getElementById("tb").innerHTML+="<tr><th>#</th><th>Customer Name</th><th>ARR</th></tr>"
 
                     for (i = 0; i < data[0].length; i++) {
 
-                      var arr= addCommas(data[0][i].Arr);
+                      var number = parseInt(data[0][i].Arr);
+		      var options1 = { style: "currency", currency: "USD" };  
+		      var arr = number.toLocaleString("en-US",options1);
 
                       
                             
@@ -117,14 +121,4 @@ function predicateBy(prop){
 
 
 
-function addCommas(nStr){
- nStr += '';
- var x = nStr.split('.');
- var x1 = x[0];
- var x2 = x.length > 1 ? '.' + x[1] : '';
- var rgx = /(\d+)(\d{3})/;
- while (rgx.test(x1)) {
-  x1 = x1.replace(rgx, '$1' + ',' + '$2');
- }
- return x1 + x2;
-}
+
