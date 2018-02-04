@@ -1,0 +1,17 @@
+{
+  "id": "line_and_functional_coverage",
+  "title": "LINE AND FUNCTIONAL COVERAGE",
+  "type": "gadget",
+  "thumbnail": "store://gadget/line_and_functional_coverage/images/index.png",
+  "options": {},
+  "data": {
+    "url": "store://gadget/line_and_functional_coverage/index.xml"
+  },
+  "notify": {
+    
+  },
+
+  "listen":{
+    }
+  
+}
