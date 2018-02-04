@@ -6,11 +6,5 @@
     "category": "Publishers",
     "data": {
         "url": "gadget/jenkins_build_statistics/index.xml"
-    },
-    "notify": {
-        "publisher": {
-            "type": "message",
-            "description": "This notifies message generated in publisher"
-        }
     }
 }

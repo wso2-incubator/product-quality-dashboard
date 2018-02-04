@@ -1,0 +1,10 @@
+{
+    "id": "wum_train",
+    "title": "WUM RELEASE TRAIN",
+    "type": "gadget",
+    "thumbnail": "store://gadget/wum_train/index.jpg",
+    "category": "Publishers",
+    "data": {
+        "url": "store://gadget/wum_train/index.xml"
+    }
+}

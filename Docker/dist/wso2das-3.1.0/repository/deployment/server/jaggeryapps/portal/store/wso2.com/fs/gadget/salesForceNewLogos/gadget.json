@@ -2,7 +2,7 @@
     "id": "salesForceNewLogos",
     "title": "SalesForce New Logos",
     "type": "gadget",
-    "thumbnail": "store://gadget/salesForceNewLogos/index.png",
+    "thumbnail": "store://gadget/salesForceNewLogos/cross.png",
     "settings": {
         "personalize": true
     },

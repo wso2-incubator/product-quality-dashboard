@@ -1,3 +1,0 @@
-12-05 14:58:20 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLException: Table "IDN_BASE_TABLE" not found; SQL statement:
-SELECT * FROM IDN_BASE_TABLE [42102-175]
